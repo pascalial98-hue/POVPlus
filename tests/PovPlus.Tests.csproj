@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <DalamudLibPath Condition="'$(DalamudLibPath)' == ''">$(APPDATA)\XIVLauncherCN\addon\Hooks\15.0.3.8</DalamudLibPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\src\PovPlus\Localization.cs" Link="Localization.cs" />
+    <EmbeddedResource Include="..\src\PovPlus\Translations\en.json" LogicalName="PovPlus.Translations.en.json" />
+    <Compile Include="..\src\PovPlus\FirstPersonMath.cs" Link="FirstPersonMath.cs" />
+    <Compile Include="..\src\PovPlus\HeadPosePatch.cs" Link="HeadPosePatch.cs" />
+    <Compile Include="..\src\PovPlus\NearPlanePatch.cs" Link="NearPlanePatch.cs" />
+    <Compile Include="..\src\PovPlus\HeadHideTransition.cs" Link="HeadHideTransition.cs" />
+    <Compile Include="..\src\PovPlus\SoftLookLimit.cs" Link="SoftLookLimit.cs" />
+    <Compile Include="..\src\PovPlus\HeadDetails.cs" Link="HeadDetails.cs" />
+    <Compile Include="..\src\PovPlus\NearVfxMath.cs" Link="NearVfxMath.cs" />
+    <Compile Include="..\src\PovPlus\VfxAlphaPatch.cs" Link="VfxAlphaPatch.cs" />
+    <Compile Include="..\src\PovPlus\LookDownLean.cs" Link="LookDownLean.cs" />
+    <Compile Include="..\src\PovPlus\BoundaryLookAxis.cs" Link="BoundaryLookAxis.cs" />
+    <Compile Include="..\src\PovPlus\MouseLookState.cs" Link="MouseLookState.cs" />
+    <Compile Include="..\src\PovPlus\MouseLookDragPatch.cs" Link="MouseLookDragPatch.cs" />
+    <Compile Include="..\src\PovPlus\DeferredInitialization.cs" Link="DeferredInitialization.cs" />
+    <Compile Include="..\src\PovPlus\NearObjectDistanceScope.cs" Link="NearObjectDistanceScope.cs" />
+    <Compile Include="..\src\PovPlus\HeadShadowMask.cs" Link="HeadShadowMask.cs" />
+    <Compile Include="..\src\PovPlus\StationaryLook.cs" Link="StationaryLook.cs" />
+    <Compile Include="..\src\PovPlus\HeadRotationWeight.cs" Link="HeadRotationWeight.cs" />
+    <Reference Include="FFXIVClientStructs"><HintPath>$(DalamudLibPath)\FFXIVClientStructs.dll</HintPath></Reference>
+    <Reference Include="InteropGenerator.Runtime"><HintPath>$(DalamudLibPath)\InteropGenerator.Runtime.dll</HintPath></Reference>
+  </ItemGroup>
+</Project>

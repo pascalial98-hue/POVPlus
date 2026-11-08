@@ -1,23 +1,56 @@
-**POV+ First Person Perspective Plugin**
-**UPDATED FOR 7.5 YOU WILL NEED TO REINSTALL THE MOD**
+# POV+ Enhanced
 
-Dalamud-based FFXIV addon to improve the First Person Camera.  
-This plugin changes the the Camera to be bound to the players head bone and there are two optional settings to add the head bones rotation to the camera rotation (When the players head turns the camera turns with it - makes emotes more immersive)  
-It also stops making characters invisible when too close to the camera allowing you to see your own body when in first person.
+**简体中文** · [English](README.en.md)
 
-**Download Instructions:**  
-Copy https://raw.githubusercontent.com/TiraesiascenGraven/POVPlus/main/repo.json into Dalamud Custom Plugin Repository.  
-It will then appear under the name "POV+" or "PovPlus" in the All Plugins list
+看见自己的身体，自然地转头、探头，并保留完整头影。
 
-**TODO LIST / KNOWN BUGS**  
+基于 [Tiraesias 的 POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta 制作的社区分支，面向 FF14 国服 Dalamud。当前版本 **1.6.0.0**，保留原项目署名、Git 历史和 AGPL-3.0-or-later 许可。
 
-Weird transition issue on the camera when in "Plugin Disabled in third person" 
+## 安装
 
-Stutter when switching between first and third person if Enabled in third person is disabled
+1. 打开 Dalamud 设置，在“实验性 / Experimental”中的“自定义插件仓库 / Custom Plugin Repositories”添加以下地址，启用并保存：
 
-The camera panning from a distance away when you zoom in for the first time with the mod enabled
+   ```text
+   https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/repo.json
+   ```
 
+2. 打开插件安装器，刷新后搜索 **POV+ Enhanced** 并安装。后续通过插件安装器更新，不需要打开测试版通道。
+3. 游戏角色设置 → 操作设置 → 常规中，将“第一人称视角自动调整 / 1st Person Camera Auto Adjustment”设为 **Never / 从不**。
+4. 输入 `/pov` 打开设置，再用游戏原本的方式进入第一人称。
 
+**从原版或个人测试版迁移：** 先备份 `PovPlus` 配置，停用旧版本并移除旧的开发插件入口；停用原 POV+ 自定义仓库，再安装本分支。内部名称仍为 `PovPlus`，现有配置可继续使用。不要同时加载两份 POV+；通常无需删除配置。
 
+手动下载见 [Releases](https://github.com/pascalial98-hue/POVPlus/releases/latest)。普通安装推荐使用上面的仓库地址。根目录的 `PovPlus.Enhanced.zip` 是当前安装器使用的包；其他旧 ZIP 和 `SamplePlugin` 保留自上游，不是本分支的当前发布内容。
 
+## 有哪些改进
 
+| 功能 | 使用方式 |
+| --- | --- |
+| 头部隐藏与自然切换 | 镜头接近头部时才隐藏，切回第三人称、离开头部后再恢复；默认保留颈骨。 |
+| 完整头影（可选） | 主画面隐藏脸、头发、头饰等模型，保留原生阴影；无需复制角色。 |
+| 合理转头范围 | 左右、抬头和低头分别限制，接近边界时柔和减速。 |
+| 到达限位后探头 | 继续拖动才前伸或侧伸；幅度、灵敏度及额外转角可调，位移和转角同步混合。停止输入保持，反向拖动收回。 |
+| 鼠标直控（可选） | 不按右键也可转视角；按住左键自由观察。自定义单键或组合键，可按住或按一下切换呼出鼠标。 |
+| 固定姿势保护 | 普通右键和直控转镜头均保护坐下、躺下及同类循环动作；移动键仍可正常结束动作。 |
+| 三轴跟随关联度 | 左右、上下、侧倾分别调整 0–100% 幅度，并独立调整平滑。 |
+| 近裁剪与近处外观 | NearPlane 最低 0.001；可选保留近处角色/物件、部分头发耳部细节，或减弱贴近镜头的自身特效。 |
+| 中英界面 | 设置顶部选择 **自动 / 简体中文 / English**，立即生效。自动跟随 Dalamud 界面语言，非中文使用英文。 |
+
+输入 `/pov toggle` 可切换插件启用状态。设置会自动保存。完整头影、近物体保留、外观细节和自身特效减弱为试验选项，默认关闭。
+
+## 兼容性与已知限制
+
+- 当前验证基线：**国服客户端 `2026.10.06.0000.0000`、Dalamud API 15（15.0.3.8）、Windows x64 / .NET 10**。清单限定该游戏版本；更新游戏后需要重新核对原生接口。**国际服与其他构建尚未验证**。
+- NearPlane 设为 0.001 能保留更多近处衣服，也可能让水雾等粒子透过地形。当前保留这个选择，没有同时解决两者；调高 NearPlane 可改善粒子遮挡。
+- 完整头影需要游戏启用自身阴影。该模式整块隐藏对应头部模型，不能同时保留发梢或耳饰；脸部模型自带的部分颈部也可能消失。特殊改模的模型槽位可能不同。
+- 近物体选项只覆盖游戏相应的距离隐藏判断，不能解决所有地图静态物体、背面剔除或尚未加载的资源。
+- 姿势保护按游戏固定/循环状态识别，不保证覆盖普通短动作、施法、骑乘或非标准动作修改。鼠标快捷键仍传给游戏，请避免常用按键冲突。
+- 核心功能已在开发期间获得实际游戏反馈。此次公开打包及语言功能通过了编译和离线检查；没有重新覆盖所有种族、装备、动作与其他相机插件的组合。
+
+## 源码与反馈
+
+当前可构建源码位于 [`src/`](src)，离线回归位于 [`tests/`](tests)。此分支以原作者公开的 Beta 二进制恢复源码为基线，再加入功能修改；上游较旧的 `SamplePlugin` 目录只作历史参考。
+
+构建步骤见 [中英开发说明](docs/BUILD.md)，版本记录见 [CHANGELOG](CHANGELOG.md)。问题请提交到[本分支 Issues](https://github.com/pascalial98-hue/POVPlus/issues)，附游戏/Dalamud/插件版本、相关选项、复现步骤和必要日志；提交前请删去日志中的私人信息。
+
+感谢原作者 **Tiraesias / TiraesiascenGraven**，以及原项目所使用的 Hypostasis、Dalamud 和 FFXIVClientStructs。详见 [NOTICE](NOTICE.md) 和 [许可证](LICENSE.md)。本分支独立维护。

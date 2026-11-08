@@ -1,0 +1,18 @@
+{
+  "Author": "Tiraesias; Enhanced fork: pascalial98-hue",
+  "Name": "POV+ Enhanced",
+  "InternalName": "PovPlus",
+  "AssemblyVersion": "1.6.0.0",
+  "Description": "第一人称身体可见、头影保留、柔和转头限位、限位探头、鼠标直控和中英界面。仅验证国服 2026.10.06 / API 15。\nImmersive first person with body visibility, head shadows, soft look limits, leaning, direct mouse look and bilingual settings. Verified on CN 2026.10.06 / API 15 only.",
+  "ApplicableVersion": "2026.10.06.0000.0000",
+  "RepoUrl": "https://github.com/pascalial98-hue/POVPlus",
+  "Tags": ["POV", "camera", "first person", "第一人称"],
+  "DalamudApiLevel": 15,
+  "LoadRequiredState": 0,
+  "LoadSync": false,
+  "CanUnloadAsync": false,
+  "LoadPriority": 0,
+  "Punchline": "沉浸式第一人称增强 / Enhanced first-person camera (CN)",
+  "AcceptsFeedback": false,
+  "IconUrl": "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/logo2.png"
+}
