@@ -4,7 +4,7 @@
 
 See your body, turn and lean naturally, and keep your head's shadow.
 
-A community fork of [Tiraesias's POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta for FFXIV CN / Dalamud. Current version: **1.6.0.0**. Original attribution, Git history and the AGPL-3.0-or-later license are retained.
+A community fork of [Tiraesias's POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta for FFXIV CN / Dalamud. Current version: **1.6.0.1**. Original attribution, Git history and the AGPL-3.0-or-later license are retained.
 
 ## Installation
 
@@ -40,12 +40,12 @@ Use `/pov toggle` to enable or disable the plugin. Settings save automatically. 
 
 ## Compatibility and limitations
 
-- Verified baseline: **CN client `2026.10.06.0000.0000`, Dalamud API 15 (15.0.3.8), Windows x64 / .NET 10**. The manifest is restricted to this game version; native interfaces need review after game updates. **International clients and other builds have not been verified.**
+- Latest validation baseline: **CN client `2026.11.03.0000.0000`, Dalamud API 15 (15.0.3.9), Windows x64 / .NET 10**. Starting with 1.6.0.1, the exact game-date restriction is removed, so ordinary updates are not rejected solely because their date changed. API requirements and existing native-interface checks remain. This does not guarantee compatibility with every future build; API or native-interface changes still require adaptation. **International clients remain unverified.**
 - NearPlane 0.001 retains more close-up clothing but can make mist and other particles appear through terrain. This tradeoff remains configurable; increasing NearPlane can improve particle occlusion.
 - Complete head shadows require the game's self-shadow option. This mode hides entire head-related models, so hair tips/ear accessories cannot be selectively retained; neck geometry belonging to the face model may also disappear. Unusual mods may use different model slots.
 - Near-object visibility affects only the relevant distance-based visibility check, not every static map object, backface-culling case or unloaded resource.
 - Pose protection recognizes fixed/looped game states; it does not promise to protect every short emote, cast, mount state or custom animation. Cursor hotkeys still reach the game, so avoid binding conflicts.
-- Core features received in-game feedback during development. This public packaging/localization update passed compilation and offline checks; not every race, outfit, animation or camera-plugin combination has been retested.
+- Core features received in-game feedback during development. Version 1.6.0.1 passed static checks against the new client's key native interfaces, compilation and offline regressions using the updated dependencies. It has not yet been retested in game after this update.
 
 ## Source and feedback
 

@@ -2,9 +2,9 @@
   "Author": "Tiraesias; Enhanced fork: pascalial98-hue",
   "Name": "POV+ Enhanced",
   "InternalName": "PovPlus",
-  "AssemblyVersion": "1.6.0.0",
-  "Description": "第一人称身体可见、头影保留、柔和转头限位、限位探头、鼠标直控和中英界面。仅验证国服 2026.10.06 / API 15。\nImmersive first person with body visibility, head shadows, soft look limits, leaning, direct mouse look and bilingual settings. Verified on CN 2026.10.06 / API 15 only.",
-  "ApplicableVersion": "2026.10.06.0000.0000",
+  "AssemblyVersion": "1.6.0.1",
+  "Description": "第一人称身体可见、头影保留、柔和转头限位、限位探头、鼠标直控和中英界面。最近核对国服 2026.11.03 / API 15。\nImmersive first person with body visibility, head shadows, soft look limits, leaning, direct mouse look and bilingual settings. Latest validation: CN 2026.11.03 / API 15.",
+  "ApplicableVersion": "any",
   "RepoUrl": "https://github.com/pascalial98-hue/POVPlus",
   "Tags": ["POV", "camera", "first person", "第一人称"],
   "DalamudApiLevel": 15,
@@ -13,6 +13,7 @@
   "CanUnloadAsync": false,
   "LoadPriority": 0,
   "Punchline": "沉浸式第一人称增强 / Enhanced first-person camera (CN)",
+  "Changelog": "1.6.0.1：修复游戏更新后被日期限制拒绝加载；取消完整日期限制，保留 API 15 与现有接口检查。已核对国服 2026.11.03 / Dalamud 15.0.3.9。\nRemove the game-date loading restriction; retain API 15 and existing native-interface checks. Validated against CN 2026.11.03 / Dalamud 15.0.3.9.",
   "AcceptsFeedback": false,
   "IconUrl": "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/logo2.png"
 }

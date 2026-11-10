@@ -24,11 +24,11 @@ with zipfile.ZipFile(binary, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as z:
         z.write(root / name, name)
 shutil.copyfile(binary, root / 'PovPlus.Enhanced.zip')
 url = 'https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/PovPlus.Enhanced.zip'
-entry = dict(manifest, TestingAssemblyVersion=version, TestingDalamudApiLevel=15,
+entry = dict(manifest, TestingAssemblyVersion=version, TestingDalamudApiLevel=manifest['DalamudApiLevel'],
              DownloadLinkInstall=url, DownloadLinkUpdate=url, DownloadLinkTesting=url,
              IsHide=False, IsTestingExclusive=False, LastUpdate=int(time.time()),
-             Changelog='1.6.0.0: 首个公开增强版，新增中英语言选择。First public Enhanced release with bilingual settings. See CHANGELOG.md.')
-(root / 'repo.json').write_text(json.dumps([entry], ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+             Changelog=manifest.get('Changelog', f'{version}: See CHANGELOG.md / 请参阅更新记录。'))
+(root / 'repo.json').write_text(json.dumps([entry], ensure_ascii=False, indent=2) + '\n', encoding='utf-8', newline='\n')
 source = out / f'{prefix}-source.zip'
 with zipfile.ZipFile(source, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as z:
     for folder in ('src', 'tests', 'scripts', 'docs'):
