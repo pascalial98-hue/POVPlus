@@ -7,6 +7,8 @@ namespace PovPlus;
 public class Configuration : IPluginConfiguration
 {
     public PluginLanguage Language = PluginLanguage.Automatic;
+    // Null distinguishes pre-guide configurations from new/pending installations.
+    public bool? HasSeenCalibrationGuide;
     public bool FirstPersonHideHead = true;
     public bool FirstPersonFullHeadShadow = false;
     public bool FirstPersonDelayHeadHide = true;
@@ -123,7 +125,7 @@ public class Configuration : IPluginConfiguration
 	public float CameraTiltOffset;
 
     // Small values preserve nearby clothing but may break particle occlusion.
-    public float CameraNearPlane = 0.1f;
+    public float CameraNearPlane = NearPlanePatch.Default;
 
 	public int Version { get; set; } = 0;
 

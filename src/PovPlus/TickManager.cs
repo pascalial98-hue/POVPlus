@@ -10,6 +10,12 @@ internal class TickManager
 
 	public unsafe void TickUpdate()
 	{
+        if (Plugin.P.CalibrationActive)
+        {
+            CameraState_CURRENT = CameraState_BEFORE = 0;
+            POVCameraFunctionality.DisablePOVCamera();
+            return;
+        }
 		if (Plugin.P.Configuration.Setting_ModEnabled && Service.ObjectTable.LocalPlayer != null &&
             Common.CameraManager != null && Common.CameraManager->worldCamera != null)
 		{

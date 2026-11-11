@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Dalamud.Game.Command;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Hooking;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
@@ -32,7 +33,9 @@ public class Plugin : IDalamudPlugin, IDisposable
     internal string NearObjectsStatus => nearObjectsUnavailable ? L.T("近处物体保留不可用，请查看 Dalamud 日志。") : "";
     private FirstPersonMouseLook? mouseLook;
     private bool mouseLookUnavailable, pluginTextInput;
-    internal bool MouseLookUiPaused => MainWindow.IsOpen || pluginTextInput;
+    internal bool MouseLookUiPaused => MainWindow.IsOpen || CalibrationActive || pluginTextInput;
+    internal bool CalibrationActive => calibrationWindow.Active;
+    private readonly CalibrationWindow calibrationWindow;
     internal bool MouseLookActive => mouseLook?.Active == true;
     internal string MouseLookStatus => mouseLookUnavailable || mouseLook?.Failed == true
         ? L.T("鼠标直控/固定姿势保护不可用，请查看 Dalamud 日志。") : MainWindow.IsOpen ? L.T("设置窗口打开时，自动释放鼠标。") : "";
@@ -59,7 +62,15 @@ public class Plugin : IDalamudPlugin, IDisposable
 		P = this;
 		pluginInterface.Create<Service>(Array.Empty<object>());
 		pluginInterface.Create<DalamudApi>(Array.Empty<object>());
-		Configuration = (Service.PluginInterface.GetPluginConfig() as Configuration) ?? new Configuration();
+		var savedConfiguration = Service.PluginInterface.GetPluginConfig() as Configuration;
+        Configuration = savedConfiguration ?? new Configuration();
+        if (Configuration.HasSeenCalibrationGuide == null)
+        {
+            Configuration.HasSeenCalibrationGuide = CalibrationState.ResolveSeen(null, savedConfiguration != null);
+            Configuration.Save();
+        }
+        calibrationWindow = new CalibrationWindow(this);
+        WindowSystem.AddWindow(calibrationWindow);
 		MainWindow = new MainWindow(this);
 		WindowSystem.AddWindow(MainWindow);
 		povCommand = new CommandInfo(OnCommand)
@@ -93,6 +104,7 @@ public class Plugin : IDalamudPlugin, IDisposable
         if (!initialization.Ensure(Environment.TickCount64, RuntimeAvailable, Initialize, CleanupRuntime,
             ex => Service.Log.Error(ex, "POV+ runtime initialization failed; retrying after login readiness."))) return;
         headVisibility?.Restore();
+        UpdateCalibration();
 		tickManager.TickUpdate();
         POVCameraFunctionality.RestoreNearPlaneIfInactive();
         POVCameraFunctionality.ResetLookDownLeanIfInactive();
@@ -135,6 +147,7 @@ public class Plugin : IDalamudPlugin, IDisposable
 
     private void CleanupRuntime()
     {
+        calibrationWindow.Cancel();
         nearObjects?.Dispose();
         nearObjects = null;
         nearObjectsUnavailable = false;
@@ -167,18 +180,20 @@ public class Plugin : IDalamudPlugin, IDisposable
 		}
 		else
 		{
-			MainWindow.Toggle();
+			ToggleConfigUi();
 		}
 	}
 
 	public void ToggleConfigUi()
 	{
+        calibrationWindow.Cancel();
 		MainWindow.Toggle();
 	}
 
     private void DrawUi()
     {
         pluginTextInput = Dalamud.Bindings.ImGui.ImGui.GetIO().WantTextInput;
+        calibrationWindow.DrawMarker();
         WindowSystem.Draw();
     }
 
@@ -190,8 +205,62 @@ public class Plugin : IDalamudPlugin, IDisposable
 
 	public void ToggleMainUi()
 	{
-		MainWindow.Toggle();
+		ToggleConfigUi();
 	}
+
+    internal unsafe bool CalibrationEnvironmentReady
+    {
+        get
+        {
+            if (!initialized || !Configuration.Setting_ModEnabled || Service.ClientState.IsGPosing ||
+                Service.ObjectTable.LocalPlayer == null) return false;
+            var condition = Service.Condition;
+            if (condition[ConditionFlag.InCombat] || condition[ConditionFlag.WatchingCutscene] ||
+                condition[ConditionFlag.WatchingCutscene78] || condition[ConditionFlag.OccupiedInCutSceneEvent] ||
+                condition[ConditionFlag.BetweenAreas] || condition[ConditionFlag.BetweenAreas51]) return false;
+            var manager = Hypostasis.Game.Common.CameraManager;
+            if (manager == null || manager->worldCamera == null || manager->worldCamera->mode is not (0 or 1)) return false;
+            var camera = (Camera*)manager->worldCamera;
+            var scene = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CameraManager.Instance();
+            return !camera->IsEventCameraAutoControl && scene != null && scene->CurrentCamera == &((CameraBase*)camera)->SceneCamera;
+        }
+    }
+
+    internal bool CanStartCalibration => CalibrationEnvironmentReady && CalibrationViewpoint.TryRead(System.Numerics.Vector3.Zero, out _);
+
+    internal unsafe bool StartCalibration()
+    {
+        if (CalibrationActive || !CanStartCalibration) return false;
+        var camera = Hypostasis.Game.Common.CameraManager->worldCamera;
+        calibrationWindow.Begin(Service.ObjectTable.LocalPlayer!.Address, (nint)camera);
+        POVCameraFunctionality.DisablePOVCamera();
+        FirstPersonLimits.Reset();
+        mouseLook?.Update();
+        headVisibility?.Restore();
+        headVisibility?.UpdateState();
+        if (!CalibrationCamera.EnsureThirdPerson((Camera*)camera))
+        {
+            calibrationWindow.Cancel();
+            return false;
+        }
+        MainWindow.IsOpen = false;
+        Configuration.HasSeenCalibrationGuide = true;
+        Configuration.Save();
+        return true;
+    }
+
+    private unsafe void UpdateCalibration()
+    {
+        if (CalibrationActive)
+        {
+            if (!CalibrationEnvironmentReady ||
+                !calibrationWindow.Matches(Service.ObjectTable.LocalPlayer!.Address, (nint)Hypostasis.Game.Common.CameraManager->worldCamera) ||
+                !CalibrationCamera.EnsureThirdPerson((Camera*)Hypostasis.Game.Common.CameraManager->worldCamera))
+                calibrationWindow.Cancel();
+            return;
+        }
+        if (Configuration.HasSeenCalibrationGuide == false && CanStartCalibration) StartCalibration();
+    }
 
     private unsafe bool RuntimeAvailable()
     {

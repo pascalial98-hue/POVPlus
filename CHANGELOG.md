@@ -1,5 +1,19 @@
 # Changelog / 更新记录
 
+## 1.6.1.0 — 2026-11-11
+
+- 新增首次使用视点校准：新配置在角色与相机就绪后自动进入第三人称，打开独立浮窗并显示实时视点标记；`/pov` 顶部提供重新进入按钮。
+- 用参考 FF14 官方中原之民形象重绘的正面、侧面插图，说明将视点放在两眼之间的鼻梁表面。支持三轴拖动、直接输入和 0.001 微调，所有引导文字提供中英版本。
+- 校准期间暂停相机绑定、鼠标直控与头部隐藏。偏移先存为草稿，保存才生效，取消/关闭或离开正常游戏场景放弃未保存的调整；结束后保持第三人称。
+- 新配置及近裁剪重置值为 **0.015**，仍允许手动设为 0.001。已有用户的偏移、NearPlane 和其他设置保留，升级不自动弹出引导。
+- 对 Dalamud CN 15.0.4.0 / API 15 编译。沿用原安装仓库、内部名称和更新地址；新增流程尚待游戏内验证。
+
+- Add first-use viewpoint calibration: new configurations enter third person once the character and camera are ready, with a separate window and live viewpoint marker. Reopen from the top of `/pov`.
+- Add front/side illustrations redrawn from the official FFXIV Midlander character reference, showing the nose-bridge surface between the eyes. Three-axis dragging, typed values and 0.001 fine steps; fully bilingual instructions.
+- Pause camera binding, direct mouse look and head hiding during calibration. Offsets remain a draft until saved; cancel, close or leaving normal gameplay discards unsaved edits. Stay in third person afterward.
+- Default/reset NearPlane is **0.015**; 0.001 remains available. Preserve existing offsets, NearPlane and other settings, without automatically interrupting existing users on upgrade.
+- Build against Dalamud CN 15.0.4.0 / API 15. Keep the original repository URL, internal name and update links. The new workflow still needs in-game verification.
+
 ## 1.6.0.1 — 2026-11-10
 
 - 修复国服更新后因旧游戏日期限制而无法加载的问题。`ApplicableVersion` 改为 `any`，保留 Dalamud API 15 要求和现有原生接口检查，后续普通小更新不再仅因日期变化而被拦截。

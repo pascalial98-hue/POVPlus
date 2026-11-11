@@ -441,7 +441,7 @@ public static class POVCameraFunctionality
 		return (T*)((GameObject*)go.Address)->DrawObject;
 	}
 
-    private static unsafe bool TryFindHead(hkaPose* pose, out int index)
+    internal static unsafe bool TryFindHead(hkaPose* pose, out int index)
     {
         index = -1;
         if (pose == null || pose->Skeleton == null || pose->Skeleton->Bones.Data == null ||

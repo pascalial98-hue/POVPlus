@@ -1,5 +1,21 @@
 # Validation / 验证记录
 
+## 1.6.1.0 — 2026-11-11
+
+| Check / 检查 | Result / 结果 |
+| --- | --- |
+| Build references / 编译依赖 | .NET SDK 10.0.100; Dalamud CN 15.0.4.0 / API 15. |
+| Offline regressions / 离线回归 | 78,962 assertions passed, including calibration migration, pending first use across restarts, draft save/cancel, invalid offset handling and native camera transition. / 78,962 项通过，包含引导迁移、重启待办、偏移草稿保存/取消及相机切换。 |
+| Camera fields / 相机字段 | Eight camera fields checked against the installed reference DLL. Transition tests verify that only zoom mode, distance and interpolated distance change; saved distance and unrelated bytes stay intact. Invalid/event/special cameras are unchanged. / 核对八个字段偏移，相机切换只改视角模式与当前/插值距离，其他字段及特殊相机保持不变。 |
+| Default and migration / 默认值与迁移 | New/reset/invalid NearPlane uses 0.015; valid saved values including 0.001 remain supported. Existing configurations skip automatic onboarding; a previously pending first use remains pending. / 新配置、重置与无效值回退到 0.015，旧有效值保留，已有用户不被自动引导打断。 |
+| Localization / 语言 | 123 English entries; main settings, calibration and status text fully covered. / 123 条英文翻译，主设置、校准及状态文字完整覆盖。 |
+| Artwork / 插图 | Embedded PNG and independent localized labels/target markers. Offline diagram composition inspected; no network fetch at runtime. / 内嵌 PNG，标签与标记独立绘制；离线检查图示排版，使用时无需联网。 |
+| Reference game / 游戏基线 | CN `2026.11.03.0000.0000`; executable SHA-256 remains `52042b60631cf2c48851b3aaee36e9ec4fedd6d7f2c68f0e9a8c3befb0af9f98`, identical to the native checks recorded for 1.6.0.1. |
+
+No in-game first-use, manual reentry, camera orbit or visual alignment test has been performed for this release. Offline checks do not establish the actual appearance of the popup or alignment on each race/modded face. Existing users can verify the flow with the calibration button at the top of `/pov`, without deleting settings. For a fresh configuration, verify that the guide opens once after login, can save/cancel normally, and does not reopen on the next login. Combat, cutscene, logout and camera changes should close an active draft without saving it.
+
+本版尚未进行游戏内首次引导、手动重进、绕看与视点对齐实测。离线检查不代表已确认弹窗实际外观或所有种族、改模脸型的对齐。已有用户可通过 `/pov` 顶部按钮验证，无需删配置；新配置需确认登录后仅自动引导一次，保存/取消正常，下次登录不再弹出。战斗、过场、退出登录或相机更换应关闭引导并放弃未保存的草稿。
+
 ## 1.6.0.1 — 2026-11-10
 
 | Check / 检查 | Result / 结果 |

@@ -295,7 +295,7 @@ internal static unsafe class FirstPersonLimits
     }
 
     internal static bool IsActive(GameCamera* camera) =>
-        Plugin.P.Configuration.Setting_ModEnabled && camera != null && camera->mode == 0 &&
+        !Plugin.P.CalibrationActive && Plugin.P.Configuration.Setting_ModEnabled && camera != null && camera->mode == 0 &&
         Common.CameraManager != null && camera == Common.CameraManager->worldCamera &&
         !Service.ClientState.IsGPosing && Service.ObjectTable.LocalPlayer != null;
 

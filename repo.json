@@ -3,7 +3,7 @@
     "Author": "Tiraesias; Enhanced fork: pascalial98-hue",
     "Name": "POV+ Enhanced",
     "InternalName": "PovPlus",
-    "AssemblyVersion": "1.6.0.1",
+    "AssemblyVersion": "1.6.1.0",
     "Description": "第一人称身体可见、头影保留、柔和转头限位、限位探头、鼠标直控和中英界面。最近核对国服 2026.11.03 / API 15。\nImmersive first person with body visibility, head shadows, soft look limits, leaning, direct mouse look and bilingual settings. Latest validation: CN 2026.11.03 / API 15.",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/pascalial98-hue/POVPlus",
@@ -19,16 +19,16 @@
     "CanUnloadAsync": false,
     "LoadPriority": 0,
     "Punchline": "沉浸式第一人称增强 / Enhanced first-person camera (CN)",
-    "Changelog": "1.6.0.1：修复游戏更新后被日期限制拒绝加载；取消完整日期限制，保留 API 15 与现有接口检查。已核对国服 2026.11.03 / Dalamud 15.0.3.9。\nRemove the game-date loading restriction; retain API 15 and existing native-interface checks. Validated against CN 2026.11.03 / Dalamud 15.0.3.9.",
+    "Changelog": "1.6.1.0：新增首次使用视点校准引导、FF14 角色正侧面图示和实时视点标记；/pov 顶部可重新进入。新配置 NearPlane 默认 0.015，旧设置保留。\nAdd first-use viewpoint calibration with FFXIV character diagrams and a live marker; reopen from /pov. New configurations default to NearPlane 0.015; existing settings are preserved.",
     "AcceptsFeedback": false,
     "IconUrl": "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/logo2.png",
-    "TestingAssemblyVersion": "1.6.0.1",
+    "TestingAssemblyVersion": "1.6.1.0",
     "TestingDalamudApiLevel": 15,
     "DownloadLinkInstall": "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/PovPlus.Enhanced.zip",
     "DownloadLinkUpdate": "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/PovPlus.Enhanced.zip",
     "DownloadLinkTesting": "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/PovPlus.Enhanced.zip",
     "IsHide": false,
     "IsTestingExclusive": false,
-    "LastUpdate": 1794318238
+    "LastUpdate": 1794410953
   }
 ]

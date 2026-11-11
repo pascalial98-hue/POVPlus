@@ -45,6 +45,11 @@ public class MainWindow : Window, IDisposable
         ImGui.SameLine();
         ImGui.TextDisabled(L.T("/pov toggle 可切换启用状态"));
         if (plugin.RuntimeStatus.Length > 0) ImGui.TextWrapped(plugin.RuntimeStatus);
+        ImGui.BeginDisabled(!plugin.CanStartCalibration);
+        var calibrate = ImGui.Button(L.Label("视点校准引导"));
+        ImGui.EndDisabled();
+        if (calibrate && plugin.StartCalibration()) return;
+        ImGui.TextWrapped(L.T("切到第三人称，用图示和实时标记调整两眼之间的视点。请在正常场景、非战斗状态下使用。"));
         ImGui.Separator();
         if (!ImGui.BeginTabBar("PovSettings")) return;
         if (ImGui.BeginTabItem(L.Label("常用"))) { Common(); ImGui.EndTabItem(); }
@@ -91,7 +96,7 @@ public class MainWindow : Window, IDisposable
         }
         Heading("画面");
         Slider("视野（FOV）", ref Config.Setting_FOV, 0, 5, 0.75f, "%.2f");
-        Slider("近裁剪距离（NearPlane）", ref Config.CameraNearPlane, 0.001f, 1, 0.1f, "%.3f");
+        Slider("近裁剪距离（NearPlane）", ref Config.CameraNearPlane, 0.001f, 1, NearPlanePatch.Default, "%.3f");
         if (ImGui.Button(L.Label("设为 0.001"))) { Config.CameraNearPlane = 0.001f; Config.Save(); }
         ImGui.TextWrapped(L.T("数值越小，近处衣服越完整；水雾等粒子可能穿过地形显示。此项只作用于第一人称。"));
         Toggle("保留近镜头的其他角色与物件（试验）", ref Config.FirstPersonKeepNearObjects);

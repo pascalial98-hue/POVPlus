@@ -8,7 +8,7 @@ internal sealed unsafe class NearPlanePatch
 {
     internal const float Minimum = 0.001f;
     internal const float Maximum = 1f;
-    internal const float Default = 0.1f;
+    internal const float Default = 0.015f;
     private nint cameraAddress;
     private float original;
     private float applied;

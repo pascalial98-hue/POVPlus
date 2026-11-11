@@ -43,5 +43,8 @@ public class Service
 	[PluginService]
 	internal static IGameGui GameGui { get; private set; }
 
+    [PluginService]
+    internal static ICondition Condition { get; private set; }
+
 	public unsafe Skeleton* GameSkeleton { get; init; }
 }

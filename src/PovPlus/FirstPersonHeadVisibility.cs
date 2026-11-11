@@ -201,7 +201,7 @@ internal sealed unsafe class FirstPersonHeadVisibility : IDisposable
     {
         var config = Plugin.P.Configuration;
         var manager = Common.CameraManager;
-        if (!config.Setting_ModEnabled || !config.FirstPersonHideHead || Service.ClientState.IsGPosing ||
+        if (Plugin.P.CalibrationActive || !config.Setting_ModEnabled || !config.FirstPersonHideHead || Service.ClientState.IsGPosing ||
             Service.ObjectTable.LocalPlayer == null || manager == null || manager->worldCamera == null ||
             manager->worldCamera->mode is not (0 or 1)) return false;
         var camera = (FFXIVClientStructs.FFXIV.Client.Game.CameraBase*)manager->worldCamera;

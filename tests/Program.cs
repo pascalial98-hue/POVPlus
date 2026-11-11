@@ -235,7 +235,7 @@ internal static partial class Program
         foreach (var value in new[] { float.NaN, float.PositiveInfinity, float.NegativeInfinity })
         {
             nearPatch.Apply(&replacementCamera, value);
-            Check(replacementCamera.NearPlane == 0.1f, "Non-finite near-plane config rejected");
+            Check(replacementCamera.NearPlane == 0.015f, "Non-finite near-plane config uses the new default");
         }
         nearPatch.Restore(&replacementCamera);
         Check(replacementCamera.NearPlane == 0.5f, "Restore after config safeguards");
@@ -325,6 +325,7 @@ internal static partial class Program
         TestStationaryLook();
         TestHeadRotationWeights();
         TestLocalization();
-        Console.WriteLine($"PASS: {assertions} assertions. Stationary-pose ordinary/direct mouse input, per-axis head-follow weights, head-shadow filtering/interop layout, runtime lifecycle, near-object distance, mouse restoration, blended leaning, limits, VFX, near plane and head transitions.");
+        TestCalibration();
+        Console.WriteLine($"PASS: {assertions} assertions. Calibration migration/drafts/camera transition, stationary-pose ordinary/direct mouse input, per-axis head-follow weights, head-shadow filtering/interop layout, runtime lifecycle, near-object distance, mouse restoration, blended leaning, limits, VFX, near plane and head transitions.");
     }
 }
