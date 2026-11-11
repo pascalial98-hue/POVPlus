@@ -2,8 +2,8 @@
   "Author": "Tiraesias; Enhanced fork: pascalial98-hue",
   "Name": "POV+ Enhanced",
   "InternalName": "PovPlus",
-  "AssemblyVersion": "1.6.1.1",
-  "Description": "看见自己的身体，自由观察、探头，并用引导校准到适合自己的视点。支持头部隐藏、可选完整头影、鼠标直控和中英界面。面向国服 / Dalamud API 15，国际服尚未验证。\nSee your body, look around and lean naturally, with guided viewpoint calibration. Includes head hiding, optional full head shadows, direct mouse look and bilingual settings. Targets FFXIV CN / Dalamud API 15; international clients are unverified.",
+  "AssemblyVersion": "1.6.1.2",
+  "Description": "看见自己的身体，自由观察、探头，用引导校准到适合自己的视点。\nSee your body, look around and lean, with guided viewpoint calibration.\n\n新配置默认隐藏头部、保留完整头影，并逐项显示中英对照。已有设置保留；也可选择单语界面和鼠标直控。\nNew configurations enable head hiding, full head shadows and paired Chinese/English text. Saved settings are retained; single-language UI and direct mouse look are also available.\n\n面向国服 / Dalamud API 15，国际服尚未验证。\nTargets FFXIV CN / Dalamud API 15; international clients are unverified.",
   "ApplicableVersion": "any",
   "RepoUrl": "https://github.com/pascalial98-hue/POVPlus",
   "Tags": [
@@ -18,7 +18,7 @@
   "CanUnloadAsync": false,
   "LoadPriority": 0,
   "Punchline": "沉浸式第一人称增强 / Enhanced first-person camera (CN)",
-  "Changelog": "1.6.1.1：统一 POV+ Enhanced 名称，更新插件图标与商店预览图；补充中英发布说明。现有功能、配置和仓库链接保持不变。\nUnify POV+ Enhanced branding, add a new icon and store preview, and include bilingual release descriptions. Existing behavior, settings and repository URLs are retained.",
+  "Changelog": "1.6.1.2：新增逐项中英对照界面与发布说明；新配置默认开启隐藏头部、完整头影；同步旧图标地址。已有设置和库链接保留。\nAdd paired Chinese/English UI and release text. New configurations enable head hiding and full head shadows. Update the legacy icon URL; saved settings and repository links are retained.",
   "AcceptsFeedback": false,
   "IconUrl": "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/docs/images/povplus-enhanced-icon-v1.png",
   "ImageUrls": [

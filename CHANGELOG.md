@@ -1,5 +1,16 @@
 # Changelog / 更新记录
 
+## 1.6.1.2 — 2026-11-12
+
+- 新增逐项中英对照界面：说明为中文后接英文，按钮和短标签并排显示。设置、状态和校准引导均支持；新配置默认使用对照模式，已有语言选择保留，可在 /pov 顶部切换。
+  Add paired Chinese/English throughout settings, status messages and calibration. New configurations default to bilingual mode; existing language choices are retained and can be changed at the top of /pov.
+- 新配置默认开启隐藏自己的头部与完整头影；保留旧配置中的开关选择，完整头影仍可关闭，游戏需开启自身阴影。
+  Enable head hiding and full head shadows by default for new configurations. Preserve saved choices; full shadows can still be disabled and require the game's self-shadow option.
+- XMA 正文及 GitHub 首页改为逐段中英对照；插件商店描述也按同样方式排列。
+  Pair each Chinese paragraph with English in the XMA description, GitHub main page and plugin-store description.
+- 旧清单使用的 logo2.png 同步换成新图标，继续使用现有库地址更新。如果安装器本次会话已缓存旧图，刷新仓库后重新打开；仍未变化时重启游戏。
+  Update the legacy logo2.png URL to the new icon, keeping the existing update repository. Refresh the repository and reopen the installer; restart the game if its current session still holds the old image.
+
 ## 1.6.1.1 — 2026-11-11
 
 - 设置窗口、校准窗口、启用开关与命令帮助统一使用 **POV+ Enhanced** 名称，商店清单沿用相同名称。

@@ -14,9 +14,10 @@
 
 脚本会校验 123 条英文翻译、编译 `src/PovPlus.csproj`、运行离线回归，并生成：
 
-- `artifacts/PovPlus-Enhanced-1.6.1.1.zip`：安装包。
-- `artifacts/PovPlus-Enhanced-1.6.1.1-source.zip`：完整对应源码、测试和构建说明。
+- `artifacts/PovPlus-Enhanced-1.6.1.2.zip`：安装包。
+- `artifacts/PovPlus-Enhanced-1.6.1.2-source.zip`：完整对应源码、测试和构建说明。
 - `artifacts/SHA256SUMS.txt`：下载校验值。
+- `artifacts/POVPlus_Enhanced_XMA_Release_Kit.zip`：逐段中英对照的发布正文、单语备用正文、发布字段及预览图标。
 - 根目录 `PovPlus.Enhanced.zip` 和 `repo.json`：自定义仓库安装/更新入口。
 
 当前构建入口为 `src`，不是上游留下的 `SamplePlugin.sln`。源码由 Beta 程序集恢复，因此仍有未使用字段和不可达旧辅助代码的编译警告；本次不以大规模清理改变已验证行为。

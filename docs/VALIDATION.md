@@ -1,5 +1,16 @@
 # Validation / 验证记录
 
+## 1.6.1.2 — 2026-11-12
+
+- 新增逐项中英对照，新配置默认隐藏头部并保留完整头影；使用实际发布程序集验证默认值及旧 JSON 中的手动关闭、自动语言和 NearPlane 0.001 均被保留，共 6 项通过。
+  Add paired Chinese/English and enable head hiding/full head shadows for new configurations. Six checks against the actual release assembly confirm defaults and preserve explicit saved off values, Auto language and NearPlane 0.001.
+- 编译无错误；79,215 项离线断言及 123 条英文翻译覆盖检查通过。新增检查覆盖逐项组合框、窗口稳定 ID、语言编号兼容与按条对照。
+  Compilation succeeds; 79,215 offline assertions and coverage of 123 English entries pass, including paired combo options, stable window IDs, saved language enum compatibility and per-item translation.
+- 本机旧安装清单仍为 1.6.1.0，图标地址为 logo2.png。该地址已同步新图标，当前清单继续使用版本化图标文件；两个文件均为相同的 512×512 PNG。
+  The inspected local installation was 1.6.1.0, pointing to logo2.png. The legacy URL now serves the new icon; current manifests retain the versioned icon URL. Both files contain the same 512×512 PNG.
+- 说明文本按中文后接英文排列。调整复选框文字换行、滑块按钮宽度及校准图示标题高度；本次尚未进行实际游戏界面排版或商店缓存刷新验证。
+  Documentation pairs Chinese with English. UI changes wrap checkbox labels, size reset buttons and reserve bilingual diagram headings. Live-game layout and installer cache refresh have not been verified for this release.
+
 ## 1.6.1.1 — 2026-11-11
 
 - Branding/artwork/documentation release: window titles, enable label, command help and assembly display metadata use `POV+ Enhanced`. Store `Name` matches. Internal assembly/config identity remains `PovPlus`; the existing custom-repository URL and installer/update URLs remain unchanged.

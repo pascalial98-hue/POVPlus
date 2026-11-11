@@ -100,7 +100,6 @@
   "头部隐藏不可用，请查看 Dalamud 日志。": "Head hiding is unavailable. Check the Dalamud log.",
   "自身特效减弱不可用，请查看 Dalamud 日志。": "Self-effect attenuation is unavailable. Check the Dalamud log.",
   "打开 POV+ Enhanced 设置；/pov toggle 切换启用状态": "Open POV+ Enhanced settings; /pov toggle enables or disables POV+ Enhanced",
-  "自动跟随 Dalamud 界面语言；修改立即生效。": "Auto follows the Dalamud UI language. Changes take effect immediately.",
   "POV+ Enhanced 视点校准###PovCalibration": "POV+ Enhanced Viewpoint Calibration###PovCalibration",
   "视点": "Viewpoint",
   "把青色十字移到两眼之间的鼻梁处。": "Move the cyan crosshair to the bridge of your nose, between your eyes.",
@@ -121,5 +120,6 @@
   "切到第三人称，用图示和实时标记调整两眼之间的视点。请在正常场景、非战斗状态下使用。": "Switch to third person and align the viewpoint between your eyes with diagrams and a live marker. Available during normal gameplay, outside combat.",
   "示意图正在加载或暂不可用；仍可按文字说明调整实时视点。": "The illustration is loading or unavailable. You can still use the instructions and live viewpoint marker.",
   "与双眼同高": "Level with both eyes",
-  "贴近鼻梁，不是鼻尖": "At the bridge, not the tip"
+  "贴近鼻梁，不是鼻尖": "At the bridge, not the tip",
+  "中英对照逐项显示中文和英文；自动模式跟随 Dalamud 语言。修改立即生效。": "Bilingual pairs Chinese with English for each item. Auto follows the Dalamud UI language. Changes take effect immediately."
 }

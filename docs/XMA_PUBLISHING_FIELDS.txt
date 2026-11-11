@@ -1,7 +1,7 @@
 POV+ Enhanced — XMA 发布字段建议（未提交 XMA）
 
 Name: POV+ Enhanced
-Version: 1.6.1.1
+Version: 1.6.1.2
 Type: Dalamud Plugin
 Author display name: Pascalial
 Genders: Unisex
@@ -14,7 +14,7 @@ Other link — Source & documentation: https://github.com/pascalial98-hue/POVPlu
 Other link — Downloads: https://github.com/pascalial98-hue/POVPlus/releases/latest
 Other link — Bug reports: https://github.com/pascalial98-hue/POVPlus/issues
 Preview: docs/images/povplus-enhanced-preview-v2.png（完整横版）
-Description: XMA_DESCRIPTION.en.txt；中文可附 XMA_DESCRIPTION.zh-CN.txt。
+Description: XMA_DESCRIPTION.bilingual.txt（主发布正文，每项中文后紧接英文 / primary listing text, Chinese followed immediately by English for each item）。单语文件仅作备用 / single-language files are optional alternatives。
 
 Compatibility: 在正文开头保留“FFXIV CN / Dalamud API 15; international clients unverified”。不要把本站常见的 Dawntrail 兼容标记解释成当前国际服已验证。
 

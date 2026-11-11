@@ -7,14 +7,14 @@ CURRENT TARGET: Chinese client, Dalamud API 15. Latest build baseline: CN 2026.1
 
 FEATURES
 
-• Visible body in first person, with head hiding timed to camera entry and exit.
+• Visible body in first person. Head hiding and full head shadows are enabled by default; the head disappears as the camera approaches and returns after it moves away.
 • Adjustable horizontal and vertical look limits, with gentle slowdown near the edge.
-• Lean forward or sideways by continuing to move the mouse at a look limit. Distance, sensitivity and extra viewing angle are adjustable.
+• Lean forward or sideways by continuing to move the mouse at a look limit. Distance, sensitivity and extra viewing angle are adjustable. Lean holds when input stops and retracts with reverse input.
 • Optional direct mouse look. Hold the left mouse button to look around without turning your character; use a configurable held or toggled shortcut to release the cursor.
 • Camera input preserves sitting, dozing and similar fixed/looped poses. Movement keys still end the pose normally.
 • First-use calibration with front/side diagrams, a live viewpoint marker and fine adjustment. Reopen it from /pov anytime outside combat during normal gameplay.
-• Independent yaw, pitch and roll follow weights, plus optional full head shadows, nearby object visibility and attenuation of close self-effects.
-• Simplified Chinese and English UI. Auto follows the Dalamud interface language.
+• Independent yaw, pitch and roll follow weights, plus optional nearby object visibility and attenuation of close self-effects.
+• New configurations show Chinese followed by English for each item. Auto, Chinese-only and English-only modes remain available. Existing language selections are retained; select the bilingual option at the top of /pov to switch.
 
 INSTALLATION
 
@@ -33,10 +33,10 @@ Already using this repository? Update through the installer; your settings are r
 NOTES
 
 • New configurations default to NearPlane 0.015. Existing values are retained; 0.001 remains available. Very low values can cause mist/particles to show through terrain.
-• Full head shadows, near-object visibility, selected hair/ear details and close self-effect attenuation are optional experiments, off by default. Full head shadows require the game's self-shadow option and hide complete head-related models; some neck geometry may belong to those models.
+• Head hiding and full head shadows default to on for new configurations; saved choices are retained. Full head shadows remain an experiment you can disable. Enable your own character shadows in the game; complete head-related models are hidden in the main view, including neck geometry belonging to the face model. Near-object visibility, hair/ear details and self-effect attenuation still default to off.
 • Outfit, face and animation mods can affect clipping and alignment. The plugin uses your character's existing animations; it does not supply a separate first-person animation set. The cosmetic mods shown in the preview are not included.
 • Fixed-pose protection covers the relevant looped game states, not every emote or custom animation. Near-object visibility does not cover every static map model or unloaded object.
-• Core features received in-game feedback during development. The new calibration workflow and the current release branding have passed offline checks but still need in-game confirmation. Compatibility with every race, face mod and future client build is not guaranteed.
+• Core features received in-game feedback during development. The new calibration and paired bilingual interface are checked offline but still need in-game confirmation; not every race, mod or future client build has been verified.
 
 CREDITS & SOURCE
 

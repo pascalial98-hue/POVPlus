@@ -37,7 +37,14 @@ with zipfile.ZipFile(source, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as z:
                 z.write(path, path.relative_to(root).as_posix())
     for name in ('PovPlus.json', 'repo.json', 'LICENSE.md', 'NOTICE.md', 'README.md', 'README.en.md', 'CHANGELOG.md', '.gitignore', '.gitattributes'):
         z.write(root / name, name)
-checksums = ''.join(f'{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}\n' for path in (binary, source))
+kit = out / 'POVPlus_Enhanced_XMA_Release_Kit.zip'
+with zipfile.ZipFile(kit, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as z:
+    for name in ('XMA_DESCRIPTION.bilingual.txt', 'XMA_DESCRIPTION.zh-CN.txt', 'XMA_DESCRIPTION.en.txt',
+                 'XMA_PUBLISHING_FIELDS.txt', 'PROMOTIONAL_ART.txt'):
+        z.write(root / 'docs' / name, name)
+    for name in ('povplus-enhanced-preview-v2.png', 'povplus-enhanced-icon-v1.png', 'povplus-enhanced-store-preview-v2.png'):
+        z.write(root / 'docs/images' / name, name)
+checksums = ''.join(f'{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}\n' for path in (binary, source, kit))
 (out / 'SHA256SUMS.txt').write_text(checksums, encoding='ascii')
 with zipfile.ZipFile(binary) as z:
     assert z.testzip() is None

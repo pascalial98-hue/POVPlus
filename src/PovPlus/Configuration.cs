@@ -6,11 +6,11 @@ namespace PovPlus;
 [Serializable]
 public class Configuration : IPluginConfiguration
 {
-    public PluginLanguage Language = PluginLanguage.Automatic;
+    public PluginLanguage Language = PluginLanguage.Bilingual;
     // Null distinguishes pre-guide configurations from new/pending installations.
     public bool? HasSeenCalibrationGuide;
     public bool FirstPersonHideHead = true;
-    public bool FirstPersonFullHeadShadow = false;
+    public bool FirstPersonFullHeadShadow = true;
     public bool FirstPersonDelayHeadHide = true;
     public float FirstPersonHeadHideDistance = HeadHideTransition.DefaultDistance;
     public float FirstPersonHeadShowDistance = HeadHideTransition.DefaultShowDistance;

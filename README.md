@@ -1,60 +1,120 @@
 # POV+ Enhanced
 
-![POV+ Enhanced — first-person body visibility and camera preview](https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/docs/images/povplus-enhanced-preview-v2.png)
+![POV+ Enhanced](https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/docs/images/povplus-enhanced-preview-v2.png)
 
-**简体中文** · [English](README.en.md)
+**中文 / English · 1.6.1.2** · [English only](README.en.md)
 
-看见自己的身体，自然地转头、探头，并保留完整头影。
+基于 Tiraesias 的 POV+ Beta 制作的国服第一人称增强分支。<br>
+An immersive first-person camera for FFXIV CN, built on Tiraesias's POV+ Beta.
 
-基于 [Tiraesias 的 POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta 制作的社区分支，面向 FF14 国服 Dalamud。当前版本 **1.6.1.1**，保留原项目署名、Git 历史和 AGPL-3.0-or-later 许可。
+低头看见自己的身体和衣服，自然地观察、探头，并把视点调整到适合自己角色的位置。<br>
+Look down to see your body and clothes, look around naturally, and adjust the viewpoint to your own character.
 
-## 安装
+当前面向国服 / Dalamud API 15。最近编译基线：国服 2026.11.03.0000.0000 / Dalamud 15.0.4.0。国际服尚未验证。<br>
+CURRENT TARGET: Chinese client, Dalamud API 15. Latest build baseline: CN 2026.11.03.0000.0000 / Dalamud 15.0.4.0. International clients have not been verified.
 
-1. 打开 Dalamud 设置，在“实验性 / Experimental”中的“自定义插件仓库 / Custom Plugin Repositories”添加以下地址，启用并保存：
+## 功能 / Features
 
-   ```text
-   https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/repo.json
-   ```
+- 第一人称显示身体，默认隐藏自己的头部并保留完整头影；镜头接近头部后才隐藏，切回第三人称、离开头部后再恢复。<br>
+  Visible body in first person. Head hiding and full head shadows are enabled by default; the head disappears as the camera approaches and returns after it moves away.
 
-2. 打开插件安装器，刷新后搜索 **POV+ Enhanced** 并安装。后续通过插件安装器更新，不需要打开测试版通道。
-3. 游戏角色设置 → 操作设置 → 常规中，将“第一人称视角自动调整 / 1st Person Camera Auto Adjustment”设为 **Never / 从不**。
-4. 首次使用会自动切到第三人称并打开视点校准引导。按图示从正面、侧面观察，把青色视点标记调到两眼之间的鼻梁表面，保存后用游戏原本的方式进入第一人称。
-5. 输入 `/pov` 打开设置，顶部“视点校准引导”按钮可随时重新校准（正常场景、非战斗状态）。
+- 左右、抬头、低头范围分别可调，接近边界时柔和减速。<br>
+  Adjustable horizontal and vertical look limits, with gentle slowdown near the edge.
 
-**从原版或个人测试版迁移：** 先备份 `PovPlus` 配置，停用旧版本并移除旧的开发插件入口；停用原 POV+ 自定义仓库，再安装本分支。内部名称仍为 `PovPlus`，现有配置可继续使用。不要同时加载两份 POV+；通常无需删除配置。
+- 顶到转头限位后继续拖动可前伸或侧伸；距离、灵敏度与额外转角可调，停止输入保持，反向拖动收回。<br>
+  Lean forward or sideways by continuing to move the mouse at a look limit. Distance, sensitivity and extra viewing angle are adjustable. Lean holds when input stops and retracts with reverse input.
 
-手动下载见 [Releases](https://github.com/pascalial98-hue/POVPlus/releases/latest)。普通安装推荐使用上面的仓库地址。根目录的 `PovPlus.Enhanced.zip` 是当前安装器使用的包；其他旧 ZIP 和 `SamplePlugin` 保留自上游，不是本分支的当前发布内容。
+- 可选鼠标直控。按住左键自由观察，不带动人物转身；自定义按住或按下切换的快捷键呼出鼠标。<br>
+  Optional direct mouse look. Hold the left mouse button to look around without turning your character; use a configurable held or toggled shortcut to release the cursor.
 
-## 有哪些改进
+- 普通右键和直控转镜头均保护坐下、躺下等固定循环动作；移动键仍可正常结束动作。<br>
+  Camera input preserves sitting, dozing and similar fixed/looped poses. Movement keys still end the pose normally.
 
-| 功能 | 使用方式 |
-| --- | --- |
-| 首次使用引导 | 独立可移动浮窗、FF14 角色正侧面图示、实时视点标记和三轴微调；保存确认，关闭或取消放弃本次偏移。 |
-| 头部隐藏与自然切换 | 镜头接近头部时才隐藏，切回第三人称、离开头部后再恢复；默认保留颈骨。 |
-| 完整头影（可选） | 主画面隐藏脸、头发、头饰等模型，保留原生阴影；无需复制角色。 |
-| 合理转头范围 | 左右、抬头和低头分别限制，接近边界时柔和减速。 |
-| 到达限位后探头 | 继续拖动才前伸或侧伸；幅度、灵敏度及额外转角可调，位移和转角同步混合。停止输入保持，反向拖动收回。 |
-| 鼠标直控（可选） | 不按右键也可转视角；按住左键自由观察。自定义单键或组合键，可按住或按一下切换呼出鼠标。 |
-| 固定姿势保护 | 普通右键和直控转镜头均保护坐下、躺下及同类循环动作；移动键仍可正常结束动作。 |
-| 三轴跟随关联度 | 左右、上下、侧倾分别调整 0–100% 幅度，并独立调整平滑。 |
-| 近裁剪与近处外观 | 新配置 NearPlane 默认 0.015、最低 0.001；可选保留近处角色/物件、部分头发耳部细节，或减弱贴近镜头的自身特效。 |
-| 中英界面 | 设置顶部选择 **自动 / 简体中文 / English**，立即生效。自动跟随 Dalamud 界面语言，非中文使用英文。 |
+- 首次使用提供正侧面图示、实时视点标记和微调引导；正常场景、非战斗状态下，可从 /pov 顶部重新进入。<br>
+  First-use calibration with front/side diagrams, a live viewpoint marker and fine adjustment. Reopen it from /pov anytime outside combat during normal gameplay.
 
-输入 `/pov toggle` 可切换插件启用状态。普通设置会自动保存；校准偏移需点击“保存并完成”。已有配置升级不自动弹出引导，也不会改写旧偏移或 NearPlane。完整头影、近物体保留、外观细节和自身特效减弱为试验选项，默认关闭。
+- 左右、上下、侧倾分别设置跟随关联度；另有可选近物体保留和近处自身特效减弱。<br>
+  Independent yaw, pitch and roll follow weights, plus optional nearby object visibility and attenuation of close self-effects.
 
-## 兼容性与已知限制
+- 新配置默认中英对照：每项中文后紧接英文。也可选择自动、简体中文或 English；旧配置保留语言选择，可在 /pov 顶部切换为“中英对照”。<br>
+  New configurations show Chinese followed by English for each item. Auto, Chinese-only and English-only modes remain available. Existing language selections are retained; select the bilingual option at the top of /pov to switch.
 
-- 最近验证基线：**国服客户端 `2026.11.03.0000.0000`、Dalamud API 15（15.0.4.0）、Windows x64 / .NET 10**。从 1.6.0.1 起取消完整游戏日期限制，普通更新不再仅因日期变化而拒绝加载；保留 API 版本要求和现有接口检查。该策略不保证所有新版都兼容；API 或原生接口发生变化时仍需适配。**国际服尚未验证**。
-- NearPlane 设为 0.001 能保留更多近处衣服，也可能让水雾等粒子透过地形。当前保留这个选择，没有同时解决两者；调高 NearPlane 可改善粒子遮挡。
-- 完整头影需要游戏启用自身阴影。该模式整块隐藏对应头部模型，不能同时保留发梢或耳饰；脸部模型自带的部分颈部也可能消失。特殊改模的模型槽位可能不同。
-- 近物体选项只覆盖游戏相应的距离隐藏判断，不能解决所有地图静态物体、背面剔除或尚未加载的资源。
-- 姿势保护按游戏固定/循环状态识别，不保证覆盖普通短动作、施法、骑乘或非标准动作修改。鼠标快捷键仍传给游戏，请避免常用按键冲突。
-- 核心功能已在开发期间获得实际游戏反馈。1.6.1.0 已通过编译、离线回归与校准相机字段布局检查；新增引导、图示和实际视点对齐仍需游戏内确认。
+## 安装 / Installation
 
-## 源码与反馈
+需要启用了 Dalamud 的 XIVLauncherCN。<br>
+Requires XIVLauncherCN with Dalamud enabled.
 
-当前可构建源码位于 [`src/`](src)，离线回归位于 [`tests/`](tests)。此分支以原作者公开的 Beta 二进制恢复源码为基线，再加入功能修改；上游较旧的 `SamplePlugin` 目录只作历史参考。
+1. 输入 /xlsettings，进入“实验性 → 自定义插件仓库”。<br>
+   Open /xlsettings → Experimental → Custom Plugin Repositories.
 
-构建步骤见 [中英开发说明](docs/BUILD.md)，版本记录见 [CHANGELOG](CHANGELOG.md)。问题请提交到[本分支 Issues](https://github.com/pascalial98-hue/POVPlus/issues)，附游戏/Dalamud/插件版本、相关选项、复现步骤和必要日志；提交前请删去日志中的私人信息。
+2. 添加以下地址，勾选启用并保存：<br>
+   Add and enable this repository, then save:
 
-感谢原作者 **Tiraesias / TiraesiascenGraven**，以及原项目所使用的 Hypostasis、Dalamud 和 FFXIVClientStructs。详见 [NOTICE](NOTICE.md) 和 [许可证](LICENSE.md)。本分支独立维护。
+   <https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/repo.json>
+
+3. 输入 /xlplugins，刷新列表，搜索并安装 POV+ Enhanced。<br>
+   Open /xlplugins, refresh, and install POV+ Enhanced.
+
+4. 在“角色设置 → 操作设置 → 常规”中，将“第一人称视角自动调整”设为“从不 / Never”。<br>
+   In Character Configuration → Control Settings → General, set 1st Person Camera Auto Adjustment to Never.
+
+5. 按首次引导，将青色视点标记调到两眼之间的鼻梁表面；从正面和侧面各确认一次，保存后用游戏原有方式进入第一人称。<br>
+   Follow the calibration guide: align the cyan marker to the surface of the nose bridge between the eyes, checking from both front and side. Save, then enter first person with the normal game controls.
+
+/pov 打开设置；/pov toggle 切换启用状态。<br>
+/pov opens settings. /pov toggle enables or disables the plugin.
+
+已经添加本仓库的用户直接在安装器更新即可，已有设置保留。从原版或开发测试版迁移时，先停用旧插件及旧仓库/开发入口，保留 PovPlus 配置，不要同时加载两份。<br>
+Already using this repository? Update through the installer; your settings are retained. If switching from the original POV+ or a development build, disable that copy and its old repository/development entry first. Keep your PovPlus configuration; do not load two copies together.
+
+## 说明 / Notes
+
+- 新配置 NearPlane 默认 0.015，旧值保留，仍可手动设置 0.001。过低时，水雾等粒子可能透过地形显示。<br>
+  New configurations default to NearPlane 0.015. Existing values are retained; 0.001 remains available. Very low values can cause mist/particles to show through terrain.
+
+- 新配置默认开启隐藏头部与完整头影，已有配置保留手动选择。完整头影仍为可关闭的试验项，需要游戏启用自身阴影；主画面整块隐藏对应头部模型，属于脸部模型的部分颈部也可能被隐藏。近物体保留、发梢/耳部细节及自身特效减弱仍默认关闭。<br>
+  Head hiding and full head shadows default to on for new configurations; saved choices are retained. Full head shadows remain an experiment you can disable. Enable your own character shadows in the game; complete head-related models are hidden in the main view, including neck geometry belonging to the face model. Near-object visibility, hair/ear details and self-effect attenuation still default to off.
+
+- 服装、脸型和动作模组会影响遮挡及对齐。插件沿用角色现有动作，不另附第一人称动作套组；预览中的外观模组不包含在插件中。<br>
+  Outfit, face and animation mods can affect clipping and alignment. The plugin uses your character's existing animations; it does not supply a separate first-person animation set. The cosmetic mods shown in the preview are not included.
+
+- 固定姿势保护覆盖相应循环状态，不保证每个动作都适用；近物体保留也不覆盖所有地图静态模型或尚未加载的物体。<br>
+  Fixed-pose protection covers the relevant looped game states, not every emote or custom animation. Near-object visibility does not cover every static map model or unloaded object.
+
+- 核心功能已在开发过程中获得游戏内反馈。新增校准与中英对照界面经过离线检查，实际游戏表现仍需确认；没有宣称已验证全部种族、改模或未来版本。<br>
+  Core features received in-game feedback during development. The new calibration and paired bilingual interface are checked offline but still need in-game confirmation; not every race, mod or future client build has been verified.
+
+## 署名与源码 / Credits & Source
+
+原项目：Tiraesias / TiraesiascenGraven<br>
+Original POV+: Tiraesias / TiraesiascenGraven
+
+<https://github.com/TiraesiascenGraven/POVPlus>
+
+增强分支：Pascalial / pascalial98-hue<br>
+Enhanced fork: Pascalial / pascalial98-hue
+
+<https://github.com/pascalial98-hue/POVPlus>
+
+分支以原作者公开的 Beta 二进制恢复源码为基线。保留原署名及 AGPL-3.0-or-later 许可，发布包附完整对应源码和构建说明。感谢 Dalamud、FFXIVClientStructs 与 Hypostasis 项目。<br>
+The fork's source baseline was recovered from the author's public Beta binary. Original attribution and the AGPL-3.0-or-later license are retained. Full corresponding source and build instructions are included with releases. Thanks to the Dalamud, FFXIVClientStructs and Hypostasis projects.
+
+下载及更新记录：https://github.com/pascalial98-hue/POVPlus/releases/latest<br>
+Downloads and changelog: https://github.com/pascalial98-hue/POVPlus/releases/latest
+
+问题反馈：https://github.com/pascalial98-hue/POVPlus/issues<br>
+Bug reports: https://github.com/pascalial98-hue/POVPlus/issues
+
+反馈时请附插件、游戏及 Dalamud 版本，相关设置和复现步骤。<br>
+Please include plugin, game and Dalamud versions, relevant settings and reproduction steps.
+
+## 开发 / Development
+
+当前可构建源码在 [`src/`](src)，离线回归在 [`tests/`](tests)。参阅[构建说明](docs/BUILD.md)、[更新记录](CHANGELOG.md)及[验证记录](docs/VALIDATION.md)。<br>
+Buildable source is in [`src/`](src), with offline regressions in [`tests/`](tests). See the [build guide](docs/BUILD.md), [changelog](CHANGELOG.md) and [validation record](docs/VALIDATION.md).
+
+根目录 `PovPlus.Enhanced.zip` 为当前安装包；其他旧 ZIP 和 `SamplePlugin` 保留自上游，非本分支当前发布内容。<br>
+The root `PovPlus.Enhanced.zip` is the current installer package. Other old ZIPs and `SamplePlugin` are inherited upstream files, not current fork releases.
+
+本分支保留原署名、Git 历史及 AGPL-3.0-or-later 许可。参阅 [NOTICE](NOTICE.md) 和 [LICENSE](LICENSE.md)。<br>
+Original attribution, Git history and the AGPL-3.0-or-later license are retained. See [NOTICE](NOTICE.md) and [LICENSE](LICENSE.md).

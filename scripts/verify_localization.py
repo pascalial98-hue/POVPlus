@@ -7,7 +7,7 @@ root = pathlib.Path(__file__).resolve().parents[1]
 src = root / 'src'
 catalog = json.loads((src / 'PovPlus/Translations/en.json').read_text(encoding='utf-8-sig'))
 missing = []
-fixed = {'Language / 语言###language', '自动 / Auto\0简体中文\0English\0'}
+fixed = {'语言 / Language###language', '自动 / Auto\0简体中文\0English\0中英对照 / 中文 + English\0'}
 paths = [*(src / 'PovPlus.Windows').glob('*.cs'), *(src / 'PovPlus').glob('*.cs')]
 for path in paths:
     for number, line in enumerate(path.read_text(encoding='utf-8-sig').splitlines(), 1):

@@ -16,11 +16,11 @@ public class MainWindow : Window, IDisposable
     public MainWindow(Plugin plugin) : base(L.T("POV+ Enhanced 第一人称设置###PovPlus"), ImGuiWindowFlags.AlwaysVerticalScrollbar)
     {
         this.plugin = plugin;
-        Size = new Vector2(560, 620);
+        Size = new Vector2(660, 720);
         SizeCondition = ImGuiCond.FirstUseEver;
         SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(420, 340),
+            MinimumSize = new Vector2(520, 340),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
     }
@@ -33,14 +33,14 @@ public class MainWindow : Window, IDisposable
     {
         DrawAxes();
         var language = Enum.IsDefined(Config.Language) ? (int)Config.Language : 0;
-        ImGui.SetNextItemWidth(230 * ImGuiHelpers.GlobalScale);
-        if (ImGui.Combo("Language / 语言###language", ref language, "自动 / Auto\0简体中文\0English\0"))
+        ImGui.SetNextItemWidth(260 * ImGuiHelpers.GlobalScale);
+        if (ImGui.Combo("语言 / Language###language", ref language, "自动 / Auto\0简体中文\0English\0中英对照 / 中文 + English\0"))
         {
             Config.Language = (PluginLanguage)language;
             Config.Save();
             plugin.RefreshLanguage();
         }
-        ImGui.TextWrapped(L.T("自动跟随 Dalamud 界面语言；修改立即生效。"));
+        ImGui.TextWrapped(L.T("中英对照逐项显示中文和英文；自动模式跟随 Dalamud 语言。修改立即生效。"));
         Toggle("启用 POV+ Enhanced", ref Config.Setting_ModEnabled);
         ImGui.TextDisabled(L.T("/pov toggle 可切换启用状态"));
         if (plugin.RuntimeStatus.Length > 0) ImGui.TextWrapped(plugin.RuntimeStatus);
@@ -112,19 +112,21 @@ public class MainWindow : Window, IDisposable
         Toggle("第一人称下，移动鼠标直接转动视角", ref Config.FirstPersonMouseLook);
         if (!Config.FirstPersonMouseLook) { recordingKey = false; return; }
         var mode = Config.FirstPersonCursorToggle ? 1 : 0;
-        if (ImGui.Combo(L.Label("呼出鼠标方式"), ref mode, L.T("按住快捷键\0按一下切换\0")))
+        ImGui.TextWrapped(L.T("呼出鼠标方式"));
+        ImGui.SetNextItemWidth(-1);
+        if (ImGui.Combo("##cursorMode", ref mode, L.T("按住快捷键\0按一下切换\0")))
         {
             Config.FirstPersonCursorToggle = mode == 1;
             Config.Save();
         }
-        ImGui.TextUnformatted(L.T("呼出快捷键：") + MouseLookKeys.Name(Config.FirstPersonCursorKey, Config.FirstPersonCursorModifiers));
+        ImGui.TextWrapped(L.T("呼出快捷键：", inline: true) + MouseLookKeys.Name(Config.FirstPersonCursorKey, Config.FirstPersonCursorModifiers));
         if (ImGui.Button(recordingKey ? L.Label("等待按键…（Esc 取消）") : L.Label("录制快捷键")))
         {
             recordingKey = true;
             keyRecorderArmed = false;
             pendingModifier = 0;
         }
-        ImGui.SameLine();
+        if (Config.Language != PluginLanguage.Bilingual) ImGui.SameLine();
         if (ImGui.Button(L.Label("重置为 Alt")))
         {
             recordingKey = false;
@@ -259,14 +261,22 @@ public class MainWindow : Window, IDisposable
 
     private void Toggle(string label, ref bool value)
     {
-        if (ImGui.Checkbox(L.Label(label), ref value)) Config.Save();
+        ImGui.PushID(label);
+        var changed = ImGui.Checkbox("##enabled", ref value);
+        ImGui.SameLine();
+        ImGui.TextWrapped(L.T(label));
+        // A wrapped label remains clickable; disabled controls also disable this hit target.
+        if (ImGui.IsItemClicked()) { value = !value; changed = true; }
+        if (changed) Config.Save();
+        ImGui.PopID();
     }
 
     private bool Slider(string label, ref float value, float min, float max, float reset, string format, bool save = true)
     {
         ImGui.PushID(label);
-        ImGui.TextUnformatted(L.T(label));
-        ImGui.SetNextItemWidth(-68 * ImGuiHelpers.GlobalScale);
+        ImGui.TextWrapped(L.T(label));
+        var resetWidth = ImGui.CalcTextSize(L.T("重置", inline: true)).X + ImGui.GetStyle().FramePadding.X * 2;
+        ImGui.SetNextItemWidth(-resetWidth - ImGui.GetStyle().ItemSpacing.X);
         var changed = ImGui.SliderFloat("##value", ref value, min, max, format, ImGuiSliderFlags.AlwaysClamp);
         ImGui.SameLine();
         if (ImGui.Button(L.Label("重置"))) { value = reset; changed = true; }

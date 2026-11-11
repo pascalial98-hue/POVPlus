@@ -23,11 +23,11 @@ internal sealed class CalibrationWindow : Window
         ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysVerticalScrollbar)
     {
         this.plugin = plugin;
-        Size = new Vector2(560, 800);
+        Size = new Vector2(660, 850);
         SizeCondition = ImGuiCond.FirstUseEver;
         Position = new Vector2(30, 80);
         PositionCondition = ImGuiCond.FirstUseEver;
-        SizeConstraints = new WindowSizeConstraints { MinimumSize = new Vector2(460, 400), MaximumSize = new Vector2(900, 1000) };
+        SizeConstraints = new WindowSizeConstraints { MinimumSize = new Vector2(520, 400), MaximumSize = new Vector2(900, 1000) };
     }
 
     internal void Begin(nint actorAddress, nint cameraAddress)
@@ -77,7 +77,7 @@ internal sealed class CalibrationWindow : Window
         draw.AddCircle(point, 9 * scale, 0xffffdf65, 32, 2 * scale);
         draw.AddLine(point - new Vector2(14 * scale, 0), point + new Vector2(14 * scale, 0), 0xffffdf65, 2 * scale);
         draw.AddLine(point - new Vector2(0, 14 * scale), point + new Vector2(0, 14 * scale), 0xffffdf65, 2 * scale);
-        var label = L.T("视点");
+        var label = L.T("视点", inline: true);
         var textPos = point + new Vector2(18, -9) * scale;
         draw.AddText(textPos + Vector2.One * scale, 0xff101010, label);
         draw.AddText(textPos, 0xffffdf65, label);
@@ -91,8 +91,8 @@ internal sealed class CalibrationWindow : Window
     public override void Draw()
     {
         var language = Enum.IsDefined(plugin.Configuration.Language) ? (int)plugin.Configuration.Language : 0;
-        ImGui.SetNextItemWidth(220 * ImGuiHelpers.GlobalScale);
-        if (ImGui.Combo("Language / 语言###language", ref language, "自动 / Auto\0简体中文\0English\0"))
+        ImGui.SetNextItemWidth(260 * ImGuiHelpers.GlobalScale);
+        if (ImGui.Combo("语言 / Language###language", ref language, "自动 / Auto\0简体中文\0English\0中英对照 / 中文 + English\0"))
         {
             plugin.Configuration.Language = (PluginLanguage)language;
             plugin.Configuration.Save();
@@ -116,15 +116,17 @@ internal sealed class CalibrationWindow : Window
         ImGui.BeginDisabled(!frameValid);
         if (ImGui.Button(L.Label("保存并完成"))) End(true);
         ImGui.EndDisabled();
-        ImGui.SameLine();
+        if (plugin.Configuration.Language != PluginLanguage.Bilingual) ImGui.SameLine();
         if (ImGui.Button(L.Label("取消本次调整"))) Cancel();
+        ImGui.PushTextWrapPos(0);
         ImGui.TextDisabled(L.T("关闭窗口会放弃本次未保存的偏移。"));
+        ImGui.PopTextWrapPos();
     }
 
     private static void Adjust(string label, ref float value)
     {
         ImGui.PushID(label);
-        ImGui.TextUnformatted(L.T(label));
+        ImGui.TextWrapped(L.T(label));
         var scale = ImGuiHelpers.GlobalScale;
         ImGui.SetNextItemWidth(Math.Max(120 * scale, ImGui.GetContentRegionAvail().X - 84 * scale));
         var changed = ImGui.DragFloat("##offset", ref value, 0.001f, -1, 1, "%.3f", ImGuiSliderFlags.AlwaysClamp);
@@ -157,7 +159,11 @@ internal sealed class CalibrationWindow : Window
         var gap = 10 * s;
         var width = (ImGui.GetContentRegionAvail().X - gap) / 2;
         var imageSide = width - 12 * s;
-        var height = imageSide + 60 * s;
+        var titles = new[] { L.T("正面：两眼之间"), L.T("侧面：鼻梁表面") };
+        var captions = new[] { L.T("与双眼同高"), L.T("贴近鼻梁，不是鼻尖") };
+        var titleHeight = Math.Max(ImGui.CalcTextSize(titles[0]).Y, ImGui.CalcTextSize(titles[1]).Y);
+        var captionHeight = Math.Max(ImGui.CalcTextSize(captions[0]).Y, ImGui.CalcTextSize(captions[1]).Y);
+        var height = imageSide + titleHeight + captionHeight + 32 * s;
         ImGui.InvisibleButton("##calibrationDiagram", new Vector2(width * 2 + gap, height));
         var draw = ImGui.GetWindowDrawList();
         const uint accent = 0xffffdf65;
@@ -166,9 +172,9 @@ internal sealed class CalibrationWindow : Window
             var left = origin + new Vector2(panel * (width + gap), 0);
             draw.AddRectFilled(left, left + new Vector2(width, height), 0xff302722, 8 * s);
             draw.AddRect(left, left + new Vector2(width, height), 0xff58483a, 8 * s);
-            var title = L.T(panel == 0 ? "正面：两眼之间" : "侧面：鼻梁表面");
+            var title = titles[panel];
             draw.AddText(left + new Vector2(10, 9) * s, 0xfff4ebe0, title);
-            var imageMin = left + new Vector2(6, 32) * s;
+            var imageMin = left + new Vector2(6 * s, titleHeight + 16 * s);
             draw.AddImage(texture.Handle, imageMin, imageMin + new Vector2(imageSide),
                 new Vector2(panel * 0.5f, 0), new Vector2((panel + 1) * 0.5f, 1));
             // Coordinates refer to the nose ROOT in each half of the atlas.
@@ -180,8 +186,8 @@ internal sealed class CalibrationWindow : Window
             draw.AddCircleFilled(target, 2 * s, 0xfff3ffdf);
             foreach (var direction in new[] { Vector2.UnitX, -Vector2.UnitX, Vector2.UnitY, -Vector2.UnitY })
                 draw.AddLine(target + direction * 9 * s, target + direction * 13 * s, accent, 1.6f * s);
-            var caption = L.T(panel == 0 ? "与双眼同高" : "贴近鼻梁，不是鼻尖");
-            draw.AddText(left + new Vector2((width - ImGui.CalcTextSize(caption).X) / 2, height - 23 * s), accent, caption);
+            var caption = captions[panel];
+            draw.AddText(left + new Vector2((width - ImGui.CalcTextSize(caption).X) / 2, height - captionHeight - 8 * s), accent, caption);
         }
     }
 }
