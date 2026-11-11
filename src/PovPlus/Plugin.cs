@@ -75,7 +75,7 @@ public class Plugin : IDalamudPlugin, IDisposable
 		WindowSystem.AddWindow(MainWindow);
 		povCommand = new CommandInfo(OnCommand)
 		{
-			HelpMessage = L.T("打开 POV+ 设置；/pov toggle 切换启用状态")
+			HelpMessage = L.T("打开 POV+ Enhanced 设置；/pov toggle 切换启用状态")
 		};
         Service.CommandManager.AddHandler("/pov", povCommand);
         Service.PluginInterface.LanguageChanged += OnLanguageChanged;
@@ -200,7 +200,7 @@ public class Plugin : IDalamudPlugin, IDisposable
     private void OnLanguageChanged(string language) => RefreshLanguage();
     internal void RefreshLanguage()
     {
-        if (povCommand != null) povCommand.HelpMessage = L.T("打开 POV+ 设置；/pov toggle 切换启用状态");
+        if (povCommand != null) povCommand.HelpMessage = L.T("打开 POV+ Enhanced 设置；/pov toggle 切换启用状态");
     }
 
 	public void ToggleMainUi()

@@ -1,0 +1,68 @@
+POV+ Enhanced — promotional artwork provenance
+
+Created with the built-in image_gen tool on 2026-11-11.
+Cover source: three in-game screenshots supplied by Pascalial (tea/body view, first-person thumbs-up, third-person comparison).
+Style reference: Pascalial's ALF promotional cover, with a new navy/teal/gold aether-and-optics theme.
+Final requested layout: tea/body view on the left; third person upper-right; first-person interaction lower-right.
+
+Files:
+docs/images/povplus-enhanced-preview-v2.png — full landscape cover, 1672 x 941.
+docs/images/povplus-enhanced-store-preview-v2.png — installer version, 730 x 380; fit proportionally with side padding.
+docs/images/povplus-enhanced-icon-v1.png — installer icon, 512 x 512.
+The icon master is 1254 x 1254. Installer exports only resize/pad the generated art to the native installer's supported bounds; they do not redraw it.
+
+The artwork uses AI-assisted composition. It is promotional artwork based on supplied screenshots, not a claim of pixel-identical unedited screenshots. Cosmetic mods shown are not included in the plugin. Original POV+ credit is retained in the cover and release documentation.
+
+INITIAL COVER PROMPT
+Use case: ads-marketing / compositing.
+Create a polished release preview cover for the FFXIV Dalamud plugin named exactly "POV+ Enhanced".
+Output ONE LANDSCAPE 16:9 graphic, about 1672 x 941, suitable for a XIV Mod Archive listing.
+
+Inputs:
+Image 1 is the ALF promotional cover, STYLE REFERENCE ONLY. Borrow its premium editorial hierarchy, fine gold double-line ornamental frames, elegant large serif typography, restrained luxury and multi-screenshot presentation. Do not copy its title, fire decorations, burgundy palette, character screenshots, clothing promotion or credits.
+Image 2 is the supplied FIRST-PERSON DOWNWARD screenshot: hands holding a teacup and saucer with white/black/gold sleeves and visible body. Use this exact screenshot as a photo panel.
+Image 3 is the supplied FIRST-PERSON FORWARD screenshot: a thumbs-up hand/black sleeve in the foreground, looking toward a black-haired Miqo'te in a red kimono by a flower-covered wall in a wooden Japanese interior. This is the MAIN HERO photo panel.
+Image 4 is the supplied THIRD-PERSON screenshot of the same thumbs-up interaction: the white-haired Miqo'te in white/black/gold clothing on the left and the seated black-haired red-kimono character on the right. Use this as a clearly labeled third-person reference photo, not a first-person result.
+
+New theme: "Through your own eyes / aether and perspective". Deep midnight navy and dark teal background, subtle optical rings and delicate celestial/compass arcs, a few understated cyan aether glints OUTSIDE the screenshots, fine champagne-gold borders. Distinctly serene, immersive, sophisticated fantasy optics. No flames, no red ribbons, no giant technological HUD, no VR goggles, no cartoon eyeballs. Keep decoration quiet and let the actual gameplay screenshots dominate.
+
+Layout: broad title band along the top. LARGE LEFT hero frame using Image 3, preserving its landscape aspect ratio and the hand, sleeve and red-clad character. Two smaller wide frames stacked on the RIGHT: upper uses Image 4; lower uses Image 2. All three supplied screenshots must be used once, with balanced margins, matching elegant frames, and neither stretch nor distort. Slight proportion-preserving crops only if needed; preserve important subjects, face shapes, hand shapes, tea and saucer, outfits, environment, rendering style and scene lighting. Treat screenshots as placed photographs: do not redraw, beautify, add fingers, change faces, invent game content, generate alternate camera perspectives, or merge the scenes together. Do not replace real screenshots with illustrations. No content from the ALF photo panels.
+
+Exact text, spelled correctly with strong readability:
+Main title: "POV+ Enhanced"
+Subtitle: "沉浸式第一人称 / IMMERSIVE FIRST PERSON"
+Hero panel label: "第一人称 · FIRST PERSON"
+Upper-right panel label: "第三人称参照 · THIRD PERSON"
+Lower-right panel label: "低头可见身体 · VISIBLE BODY"
+Bottom features: "自由观察 · 限位探头 · 视点校准"
+Small English feature line: "FREE LOOK · NATURAL LEANING · VIEWPOINT CALIBRATION"
+Small author credit: "Enhanced by Pascalial"
+Small original-project credit: "Based on POV+ by Tiraesias"
+Compatibility badge: "CN · DALAMUD API 15"
+
+Use natural elegant Chinese typography paired with refined English serif title and small uppercase captions. Give title and labels sufficient contrast. Balanced final professional cover; no extra labels, URLs, version numbers, claims, warnings or logos. Keep important text away from image edges.
+
+FINAL COVER EDIT PROMPT
+Edit the existing finished POV+ Enhanced landscape release cover (Image 1). Make ONLY a panel-content swap, retaining the complete design exactly.
+
+Inputs:
+Image 1: the finished cover, edit target.
+Image 2: original first-person looking-down tea screenshot, source for the NEW large LEFT panel.
+Image 3: original first-person thumbs-up screenshot, source for the NEW LOWER-RIGHT panel.
+
+Required changes:
+1. Replace the large LEFT panel's screenshot with Image 2 (hands holding teacup and saucer, sleeves, visible torso). Reframe proportionally to the existing large frame. Make cup, both hands and visible body readable; retain the original in-game screenshot appearance and details. Do not redraw or beautify the scene.
+2. Replace the LOWER-RIGHT panel's screenshot with Image 3 (first-person black sleeve and thumbs-up, looking at the seated black-haired red-kimono Miqo'te by flowers). Reframe proportionally to the existing small frame; keep the hand and the red-clad character visible. Preserve the actual screenshot, faces, hand anatomy, costume and environment.
+3. Swap the captions WITH their content. Large LEFT panel caption must read exactly "低头可见身体 · VISIBLE BODY". LOWER-RIGHT caption must read exactly "第一人称 · FIRST PERSON".
+
+Keep the UPPER-RIGHT third-person photograph and its caption exactly unchanged.
+Keep ALL frame geometry and positions, navy/teal background, champagne gold ornament, celestial lines and glints, title "POV+ Enhanced", subtitle, feature footer, author credit, original project credit, and "CN · DALAMUD API 15" badge exactly unchanged. Same landscape dimensions and crisp print quality. No additions, no changes to the overall layout, no image stretching.
+
+ICON PROMPT
+Use case: logo-brand.
+Create a finished square app/plugin icon for "POV+ Enhanced", a first-person camera extension for FFXIV.
+Production asset, ideally 512 x 512 pixels, SQUARE 1:1.
+Theme: elegant fantasy optics / aether, matching a midnight navy, deep teal, champagne-gold promotional cover.
+Design a strong simple central emblem: a gold horizontal eye-shaped aperture embracing a luminous cyan camera lens/pupil. Integrate a small clear PLUS sign at the upper-right of the lens to convey Enhanced. Beneath the eye/lens, place the exact short name "POV+" in bold clean highly legible cream-gold lettering. Use only this text, no "Enhanced" and no additional tiny text.
+Keep everything large, centered, symmetrical and extremely readable when shrunk to 64 pixels. Icon should be recognizable as first-person vision, not a full photographic camera body. A rich dark navy square background with subtle teal inner radiance, one restrained thin gold outer border with modest geometric corner accents. Subtle soft cyan illumination in the lens, crisp gold edges, tasteful slight dimensional polish. Broad shapes with strong contrast. Professional release icon, original identity.
+No screenshots, people, hands, scenery, tiny stars, filigree clutter, small decorative text, photoreal textures, flames, busy HUD grids, official Final Fantasy logo, watermarks or mockup presentation. Fill the image with the actual finished icon, no external margin or drop-shadow beyond its square. Solid opaque background.

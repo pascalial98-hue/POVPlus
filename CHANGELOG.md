@@ -1,5 +1,17 @@
 # Changelog / 更新记录
 
+## 1.6.1.1 — 2026-11-11
+
+- 设置窗口、校准窗口、启用开关与命令帮助统一使用 **POV+ Enhanced** 名称，商店清单沿用相同名称。
+- 新增深蓝/青绿/金色插件图标与发布预览图；左侧为低头身体可见，右侧为第三人称参照和第一人称互动。商店分别使用 512×512 图标与 730×380 预览图。
+- 补充适合 XMA 的中英发布介绍、安装说明、原作者署名及 AI 使用说明。国际服仍未验证。
+- 仅更新名称、图像和文档，现有相机功能、配置、内部名称 `PovPlus` 与原库更新地址保持不变。
+
+- Use **POV+ Enhanced** consistently in settings, calibration, enable controls and command help, matching the store listing.
+- Add a navy/teal/gold icon and release preview. The large panel shows the downward body view; smaller panels compare third-person and first-person interaction. Store assets use a 512×512 icon and 730×380 preview.
+- Include bilingual XMA-ready descriptions, installation steps, upstream credits and AI-use information. International clients remain unverified.
+- Branding, artwork and documentation only; camera behavior, saved settings, internal name `PovPlus` and the existing update repository remain unchanged.
+
 ## 1.6.1.0 — 2026-11-11
 
 - 新增首次使用视点校准：新配置在角色与相机就绪后自动进入第三人称，打开独立浮窗并显示实时视点标记；`/pov` 顶部提供重新进入按钮。

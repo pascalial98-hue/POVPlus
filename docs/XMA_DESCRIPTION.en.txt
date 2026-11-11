@@ -1,0 +1,52 @@
+POV+ Enhanced
+
+An immersive first-person camera for FFXIV CN, built on Tiraesias's POV+ Beta.
+Look down to see your body and clothes, look around naturally, and adjust the viewpoint to your own character.
+
+CURRENT TARGET: Chinese client, Dalamud API 15. Latest build baseline: CN 2026.11.03.0000.0000 / Dalamud 15.0.4.0. International clients have not been verified.
+
+FEATURES
+
+• Visible body in first person, with head hiding timed to camera entry and exit.
+• Adjustable horizontal and vertical look limits, with gentle slowdown near the edge.
+• Lean forward or sideways by continuing to move the mouse at a look limit. Distance, sensitivity and extra viewing angle are adjustable.
+• Optional direct mouse look. Hold the left mouse button to look around without turning your character; use a configurable held or toggled shortcut to release the cursor.
+• Camera input preserves sitting, dozing and similar fixed/looped poses. Movement keys still end the pose normally.
+• First-use calibration with front/side diagrams, a live viewpoint marker and fine adjustment. Reopen it from /pov anytime outside combat during normal gameplay.
+• Independent yaw, pitch and roll follow weights, plus optional full head shadows, nearby object visibility and attenuation of close self-effects.
+• Simplified Chinese and English UI. Auto follows the Dalamud interface language.
+
+INSTALLATION
+
+Requires XIVLauncherCN with Dalamud enabled.
+
+1. Open /xlsettings → Experimental → Custom Plugin Repositories.
+2. Add and enable this repository, then save:
+https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/repo.json
+3. Open /xlplugins, refresh, and install POV+ Enhanced.
+4. In Character Configuration → Control Settings → General, set 1st Person Camera Auto Adjustment to Never.
+5. Follow the calibration guide: align the cyan marker to the surface of the nose bridge between the eyes, checking from both front and side. Save, then enter first person with the normal game controls.
+
+/pov opens settings. /pov toggle enables or disables the plugin.
+Already using this repository? Update through the installer; your settings are retained. If switching from the original POV+ or a development build, disable that copy and its old repository/development entry first. Keep your PovPlus configuration; do not load two copies together.
+
+NOTES
+
+• New configurations default to NearPlane 0.015. Existing values are retained; 0.001 remains available. Very low values can cause mist/particles to show through terrain.
+• Full head shadows, near-object visibility, selected hair/ear details and close self-effect attenuation are optional experiments, off by default. Full head shadows require the game's self-shadow option and hide complete head-related models; some neck geometry may belong to those models.
+• Outfit, face and animation mods can affect clipping and alignment. The plugin uses your character's existing animations; it does not supply a separate first-person animation set. The cosmetic mods shown in the preview are not included.
+• Fixed-pose protection covers the relevant looped game states, not every emote or custom animation. Near-object visibility does not cover every static map model or unloaded object.
+• Core features received in-game feedback during development. The new calibration workflow and the current release branding have passed offline checks but still need in-game confirmation. Compatibility with every race, face mod and future client build is not guaranteed.
+
+CREDITS & SOURCE
+
+Original POV+: Tiraesias / TiraesiascenGraven
+https://github.com/TiraesiascenGraven/POVPlus
+Enhanced fork: Pascalial / pascalial98-hue
+https://github.com/pascalial98-hue/POVPlus
+
+The fork's source baseline was recovered from the author's public Beta binary. Original attribution and the AGPL-3.0-or-later license are retained. Full corresponding source and build instructions are included with releases. Thanks to the Dalamud, FFXIVClientStructs and Hypostasis projects.
+
+Downloads and changelog: https://github.com/pascalial98-hue/POVPlus/releases/latest
+Bug reports: https://github.com/pascalial98-hue/POVPlus/issues
+Please include plugin, game and Dalamud versions, relevant settings and reproduction steps.

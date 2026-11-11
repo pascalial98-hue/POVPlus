@@ -22,7 +22,7 @@ internal static partial class Program
         }
         var combo = UiText.Translate("按住快捷键\0按一下切换\0", PluginLanguage.English, "zh");
         Check(combo == "Hold hotkey\0Press to toggle\0", "Combo retains separators");
-        Check(UiText.Translate("POV+ 第一人称设置###PovPlus", PluginLanguage.English, "zh").EndsWith("###PovPlus"), "Stable window identity");
+        Check(UiText.Translate("POV+ Enhanced 第一人称设置###PovPlus", PluginLanguage.English, "zh").EndsWith("###PovPlus"), "Stable window identity");
         Check(UiText.Translate("unknown", PluginLanguage.English, "en") == "unknown", "Unknown text remains readable");
     }
 }

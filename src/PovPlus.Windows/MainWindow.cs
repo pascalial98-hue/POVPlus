@@ -13,7 +13,7 @@ public class MainWindow : Window, IDisposable
     private bool recordingKey, keyRecorderArmed;
     private int pendingModifier;
 
-    public MainWindow(Plugin plugin) : base(L.T("POV+ 第一人称设置###PovPlus"), ImGuiWindowFlags.AlwaysVerticalScrollbar)
+    public MainWindow(Plugin plugin) : base(L.T("POV+ Enhanced 第一人称设置###PovPlus"), ImGuiWindowFlags.AlwaysVerticalScrollbar)
     {
         this.plugin = plugin;
         Size = new Vector2(560, 620);
@@ -27,7 +27,7 @@ public class MainWindow : Window, IDisposable
 
     public void Dispose() { }
     public override void OnClose() => recordingKey = false;
-    public override void PreDraw() => WindowName = L.T("POV+ 第一人称设置###PovPlus");
+    public override void PreDraw() => WindowName = L.T("POV+ Enhanced 第一人称设置###PovPlus");
 
     public override void Draw()
     {
@@ -41,8 +41,7 @@ public class MainWindow : Window, IDisposable
             plugin.RefreshLanguage();
         }
         ImGui.TextWrapped(L.T("自动跟随 Dalamud 界面语言；修改立即生效。"));
-        Toggle("启用 POV+", ref Config.Setting_ModEnabled);
-        ImGui.SameLine();
+        Toggle("启用 POV+ Enhanced", ref Config.Setting_ModEnabled);
         ImGui.TextDisabled(L.T("/pov toggle 可切换启用状态"));
         if (plugin.RuntimeStatus.Length > 0) ImGui.TextWrapped(plugin.RuntimeStatus);
         ImGui.BeginDisabled(!plugin.CanStartCalibration);

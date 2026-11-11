@@ -1,0 +1,34 @@
+POV+ Enhanced — XMA 发布字段建议（未提交 XMA）
+
+Name: POV+ Enhanced
+Version: 1.6.1.1
+Type: Dalamud Plugin
+Author display name: Pascalial
+Genders: Unisex
+Races: Unknown / Not applicable（镜头插件不替换指定种族模型；正文说明种族及改模适配需自行校准，不把标签写成已全种族实测。）
+Affects / Replaces: First-person camera
+Tags: plugin, dalamud, camera, first person, immersion, body visibility, free look, leaning, roleplay
+Primary File or Link label: Repository (copy link into Dalamud settings)
+Primary URL: https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/repo.json
+Other link — Source & documentation: https://github.com/pascalial98-hue/POVPlus
+Other link — Downloads: https://github.com/pascalial98-hue/POVPlus/releases/latest
+Other link — Bug reports: https://github.com/pascalial98-hue/POVPlus/issues
+Preview: docs/images/povplus-enhanced-preview-v2.png（完整横版）
+Description: XMA_DESCRIPTION.en.txt；中文可附 XMA_DESCRIPTION.zh-CN.txt。
+
+Compatibility: 在正文开头保留“FFXIV CN / Dalamud API 15; international clients unverified”。不要把本站常见的 Dawntrail 兼容标记解释成当前国际服已验证。
+
+AI Usage: AI Used in Mod Files/Plugin Code
+Contributor Information（可直接使用）：
+Original POV+ by Tiraesias / TiraesiascenGraven: https://github.com/TiraesiascenGraven/POVPlus
+Enhanced fork by Pascalial / pascalial98-hue: https://github.com/pascalial98-hue/POVPlus
+The fork was developed with AI-assisted coding and debugging under Pascalial's direction. Original upstream code and attribution are retained. The release cover uses AI-assisted composition based on supplied in-game screenshots; the new icon and calibration illustrations were generated with AI tools. Full source and artwork provenance are supplied. FFXIV character designs and game assets belong to Square Enix.
+
+Preview ordering: main panel = first-person downward body view; upper right = third-person reference; lower right = first-person interaction. The preview's outfit/face/scene mods are not included.
+
+写法参考（2026-11-11 读取，仅参考结构，不复制作者文案）：
+Instant Edit: https://www.xivmodarchive.com/modid/168028
+PoseKit: https://www.xivmodarchive.com/modid/169887
+Starflow: https://www.xivmodarchive.com/modid/171835
+
+以上页面常见结构：独立 Dalamud Plugin 分类、简短用途说明、功能、仓库安装路径、命令/要求、作者署名与 AI Usage、下载/反馈链接。本文件是填写建议，尚未在 XMA 建立或提交条目。

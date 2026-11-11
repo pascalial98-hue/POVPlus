@@ -1,10 +1,12 @@
 # POV+ Enhanced
 
+![POV+ Enhanced — first-person body visibility and camera preview](https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/docs/images/povplus-enhanced-preview-v2.png)
+
 [简体中文](README.md) · **English**
 
 See your body, turn and lean naturally, and keep your head's shadow.
 
-A community fork of [Tiraesias's POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta for FFXIV CN / Dalamud. Current version: **1.6.1.0**. Original attribution, Git history and the AGPL-3.0-or-later license are retained.
+A community fork of [Tiraesias's POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta for FFXIV CN / Dalamud. Current version: **1.6.1.1**. Original attribution, Git history and the AGPL-3.0-or-later license are retained.
 
 ## Installation
 

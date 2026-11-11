@@ -1,10 +1,12 @@
 # POV+ Enhanced
 
+![POV+ Enhanced — first-person body visibility and camera preview](https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/docs/images/povplus-enhanced-preview-v2.png)
+
 **简体中文** · [English](README.en.md)
 
 看见自己的身体，自然地转头、探头，并保留完整头影。
 
-基于 [Tiraesias 的 POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta 制作的社区分支，面向 FF14 国服 Dalamud。当前版本 **1.6.1.0**，保留原项目署名、Git 历史和 AGPL-3.0-or-later 许可。
+基于 [Tiraesias 的 POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta 制作的社区分支，面向 FF14 国服 Dalamud。当前版本 **1.6.1.1**，保留原项目署名、Git 历史和 AGPL-3.0-or-later 许可。
 
 ## 安装
 

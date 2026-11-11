@@ -3,8 +3,8 @@
     "Author": "Tiraesias; Enhanced fork: pascalial98-hue",
     "Name": "POV+ Enhanced",
     "InternalName": "PovPlus",
-    "AssemblyVersion": "1.6.1.0",
-    "Description": "第一人称身体可见、头影保留、柔和转头限位、限位探头、鼠标直控和中英界面。最近核对国服 2026.11.03 / API 15。\nImmersive first person with body visibility, head shadows, soft look limits, leaning, direct mouse look and bilingual settings. Latest validation: CN 2026.11.03 / API 15.",
+    "AssemblyVersion": "1.6.1.1",
+    "Description": "看见自己的身体，自由观察、探头，并用引导校准到适合自己的视点。支持头部隐藏、可选完整头影、鼠标直控和中英界面。面向国服 / Dalamud API 15，国际服尚未验证。\nSee your body, look around and lean naturally, with guided viewpoint calibration. Includes head hiding, optional full head shadows, direct mouse look and bilingual settings. Targets FFXIV CN / Dalamud API 15; international clients are unverified.",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/pascalial98-hue/POVPlus",
     "Tags": [
@@ -19,16 +19,19 @@
     "CanUnloadAsync": false,
     "LoadPriority": 0,
     "Punchline": "沉浸式第一人称增强 / Enhanced first-person camera (CN)",
-    "Changelog": "1.6.1.0：新增首次使用视点校准引导、FF14 角色正侧面图示和实时视点标记；/pov 顶部可重新进入。新配置 NearPlane 默认 0.015，旧设置保留。\nAdd first-use viewpoint calibration with FFXIV character diagrams and a live marker; reopen from /pov. New configurations default to NearPlane 0.015; existing settings are preserved.",
+    "Changelog": "1.6.1.1：统一 POV+ Enhanced 名称，更新插件图标与商店预览图；补充中英发布说明。现有功能、配置和仓库链接保持不变。\nUnify POV+ Enhanced branding, add a new icon and store preview, and include bilingual release descriptions. Existing behavior, settings and repository URLs are retained.",
     "AcceptsFeedback": false,
-    "IconUrl": "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/logo2.png",
-    "TestingAssemblyVersion": "1.6.1.0",
+    "IconUrl": "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/docs/images/povplus-enhanced-icon-v1.png",
+    "ImageUrls": [
+      "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/docs/images/povplus-enhanced-store-preview-v2.png"
+    ],
+    "TestingAssemblyVersion": "1.6.1.1",
     "TestingDalamudApiLevel": 15,
     "DownloadLinkInstall": "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/PovPlus.Enhanced.zip",
     "DownloadLinkUpdate": "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/PovPlus.Enhanced.zip",
     "DownloadLinkTesting": "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/PovPlus.Enhanced.zip",
     "IsHide": false,
     "IsTestingExclusive": false,
-    "LastUpdate": 1794410953
+    "LastUpdate": 1794412581
   }
 ]

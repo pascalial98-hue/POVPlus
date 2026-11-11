@@ -19,7 +19,7 @@ internal sealed class CalibrationWindow : Window
     private nint camera;
     internal bool Active => state.Active;
 
-    internal CalibrationWindow(Plugin plugin) : base(L.T("POV+ 视点校准###PovCalibration"),
+    internal CalibrationWindow(Plugin plugin) : base(L.T("POV+ Enhanced 视点校准###PovCalibration"),
         ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysVerticalScrollbar)
     {
         this.plugin = plugin;
@@ -43,7 +43,7 @@ internal sealed class CalibrationWindow : Window
     internal bool Matches(nint actorAddress, nint cameraAddress) => actor == actorAddress && camera == cameraAddress;
     internal void Cancel() => End(false);
     public override void OnClose() => Cancel();
-    public override void PreDraw() => WindowName = L.T("POV+ 视点校准###PovCalibration");
+    public override void PreDraw() => WindowName = L.T("POV+ Enhanced 视点校准###PovCalibration");
 
     private void End(bool save)
     {

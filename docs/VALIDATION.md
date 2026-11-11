@@ -1,5 +1,14 @@
 # Validation / 验证记录
 
+## 1.6.1.1 — 2026-11-11
+
+- Branding/artwork/documentation release: window titles, enable label, command help and assembly display metadata use `POV+ Enhanced`. Store `Name` matches. Internal assembly/config identity remains `PovPlus`; the existing custom-repository URL and installer/update URLs remain unchanged.
+- 本版仅统一名称、更新图像和文档；保留 `PovPlus` 内部标识、现有配置与原库更新路径，没有修改相机功能。
+- Icon and preview dimensions checked against the installed Dalamud CN 15.0.4.0 `PluginImageCache`: 512×512 square icon and 730×380 preview. The full 1672×941 cover is retained separately; installer export preserves its proportions. The icon was also visually inspected at 64×64.
+- 与本机安装器核对图标/预览尺寸，分别使用 512×512、730×380；完整横版保留 1672×941，另检查了 64×64 图标可读性。
+- Release compilation, 78,962 offline assertions and 123 English translation entries pass. There is no new in-game visual test of the installer, renamed windows or calibration flow in this release.
+- 编译、78,962 项离线断言及 123 条英文翻译检查通过；本次未在游戏中实测商店图像、新名称或校准流程。
+
 ## 1.6.1.0 — 2026-11-11
 
 | Check / 检查 | Result / 结果 |
