@@ -122,5 +122,10 @@
   "中英对照逐项显示中文和英文；自动模式跟随 Dalamud 语言。修改立即生效。": "Bilingual pairs Chinese with English for each item. Auto follows the Dalamud UI language. Changes take effect immediately.",
   "镜头操作": "Camera Controls",
   "坐下、躺下及同类固定/循环动作期间，手柄右摇杆、普通右键和鼠标直控都只转镜头，避免转身打断动作。左摇杆和移动键仍可正常起身。": "While sitting, dozing or in similar stationary/looping emotes, the gamepad right stick, ordinary right-drag and direct mouse look turn only the camera. The left stick and movement keys still end the pose normally.",
-  "手柄等镜头转动的固定姿势保护不可用，请查看 Dalamud 日志。": "Stationary-pose camera protection, including gamepad look, is unavailable. Check the Dalamud log."
+  "手柄等镜头转动的固定姿势保护不可用，请查看 Dalamud 日志。": "Stationary-pose camera protection, including gamepad look, is unavailable. Check the Dalamud log.",
+  "视角与限位跟随身体姿态": "Body-relative view and look limits",
+  "以躯干姿态作为正视方向。弯腰 90° 时正视地面，抬头 90° 可看向前方；继续低头可越过垂直方向。转头限位和探头都相对身体计算，头部跟随只叠加头颈相对躯干的动作。": "The torso defines your neutral view. A 90° bow looks at the ground; looking up 90° reaches the horizon. Looking down can pass world vertical. Look limits and leaning are body-relative; head follow adds only head/neck motion relative to the torso.",
+  "身体姿态视角不可用；其他第一人称功能仍可使用，请查看 Dalamud 日志。": "Body-relative view is unavailable. Other first-person features remain usable; check the Dalamud log.",
+  "移动时自动减弱步伐引起的快速旋转晃动，保留持续的身体倾斜；停下后平滑恢复。鼠标转头和视点位置不受此平滑影响。": "Automatically smooths rapid stride-induced rotation while moving, retaining sustained body lean. Normal response returns smoothly after stopping. Mouse look and viewpoint position are unaffected by this smoothing.",
+  "此选项适合静止姿态观察，不适合移动时使用；即使有平滑处理，跑动时仍可能明显晃动。": "This option is intended for viewing stationary poses, not for use while moving. Running may still cause noticeable camera sway even with smoothing."
 }

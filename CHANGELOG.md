@@ -1,5 +1,22 @@
 # Changelog / 更新记录
 
+## 1.6.1.4 — 2026-11-12
+
+- 新增可独立开启的“视角与限位跟随身体姿态”，默认关闭。以躯干作为正视基准，弯腰 90° 时正视地面，抬头 90° 可看向前方；转头范围和探头方向随身体姿态变化。<br>
+  Add an independent, default-off Body-relative view and look limits option. The torso defines the neutral view: a 90° bow looks at the ground, while looking up 90° reaches the horizon. Look limits and leaning directions follow body posture.
+
+- **使用建议：此选项适合静止姿态观察，不适合移动时使用；即使有平滑处理，跑动时仍可能明显晃动。**<br>
+  **Usage note: This option is intended for viewing stationary poses, not for use while moving. Running may still cause noticeable camera sway even with smoothing.**
+
+- 抬头上限放宽到 90°，头颈跟随只叠加相对躯干的变化，避免重复计算弯腰；移动时加入旋转平滑，停下后逐渐恢复。鼠标转头及原有视点位置不经过这层平滑。<br>
+  Raise the upward look limit to 90°. Head follow adds only motion relative to the torso to avoid counting bends twice. Smooth animation rotation while moving and restore the stationary response gradually after stopping; mouse input and viewpoint position bypass this smoothing.
+
+- 已添加本分支仓库的用户直接在 Dalamud 安装器更新，无需更换库链接或重装；保留 `PovPlus` 内部标识、API 15 和现有配置。<br>
+  Existing users of this fork can update directly in the Dalamud installer, without changing the repository URL or reinstalling. Keep the `PovPlus` identity, API 15 and saved settings.
+
+- 本地测试版已获得游戏内确认；146,981 项离线断言、129 条英文翻译覆盖及发布编译通过。移动使用的限制如上，不代表已验证所有种族、动作模组或国际服客户端。<br>
+  The local test build received in-game confirmation. Release compilation, 146,981 offline assertions and 129 English translation entries pass. The movement limitation above remains; this does not verify every race, animation mod or international client.
+
 ## 1.6.1.3 — 2026-11-12
 
 - 修复第一人称下，手柄右摇杆转镜头会让坐下、躺下及同类固定循环动作中断的问题。固定姿势期间改用游戏原生的只转镜头分支，保留原有摇杆灵敏度和镜头角度限制。

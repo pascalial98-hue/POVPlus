@@ -129,7 +129,7 @@ internal static unsafe class FirstPersonLimits
         var config = Plugin.P.Configuration;
         var side = FirstPersonMath.Degrees(config.FirstPersonYawDegrees, 80, 85);
         var down = FirstPersonMath.Degrees(config.FirstPersonLookDownDegrees, 75, 85);
-        var up = FirstPersonMath.Degrees(config.FirstPersonLookUpDegrees, 60, 85);
+        var up = FirstPersonMath.Degrees(config.FirstPersonLookUpDegrees, 60, 90);
         var player = Service.ObjectTable.LocalPlayer;
         if (player == null) return;
         var afterYaw = camera->GameObjectHRotation;
@@ -203,7 +203,7 @@ internal static unsafe class FirstPersonLimits
         {
             var config = Plugin.P.Configuration;
             var side = FirstPersonMath.Degrees(config.FirstPersonYawDegrees, 80, 85);
-            var up = FirstPersonMath.Degrees(config.FirstPersonLookUpDegrees, 60, 85);
+            var up = FirstPersonMath.Degrees(config.FirstPersonLookUpDegrees, 60, 90);
             var down = FirstPersonMath.Degrees(config.FirstPersonLookDownDegrees, 75, 85);
             var band = config.FirstPersonSoftLimits ? FirstPersonMath.Degrees(config.FirstPersonSoftZoneDegrees, 12, 25) : 0;
             var sensitivity = config.FirstPersonLeanSensitivity;
@@ -311,7 +311,7 @@ internal static unsafe class FirstPersonLimits
         if (player == null) return;
         if (player.Address != lastPlayer) { Reset(); lastPlayer = player.Address; }
         var side = FirstPersonMath.Degrees(config.FirstPersonYawDegrees, 80f, 85f);
-        var up = FirstPersonMath.Degrees(config.FirstPersonLookUpDegrees, 60f, 85f);
+        var up = FirstPersonMath.Degrees(config.FirstPersonLookUpDegrees, 60f, 90f);
         var down = FirstPersonMath.Degrees(config.FirstPersonLookDownDegrees, 75f, 85f);
         var band = config.FirstPersonSoftLimits
             ? FirstPersonMath.Degrees(config.FirstPersonSoftZoneDegrees, 12f, 25f) : 0f;

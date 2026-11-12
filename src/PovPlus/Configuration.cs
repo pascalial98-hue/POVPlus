@@ -15,6 +15,7 @@ public class Configuration : IPluginConfiguration
     public float FirstPersonHeadHideDistance = HeadHideTransition.DefaultDistance;
     public float FirstPersonHeadShowDistance = HeadHideTransition.DefaultShowDistance;
     public bool FirstPersonLimitLook = true;
+    public bool FirstPersonBodyRelativeLook = false;
     public bool FirstPersonSoftLimits = true;
     public float FirstPersonSoftZoneDegrees = 12f;
     public bool FirstPersonPreserveHair = false;

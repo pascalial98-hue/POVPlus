@@ -2,7 +2,7 @@
 
 ![POV+ Enhanced](https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/docs/images/povplus-enhanced-preview-v2.png)
 
-**中文 / English · 1.6.1.3** · [English only](README.en.md)
+**中文 / English · 1.6.1.4** · [English only](README.en.md)
 
 基于 Tiraesias 的 POV+ Beta 制作的国服第一人称增强分支。<br>
 An immersive first-person camera for FFXIV CN, built on Tiraesias's POV+ Beta.
@@ -38,6 +38,17 @@ CURRENT TARGET: Chinese client, Dalamud API 15. Latest build baseline: CN 2026.1
 
 - 新配置默认中英对照：每项中文后紧接英文。也可选择自动、简体中文或 English；旧配置保留语言选择，可在 /pov 顶部切换为“中英对照”。<br>
   New configurations show Chinese followed by English for each item. Auto, Chinese-only and English-only modes remain available. Existing language selections are retained; select the bilingual option at the top of /pov to switch.
+
+### 身体姿态视角 / Body-relative view
+
+新增可独立开启的“视角与限位跟随身体姿态”，默认关闭。以躯干作为正视基准，弯腰 90° 时正视地面，抬头 90° 可看向前方；转头范围和探头方向随身体姿态变化。<br>
+Add an independent, default-off Body-relative view and look limits option. The torso defines the neutral view: a 90° bow looks at the ground, while looking up 90° reaches the horizon. Look limits and leaning directions follow body posture.
+
+**此选项适合静止姿态观察，不适合移动时使用；即使有平滑处理，跑动时仍可能明显晃动。**<br>
+**This option is intended for viewing stationary poses, not for use while moving. Running may still cause noticeable camera sway even with smoothing.**
+
+开启位置：`/pov → 常用 → 转头范围 → 视角与限位跟随身体姿态`。<br>
+Enable under `/pov → General → Look Limits → Body-relative view and look limits`.
 
 ## 安装 / Installation
 

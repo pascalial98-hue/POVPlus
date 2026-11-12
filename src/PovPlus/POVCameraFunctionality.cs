@@ -103,9 +103,12 @@ public static class POVCameraFunctionality
     private static nint leanActor, leanModel, leanSkeleton, leanCamera;
     private static readonly HeadRotationWeight yawWeight = new();
     private static readonly HeadRotationWeight pitchWeight = new();
+    private static bool headFollowBodyFrame;
+    private static int headBodyGeneration;
 
 	private unsafe static void GetCameraPositionDetour(GameCamera* HypostasisCamera, GameObject* target, System.Numerics.Vector3* position, Bool swapPerson)
 	{
+        BodyRelativeLook.BeginPosition(HypostasisCamera);
         FirstPersonLimits.Apply(HypostasisCamera);
 		IPlayerCharacter localPlayer = Service.ObjectTable.LocalPlayer;
 		if (localPlayer == null || target == null)
@@ -161,11 +164,28 @@ public static class POVCameraFunctionality
 		System.Numerics.Vector3 vector5 = new System.Numerics.Vector3(vector5.X = Plugin.P.Configuration.SETTINGS_CameraOffsetX, vector5.Y = Plugin.P.Configuration.SETTINGS_CameraOffsetY, vector5.Z = Plugin.P.Configuration.SETTINGS_CameraOffsetZ);
 		System.Numerics.Vector3 vector6 = vector4 * vector5.X + vector3 * vector5.Y + vector2 * vector5.Z;
 		GlobalVars.BoneLocation = FirstPersonMath.HeadCameraPosition(position2, quaternion, matrix, vector5);
+        var bodyFrame = BodyRelativeLook.Sample(HypostasisCamera, localPlayer.Address, (nint)characterBase,
+            havokPose, rotation, localPlayer.Rotation, localPlayer.Position, quaternion, out var headForFollow);
+        // Position still follows the original head transform. Only animation
+        // orientation is made relative to the torso, avoiding double-counting.
+        if (bodyFrame) quaternion = headForFollow;
+        var rebaseHeadFollow = headFollowBodyFrame != bodyFrame ||
+            (bodyFrame && headBodyGeneration != BodyRelativeLook.Generation);
+        if (rebaseHeadFollow)
+        {
+            HypostasisCamera->currentHRotation -= yawWeight.Update(0, 0, false);
+            HypostasisCamera->currentVRotation += pitchWeight.Update(0, 0, false);
+            AccumulatedYaw = YawChaser = AccumulatedPitch = PitchChaser = AccumulatedRoll = RollChaser = 0;
+            HasPreviousPitch = HasPreviousHeadRoll = false;
+            headFollowBodyFrame = bodyFrame;
+            headBodyGeneration = BodyRelativeLook.Generation;
+        }
 		float num7 = MathF.Max(MathF.Pow(1f - Plugin.P.Configuration.Settings_PitchSmoothing / 100f, 3f), 0.01f);
 		float num8 = MathF.Max(MathF.Pow(1f - Plugin.P.Configuration.Settings_YawSmoothing / 100f, 3f), 0.01f);
 		float num9 = MathF.Max(MathF.Pow(1f - Plugin.P.Configuration.Settings_RollSmoothing / 100f, 3f), 0.01f);
 		System.Numerics.Vector3 vector7 = System.Numerics.Vector3.Transform(System.Numerics.Vector3.UnitZ, quaternion);
 		float num10 = MathF.Atan2(vector7.X, vector7.Z);
+        if (rebaseHeadFollow) PreviousBoneYaw = num10;
 		{
 			float num11 = num10 - PreviousBoneYaw;
 			if (num11 > (float)Math.PI)
@@ -228,7 +248,7 @@ public static class POVCameraFunctionality
 		{
 			if (!HasPreviousHeadRoll)
 			{
-				PreviousHeadRotationRoll = (float)Math.PI / 2f;
+				PreviousHeadRotationRoll = bodyFrame || rebaseHeadFollow ? x : (float)Math.PI / 2f;
 				HasPreviousHeadRoll = true;
 			}
 			float num18;
@@ -246,7 +266,8 @@ public static class POVCameraFunctionality
                 Plugin.P.Configuration.HeadRollWeight, Plugin.P.Configuration.RollEnabled);
 		}
 		bool flag = (int)MathF.Floor((HypostasisCamera->currentVRotation + (float)Math.PI / 2f) / (float)Math.PI) % 2 == 0;
-		float num20 = (flag ? 0f : ((float)Math.PI));
+		// Body mode supplies a pole-safe up vector to the render camera itself.
+		float num20 = (bodyFrame || flag ? 0f : ((float)Math.PI));
 		if (flag)
 		{
 			HypostasisCamera->tilt = num20 + Plugin.P.Configuration.CameraTiltOffset - num17;
@@ -275,6 +296,7 @@ public static class POVCameraFunctionality
         // the first vtable it sees, which may be observed before world login.
         positionHook = Service.GameInteropProvider.HookFromAddress<GameCamera.GameCameraVTable.GetCameraPositionDelegate>(
             camera->vtbl[16], GetCameraPositionDetour);
+        BodyRelativeLook.Initialize(camera);
         boundCamera = (nint)camera;
         boundVTable = (nint)camera->vtbl;
         GlobalVars.PreviousMaxVRotation = camera->maxVRotation;
@@ -300,6 +322,7 @@ public static class POVCameraFunctionality
         DisablePOVCamera();
         positionHook?.Dispose();
         positionHook = null;
+        BodyRelativeLook.Dispose();
         cameraSettingsCaptured = false;
         boundCamera = boundVTable = 0;
         headSkeleton = 0;
@@ -316,6 +339,8 @@ public static class POVCameraFunctionality
         if (!bodyHook.IsEnabled) bodyHook.Enable();
         if (POVEnabled) return;
         ResetLookDownLean();
+        BodyRelativeLook.Reset();
+        headFollowBodyFrame = false;
         PreviousBoneYaw = 0f;
         AccumulatedYaw = YawChaser = AccumulatedPitch = PitchChaser = AccumulatedRoll = RollChaser = 0f;
         yawWeight.Reset();
@@ -334,6 +359,7 @@ public static class POVCameraFunctionality
         var wasEnabled = POVEnabled;
         POVEnabled = false;
         RestoreNearPlane();
+        BodyRelativeLook.Reset();
         ResetLookDownLean();
         FirstPersonLimits.ResetLean();
         if (Plugin.P.ExecuteEmoteHook2?.IsEnabled == true) Plugin.P.ExecuteEmoteHook2.Disable();
@@ -426,6 +452,7 @@ public static class POVCameraFunctionality
         }
         var amounts = LookDownLean.Target(FirstPersonLimits.LeanPressure, config.FirstPersonLeanForward, config.FirstPersonLeanSide);
         appliedLean = LookDownLean.ToWorld(amounts, player.Rotation);
+        if (BodyRelativeLook.Active) appliedLean = System.Numerics.Vector3.Transform(appliedLean, BodyRelativeLook.WorldRotation);
         return appliedLean;
     }
 

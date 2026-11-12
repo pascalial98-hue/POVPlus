@@ -6,7 +6,7 @@
 
 See your body, turn and lean naturally, and keep your head's shadow.
 
-A community fork of [Tiraesias's POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta for FFXIV CN / Dalamud. Current version: **1.6.1.3**. Original attribution, Git history and the AGPL-3.0-or-later license are retained.
+A community fork of [Tiraesias's POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta for FFXIV CN / Dalamud. Current version: **1.6.1.4**. Original attribution, Git history and the AGPL-3.0-or-later license are retained.
 
 ## Installation
 
@@ -32,7 +32,8 @@ Manual packages are available in [Releases](https://github.com/pascalial98-hue/P
 | First-use guide | A movable window, FFXIV character front/side diagrams, live viewpoint marker and three-axis fine adjustment. Save to apply; closing or cancelling discards draft offsets. |
 | Head hiding and camera transitions | Hides the head as the camera approaches, and restores it only after the camera has moved away. Enabled by default for new configurations. |
 | Complete head shadow, on by default | Excludes face, hair, headgear and related models from the main view while keeping their native shadow rendering. No duplicate actor is created. |
-| Natural look limits | Separate horizontal, upward and downward limits with gentle slowdown near the boundary. |
+| Natural look limits | Separate horizontal, upward (up to 90°) and downward limits with gentle slowdown near the boundary. |
+| Body-relative view, optional | The torso defines neutral view, look limits and leaning directions. Default off; intended for stationary poses. |
 | Lean beyond the boundary | Continue moving the mouse at a limit to lean forward or sideways. Adjustable distance, sensitivity and extra angle; translation and rotation blend together. Holds when input stops, retracts with reverse input. |
 | Direct mouse look, optional | Turn without holding RMB; hold LMB to look around without turning the character. Release the cursor with a customizable held or toggled key/chord. |
 | Stationary-pose protection | Gamepad right-stick look, ordinary RMB and direct mouse look preserve sitting, dozing and similar looped poses. The left stick and movement keys still end the pose. |
@@ -41,6 +42,14 @@ Manual packages are available in [Releases](https://github.com/pascalial98-hue/P
 | Bilingual settings | New configurations default to **中英对照 / 中文 + English**, pairing each Chinese item with English. **Auto / 简体中文 / English** remain available at the top of settings. Changes apply immediately. Auto follows Dalamud's UI language, using English for non-Chinese languages. |
 
 Use `/pov toggle` to enable or disable the plugin. Ordinary settings save automatically; calibration offsets require **Save and finish**. Existing configurations are not interrupted with automatic onboarding, and their offsets and NearPlane remain unchanged. Head hiding and full head shadows default to on for new configurations. Existing choices, including language selections, are retained. Full head shadows remain experimental and can be disabled; near-object visibility, appearance details and self-effect attenuation still default to off.
+
+## Body-relative view
+
+Add an independent, default-off Body-relative view and look limits option. The torso defines the neutral view: a 90° bow looks at the ground, while looking up 90° reaches the horizon. Look limits and leaning directions follow body posture.
+
+**This option is intended for viewing stationary poses, not for use while moving. Running may still cause noticeable camera sway even with smoothing.**
+
+Enable under `/pov → General → Look Limits → Body-relative view and look limits`. Movement smoothing reduces animation rotation but does not make this option suitable for running. Mouse input and viewpoint position bypass that smoothing.
 
 ## Compatibility and limitations
 

@@ -16,6 +16,12 @@ FEATURES
 • Independent yaw, pitch and roll follow weights, plus optional nearby object visibility and attenuation of close self-effects.
 • New configurations show Chinese followed by English for each item. Auto, Chinese-only and English-only modes remain available. Existing language selections are retained; select the bilingual option at the top of /pov to switch.
 
+BODY-RELATIVE VIEW
+
+Add an independent, default-off Body-relative view and look limits option. The torso defines the neutral view: a 90° bow looks at the ground, while looking up 90° reaches the horizon. Look limits and leaning directions follow body posture.
+
+This option is intended for viewing stationary poses, not for use while moving. Running may still cause noticeable camera sway even with smoothing.
+
 INSTALLATION
 
 Requires XIVLauncherCN with Dalamud enabled.

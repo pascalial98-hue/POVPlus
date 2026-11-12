@@ -1,5 +1,22 @@
 # Validation / 验证记录
 
+## 1.6.1.4 — 2026-11-12
+
+- 本地两轮游戏测试确认身体姿态视角工作正常。首次反馈静止姿态良好，但跑步躯干摆动明显；加入移动旋转平滑后再次确认可用，并明确要求注明此选项不适合移动时使用。默认关闭，保存过的选择继续保留。<br>
+  Two local in-game test rounds confirmed the body-relative view. Initial feedback found stationary poses worked well but running transmitted strong torso sway. The motion-smoothed revision was accepted, with an explicit limitation: the option is unsuitable while moving. It defaults to off and preserves saved choices.
+
+- 从上部脊椎骨骼及 Havok 局部参考姿态的父链得到身体参考方向。世界空间渲染阶段同时旋转视线和上方向，保持原生输入角度；原始躯干旋转从头颈跟随中剔除。越过垂直方向时使用仍有定义的相机右方向，避免世界向上轴的奇点。<br>
+  Derive the body reference from the upper spine and the parent chain of the Havok local reference pose. Rotate look and up together at rendering while retaining native input angles; remove raw torso rotation from head follow. A yaw-defined right direction remains valid at vertical views.
+
+- 在国服 2026.11.03.0000.0000 核对 Scene.Camera 构造、虚表第 4 项 UpdateRender 及其输入/输出路径：读取 +0x80 视线与 +0x90 上方向，生成 +0xA0 视图矩阵，再传给渲染相机。调用原函数后在 finally 中恢复输入，不直接修改投影矩阵。<br>
+  Inspect the Scene.Camera constructor, vtable slot 4 UpdateRender and its data flow in CN 2026.11.03.0000.0000: it consumes look-at at +0x80 and up at +0x90, builds the view matrix at +0xA0, then passes it to the render camera. Restore scoped inputs in finally after the original call; do not edit projection matrices.
+
+- 角色实际位移触发两级旋转平滑，姿态和相对头颈方向分别处理；角色朝向、鼠标输入和视点位置不经过该滤波。模拟 1.5/2.5/3.5 Hz 步伐在 60 FPS 下的躯干旋转 RMS 为此前的约 21.7%/10.6%/6.7%。这是离线模拟衰减，不是游戏内舒适度保证。<br>
+  Actual actor displacement activates two-stage rotation smoothing for body and relative head motion. Character heading, mouse input and viewpoint position bypass the filter. Simulated 1.5/2.5/3.5 Hz strides at 60 FPS retain about 21.7%/10.6%/6.7% of the prior torso rotation RMS. These are offline attenuation measurements, not an in-game comfort guarantee.
+
+- 146,981 项离线断言覆盖姿态参考、90° 抬头、越过垂直方向、探头、头颈分离、停止过渡、采样中断、无效数据和既有功能。129 条英文翻译覆盖通过；设置、README、商店清单和发布说明均注明移动使用限制。<br>
+  146,981 offline assertions cover pose references, 90° upward look, vertical crossings, leaning, relative head motion, stop transitions, sampling interruptions, invalid data and existing features. Coverage of 129 English translations passes; settings, README, store manifest and release notes state the movement limitation.
+
 ## 1.6.1.3 — 2026-11-12
 
 - 原因：此前只将鼠标右拖转换为左拖，手柄右摇杆仍经原生相机分支发出人物转身请求。用户确认仅推右摇杆就会起身。

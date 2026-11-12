@@ -12,6 +12,10 @@
     <Compile Include="..\src\PovPlus\Localization.cs" Link="Localization.cs" />
     <EmbeddedResource Include="..\src\PovPlus\Translations\en.json" LogicalName="PovPlus.Translations.en.json" />
     <Compile Include="..\src\PovPlus\FirstPersonMath.cs" Link="FirstPersonMath.cs" />
+    <Compile Include="..\src\PovPlus\BodyPoseMath.cs" Link="BodyPoseMath.cs" />
+    <Compile Include="..\src\PovPlus\BodyPoseMotionFilter.cs" Link="BodyPoseMotionFilter.cs" />
+    <Compile Include="..\src\PovPlus\BodyPoseReference.cs" Link="BodyPoseReference.cs" />
+    <Compile Include="..\src\PovPlus\BodyViewScope.cs" Link="BodyViewScope.cs" />
     <Compile Include="..\src\PovPlus\HeadPosePatch.cs" Link="HeadPosePatch.cs" />
     <Compile Include="..\src\PovPlus\NearPlanePatch.cs" Link="NearPlanePatch.cs" />
     <Compile Include="..\src\PovPlus\HeadHideTransition.cs" Link="HeadHideTransition.cs" />

@@ -61,10 +61,18 @@ public class MainWindow : Window, IDisposable
     {
         MouseLookSettings();
         Heading("转头范围");
+        Toggle("视角与限位跟随身体姿态", ref Config.FirstPersonBodyRelativeLook);
+        ImGui.TextWrapped(L.T("此选项适合静止姿态观察，不适合移动时使用；即使有平滑处理，跑动时仍可能明显晃动。"));
+        if (Config.FirstPersonBodyRelativeLook)
+        {
+            ImGui.TextWrapped(L.T("以躯干姿态作为正视方向。弯腰 90° 时正视地面，抬头 90° 可看向前方；继续低头可越过垂直方向。转头限位和探头都相对身体计算，头部跟随只叠加头颈相对躯干的动作。"));
+            ImGui.TextWrapped(L.T("移动时自动减弱步伐引起的快速旋转晃动，保留持续的身体倾斜；停下后平滑恢复。鼠标转头和视点位置不受此平滑影响。"));
+            if (BodyRelativeLook.Status.Length > 0) ImGui.TextWrapped(BodyRelativeLook.Status);
+        }
         Toggle("限制转头角度", ref Config.FirstPersonLimitLook);
         ImGui.BeginDisabled(!Config.FirstPersonLimitLook);
         Slider("左右各", ref Config.FirstPersonYawDegrees, 5, 85, 80, "%.0f°");
-        Slider("向上", ref Config.FirstPersonLookUpDegrees, 5, 85, 60, "%.0f°");
+        Slider("向上", ref Config.FirstPersonLookUpDegrees, 5, 90, 60, "%.0f°");
         Slider("向下", ref Config.FirstPersonLookDownDegrees, 5, 85, 75, "%.0f°");
         Toggle("接近边界时柔和减速", ref Config.FirstPersonSoftLimits);
         if (Config.FirstPersonSoftLimits)
