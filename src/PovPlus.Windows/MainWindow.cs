@@ -106,8 +106,9 @@ public class MainWindow : Window, IDisposable
 
     private void MouseLookSettings()
     {
-        Heading("鼠标直控");
-        ImGui.TextWrapped(L.T("坐下、躺下及同类固定/循环动作期间，普通右键和直控都只转镜头，避免转身打断动作。移动键仍可正常起身。"));
+        Heading("镜头操作");
+        ImGui.TextWrapped(L.T("坐下、躺下及同类固定/循环动作期间，手柄右摇杆、普通右键和鼠标直控都只转镜头，避免转身打断动作。左摇杆和移动键仍可正常起身。"));
+        if (plugin.StationaryCameraStatus.Length > 0) ImGui.TextWrapped(plugin.StationaryCameraStatus);
         if (plugin.MouseLookStatus.Length > 0) ImGui.TextWrapped(plugin.MouseLookStatus);
         Toggle("第一人称下，移动鼠标直接转动视角", ref Config.FirstPersonMouseLook);
         if (!Config.FirstPersonMouseLook) { recordingKey = false; return; }

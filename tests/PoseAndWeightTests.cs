@@ -14,6 +14,18 @@ internal static partial class Program
                 Check(!StationaryLook.Protects(mode), "Ordinary standing, mounts and unrelated modes keep normal turning");
         Check(Marshal.OffsetOf<Character>(nameof(Character.Mode)) == 0x2364, "Installed character-mode layout matches native posture branch");
         Check(Marshal.OffsetOf<InputManager>(nameof(InputManager.MouseButtonHoldStateRaw)) == 0x28, "Native held-button offset");
+        foreach (var mode in Enum.GetValues<CharacterModes>())
+        foreach (var nativeMode in new[] { -1, 0, 1, 2, 3, 4, 255 })
+        {
+            var protectedPose = StationaryLook.Protects(mode);
+            var expected = protectedPose && nativeMode == 1 ? 3 : nativeMode;
+            Check(StationaryLook.CameraRotationMode(nativeMode, protectedPose) == expected,
+                "Native camera turn request becomes free look only during fixed loops");
+            Check(StationaryLook.CameraRotationMode(nativeMode, false) == nativeMode,
+                "Inactive/other-camera scope preserves every native mode");
+        }
+        Check(StationaryLook.CameraRotationMode(1, true) == 3 && StationaryLook.CameraRotationMode(1, false) == 1,
+            "Ending a pose resumes ordinary camera turning immediately without stored input state");
         foreach (var buttons in new[] { 0, 1, 2, 3, 4, -1, 255 })
         {
             Check(StationaryLook.Buttons(buttons, false) == buttons, "Unprotected input unchanged");

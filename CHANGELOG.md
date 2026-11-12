@@ -1,5 +1,16 @@
 # Changelog / 更新记录
 
+## 1.6.1.3 — 2026-11-12
+
+- 修复第一人称下，手柄右摇杆转镜头会让坐下、躺下及同类固定循环动作中断的问题。固定姿势期间改用游戏原生的只转镜头分支，保留原有摇杆灵敏度和镜头角度限制。
+  Fix gamepad right-stick camera input interrupting sitting, dozing and similar stationary loops in first person. Use the native camera-only rotation path during those poses, retaining stick sensitivity and camera limits.
+- 左摇杆和移动键仍交由游戏正常处理；保护无需开启鼠标直控。离开固定姿势或第一人称后恢复正常转身行为。
+  Leave left-stick and movement-key input to the game. Protection does not require direct mouse look; normal turning resumes outside fixed poses or first person.
+- 新增独立的镜头转身判断保护与故障提示，原有鼠标保护保留。原库地址、配置和内部名称不变。
+  Add independent camera-turn protection with a failure status while retaining the existing mouse protection. Keep the repository URL, saved settings and internal plugin name.
+- 编译、79,446 项离线断言及 26 项当前客户端原生控制流检查通过；尚待游戏内手柄验证。
+  Compilation, 79,446 offline assertions and 26 native control-flow checks pass. Controller behavior still needs in-game verification.
+
 ## 1.6.1.2 — 2026-11-12
 
 - 新增逐项中英对照界面：说明为中文后接英文，按钮和短标签并排显示。设置、状态和校准引导均支持；新配置默认使用对照模式，已有语言选择保留，可在 /pov 顶部切换。

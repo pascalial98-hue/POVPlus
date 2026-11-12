@@ -32,6 +32,10 @@ public class Plugin : IDalamudPlugin, IDisposable
     private bool nearObjectsUnavailable;
     internal string NearObjectsStatus => nearObjectsUnavailable ? L.T("近处物体保留不可用，请查看 Dalamud 日志。") : "";
     private FirstPersonMouseLook? mouseLook;
+    private StationaryCameraLook? stationaryCamera;
+    private bool stationaryCameraUnavailable;
+    internal string StationaryCameraStatus => stationaryCameraUnavailable || stationaryCamera?.Failed == true
+        ? L.T("手柄等镜头转动的固定姿势保护不可用，请查看 Dalamud 日志。") : "";
     private bool mouseLookUnavailable, pluginTextInput;
     internal bool MouseLookUiPaused => MainWindow.IsOpen || CalibrationActive || pluginTextInput;
     internal bool CalibrationActive => calibrationWindow.Active;
@@ -120,8 +124,14 @@ public class Plugin : IDalamudPlugin, IDisposable
             try { nearObjects = new NearObjectVisibility(); }
             catch (Exception ex) { nearObjectsUnavailable = true; Service.Log.Error(ex, "POV+ could not initialize near-object visibility."); }
         }
-        // Shared native input hooks also protect ordinary RMB while sitting;
-        // do not tie their initialization to the optional direct-mouse toggle.
+        // The camera-turn decision covers gamepad input independently of the
+        // optional mouse capture and its cursor interfaces.
+        if (Configuration.Setting_ModEnabled && stationaryCamera == null && !stationaryCameraUnavailable)
+        {
+            try { stationaryCamera = new StationaryCameraLook(); }
+            catch (Exception ex) { stationaryCameraUnavailable = true; Service.Log.Error(ex, "POV+ could not initialize stationary camera-turn protection."); }
+        }
+        // Ordinary RMB protection likewise does not require direct mouse look.
         if (Configuration.Setting_ModEnabled && mouseLook == null && !mouseLookUnavailable)
         {
             try { mouseLook = new FirstPersonMouseLook(); }
@@ -153,6 +163,9 @@ public class Plugin : IDalamudPlugin, IDisposable
         nearObjectsUnavailable = false;
         mouseLook?.Dispose();
         mouseLook = null;
+        stationaryCamera?.Dispose();
+        stationaryCamera = null;
+        stationaryCameraUnavailable = false;
         headVisibility?.Dispose();
         headVisibility = null;
         FirstPersonLimits.Dispose();

@@ -13,6 +13,12 @@ internal static class StationaryLook
     internal static int Buttons(int physical, bool protect) =>
         protect && physical == (int)InputManager.MouseButtonHoldState.Right
             ? (int)InputManager.MouseButtonHoldState.Left : physical;
+
+    // Native camera mode 1 applies the camera rotation and requests character
+    // turning. Mode 3 applies the same yaw/pitch input without that request.
+    // Never replace auto-return (0), target alignment (2) or unknown modes.
+    internal static int CameraRotationMode(int original, bool protect) =>
+        protect && original == 1 ? 3 : original;
 }
 
 // Ordinary physical RMB must keep the native drag distance, coordinates and

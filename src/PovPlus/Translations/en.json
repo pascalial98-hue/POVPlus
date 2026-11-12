@@ -31,8 +31,6 @@
   "数值越小，近处衣服越完整；水雾等粒子可能穿过地形显示。此项只作用于第一人称。": "Lower values keep nearby clothing visible, but mist and other particles may show through terrain. Applies only in first person.",
   "保留近镜头的其他角色与物件（试验）": "Keep nearby objects visible (experimental)",
   "解除另一层按距离隐藏整个对象的判断，仅在第一人称生效。针对走该判断的角色与物件；部分地图静态模型、未加载物体及背面不可见不在此项覆盖范围内。": "Disables a separate proximity rule that hides entire objects, only in first person. Covers characters and objects using that rule; some static scenery, unloaded objects and back-face culling are not covered.",
-  "鼠标直控": "Direct Mouse Look",
-  "坐下、躺下及同类固定/循环动作期间，普通右键和直控都只转镜头，避免转身打断动作。移动键仍可正常起身。": "While sitting, dozing or in similar stationary/looping emotes, both ordinary right-drag and direct mouse look turn only the camera. Movement keys still end the pose normally.",
   "第一人称下，移动鼠标直接转动视角": "Direct mouse look in first person",
   "呼出鼠标方式": "Release cursor",
   "按住快捷键\u0000按一下切换\u0000": "Hold hotkey\u0000Press to toggle\u0000",
@@ -121,5 +119,8 @@
   "示意图正在加载或暂不可用；仍可按文字说明调整实时视点。": "The illustration is loading or unavailable. You can still use the instructions and live viewpoint marker.",
   "与双眼同高": "Level with both eyes",
   "贴近鼻梁，不是鼻尖": "At the bridge, not the tip",
-  "中英对照逐项显示中文和英文；自动模式跟随 Dalamud 语言。修改立即生效。": "Bilingual pairs Chinese with English for each item. Auto follows the Dalamud UI language. Changes take effect immediately."
+  "中英对照逐项显示中文和英文；自动模式跟随 Dalamud 语言。修改立即生效。": "Bilingual pairs Chinese with English for each item. Auto follows the Dalamud UI language. Changes take effect immediately.",
+  "镜头操作": "Camera Controls",
+  "坐下、躺下及同类固定/循环动作期间，手柄右摇杆、普通右键和鼠标直控都只转镜头，避免转身打断动作。左摇杆和移动键仍可正常起身。": "While sitting, dozing or in similar stationary/looping emotes, the gamepad right stick, ordinary right-drag and direct mouse look turn only the camera. The left stick and movement keys still end the pose normally.",
+  "手柄等镜头转动的固定姿势保护不可用，请查看 Dalamud 日志。": "Stationary-pose camera protection, including gamepad look, is unavailable. Check the Dalamud log."
 }

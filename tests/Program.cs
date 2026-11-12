@@ -326,6 +326,6 @@ internal static partial class Program
         TestHeadRotationWeights();
         TestLocalization();
         TestCalibration();
-        Console.WriteLine($"PASS: {assertions} assertions. Calibration migration/drafts/camera transition, stationary-pose ordinary/direct mouse input, per-axis head-follow weights, head-shadow filtering/interop layout, runtime lifecycle, near-object distance, mouse restoration, blended leaning, limits, VFX, near plane and head transitions.");
+        Console.WriteLine($"PASS: {assertions} assertions. Calibration migration/drafts/camera transition, stationary camera-turn policy and ordinary/direct mouse input, per-axis head-follow weights, head-shadow filtering/interop layout, runtime lifecycle, near-object distance, mouse restoration, blended leaning, limits, VFX, near plane and head transitions.");
     }
 }

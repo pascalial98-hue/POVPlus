@@ -2,7 +2,7 @@
 
 ![POV+ Enhanced](https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/docs/images/povplus-enhanced-preview-v2.png)
 
-**中文 / English · 1.6.1.2** · [English only](README.en.md)
+**中文 / English · 1.6.1.3** · [English only](README.en.md)
 
 基于 Tiraesias 的 POV+ Beta 制作的国服第一人称增强分支。<br>
 An immersive first-person camera for FFXIV CN, built on Tiraesias's POV+ Beta.
@@ -27,8 +27,8 @@ CURRENT TARGET: Chinese client, Dalamud API 15. Latest build baseline: CN 2026.1
 - 可选鼠标直控。按住左键自由观察，不带动人物转身；自定义按住或按下切换的快捷键呼出鼠标。<br>
   Optional direct mouse look. Hold the left mouse button to look around without turning your character; use a configurable held or toggled shortcut to release the cursor.
 
-- 普通右键和直控转镜头均保护坐下、躺下等固定循环动作；移动键仍可正常结束动作。<br>
-  Camera input preserves sitting, dozing and similar fixed/looped poses. Movement keys still end the pose normally.
+- 手柄右摇杆、普通右键和鼠标直控转镜头均保护坐下、躺下等固定循环动作；左摇杆和移动键仍可正常结束动作。<br>
+  Gamepad right-stick look, ordinary right-drag and direct mouse look preserve sitting, dozing and similar fixed/looped poses. The left stick and movement keys still end the pose normally.
 
 - 首次使用提供正侧面图示、实时视点标记和微调引导；正常场景、非战斗状态下，可从 /pov 顶部重新进入。<br>
   First-use calibration with front/side diagrams, a live viewpoint marker and fine adjustment. Reopen it from /pov anytime outside combat during normal gameplay.

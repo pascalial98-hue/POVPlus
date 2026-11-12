@@ -1,5 +1,18 @@
 # Validation / 验证记录
 
+## 1.6.1.3 — 2026-11-12
+
+- 原因：此前只将鼠标右拖转换为左拖，手柄右摇杆仍经原生相机分支发出人物转身请求。用户确认仅推右摇杆就会起身。
+  Cause: the earlier protection converted right-mouse drag to free look, while native analog camera input could still request character turning. The user confirmed that right-stick input alone ended the pose.
+- 在当前国服客户端 `2026.11.03.0000.0000` 中，独立定位原生相机旋转模式函数及调用者，核对 26 项控制流/指令：模式 1 与 3 使用相同的水平角更新和垂直角限制，仅模式 1 的额外分支请求人物转身。
+  Independently locate the camera rotation-mode function and caller in CN `2026.11.03.0000.0000`. Twenty-six checks confirm identical yaw integration and pitch clamping for modes 1 and 3, with the additional character-turn request restricted to mode 1.
+- 仅在插件启用、当前世界相机为第一人称、角色处于既有固定循环模式 3/11 时，将模式 1 改为只转镜头的模式 3。第三人称、GPose、校准、事件相机、其他动作及其他原生模式不变。接口返回值按原生 EAX 使用 32 位整数。
+  Override mode 1 with camera-only mode 3 only for the enabled first-person world camera during stationary character modes 3/11. Preserve third person, GPose, calibration, event cameras, unrelated poses and other native modes. Match the native 32-bit EAX return ABI.
+- 不改写摇杆、人物动作、移动标志或角色朝向；判断每次调用即时生效，没有需要跨帧恢复的输入快照。镜头保护单独初始化，失败时保留游戏决定并显示状态，不影响原有鼠标保护。
+  Do not write stick values, character modes, movement flags or character rotation. The decision is per-call with no retained input snapshot. Initialize independently; failure retains the native decision and reports status without disabling existing mouse protection.
+- 发布编译通过，79,446 项离线断言与 124 条英文翻译覆盖通过。尚未做游戏内手柄实测；需要确认右摇杆左右/上下转镜头维持坐姿和躺姿，左摇杆正常起身，站立及第三人称操作正常。
+  Release compilation, 79,446 offline assertions and coverage of 124 English entries pass. No in-game controller test has been performed. Verify right-stick yaw/pitch while sitting/dozing, left-stick stand-up movement, and normal standing/third-person controls.
+
 ## 1.6.1.2 — 2026-11-12
 
 - 新增逐项中英对照，新配置默认隐藏头部并保留完整头影；使用实际发布程序集验证默认值及旧 JSON 中的手动关闭、自动语言和 NearPlane 0.001 均被保留，共 6 项通过。

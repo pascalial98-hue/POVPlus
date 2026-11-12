@@ -6,7 +6,7 @@
 
 See your body, turn and lean naturally, and keep your head's shadow.
 
-A community fork of [Tiraesias's POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta for FFXIV CN / Dalamud. Current version: **1.6.1.2**. Original attribution, Git history and the AGPL-3.0-or-later license are retained.
+A community fork of [Tiraesias's POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta for FFXIV CN / Dalamud. Current version: **1.6.1.3**. Original attribution, Git history and the AGPL-3.0-or-later license are retained.
 
 ## Installation
 
@@ -35,7 +35,7 @@ Manual packages are available in [Releases](https://github.com/pascalial98-hue/P
 | Natural look limits | Separate horizontal, upward and downward limits with gentle slowdown near the boundary. |
 | Lean beyond the boundary | Continue moving the mouse at a limit to lean forward or sideways. Adjustable distance, sensitivity and extra angle; translation and rotation blend together. Holds when input stops, retracts with reverse input. |
 | Direct mouse look, optional | Turn without holding RMB; hold LMB to look around without turning the character. Release the cursor with a customizable held or toggled key/chord. |
-| Stationary-pose protection | Ordinary RMB and direct mouse look preserve sitting, dozing and similar looped poses. Movement keys still end the pose. |
+| Stationary-pose protection | Gamepad right-stick look, ordinary RMB and direct mouse look preserve sitting, dozing and similar looped poses. The left stick and movement keys still end the pose. |
 | Head-animation weights | Independent 0–100% yaw, pitch and roll weights, separate from smoothing. |
 | Close-up visibility | NearPlane defaults to 0.015 for new configurations and supports values down to 0.001; optional near-object visibility, selected hair/ear details and attenuation of nearby self-targeted effects. |
 | Bilingual settings | New configurations default to **中英对照 / 中文 + English**, pairing each Chinese item with English. **Auto / 简体中文 / English** remain available at the top of settings. Changes apply immediately. Auto follows Dalamud's UI language, using English for non-Chinese languages. |

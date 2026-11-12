@@ -11,7 +11,7 @@ FEATURES
 • Adjustable horizontal and vertical look limits, with gentle slowdown near the edge.
 • Lean forward or sideways by continuing to move the mouse at a look limit. Distance, sensitivity and extra viewing angle are adjustable. Lean holds when input stops and retracts with reverse input.
 • Optional direct mouse look. Hold the left mouse button to look around without turning your character; use a configurable held or toggled shortcut to release the cursor.
-• Camera input preserves sitting, dozing and similar fixed/looped poses. Movement keys still end the pose normally.
+• Gamepad right-stick look, ordinary right-drag and direct mouse look preserve sitting, dozing and similar fixed/looped poses. The left stick and movement keys still end the pose normally.
 • First-use calibration with front/side diagrams, a live viewpoint marker and fine adjustment. Reopen it from /pov anytime outside combat during normal gameplay.
 • Independent yaw, pitch and roll follow weights, plus optional nearby object visibility and attenuation of close self-effects.
 • New configurations show Chinese followed by English for each item. Auto, Chinese-only and English-only modes remain available. Existing language selections are retained; select the bilingual option at the top of /pov to switch.
