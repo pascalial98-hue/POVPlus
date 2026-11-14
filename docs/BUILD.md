@@ -1,5 +1,36 @@
 # Build / 构建
 
+## 主库标准构建 / Standard repository build
+
+当前构建入口是 `src/PovPlus.csproj`，使用 .NET SDK 10；运行插件需要 Windows x64 和国服 Dalamud API 15。原生接口基线为国服 `2026.11.03.0000.0000`，本地验证依赖为 Dalamud CN `15.0.4.0`。<br>
+Build `src/PovPlus.csproj` with .NET SDK 10. Running the plugin requires Windows x64 and Dalamud CN API 15. Native interfaces target CN `2026.11.03.0000.0000`; local validation uses Dalamud CN `15.0.4.0` references.
+
+在仓库根目录运行以下命令，将 `<Dalamud reference directory>` 替换为实际依赖路径。主库 Plogon 同样通过 `DalamudLibPath` 提供依赖。首次联网还原后，构建可使用本地 NuGet 包缓存；构建期间不执行额外下载脚本。<br>
+Run from the repository root, replacing `<Dalamud reference directory>` with the actual reference directory. Plogon supplies references through the same property. After an initial online restore, builds can use the local NuGet cache; no additional download scripts run during compilation.
+
+```text
+dotnet restore src/PovPlus.csproj --locked-mode -p:DalamudLibPath="<Dalamud reference directory>"
+dotnet build src/PovPlus.csproj -c Release -o artifacts/dip17 --no-restore -p:DalamudLibPath="<Dalamud reference directory>" -p:IsPlogonBuild=True
+python scripts/verify_dip17.py artifacts/dip17 --baseline PovPlus.Enhanced.zip
+```
+
+Release 构建自动调用固定版本的 `DalamudPackager` 15.0.0，输出 `artifacts/dip17/PovPlus/latest.zip` 及旁边的 `PovPlus.json`。安装包只包含插件 DLL、清单、LICENSE 与 NOTICE，不包含 Dalamud 或游戏依赖。根目录 `PovPlus.json` 是两种分发方式共用的清单来源；版本由 `src/Properties/AssemblyInfo.cs` 固定。<br>
+Release builds invoke pinned DalamudPackager 15.0.0 and emit `artifacts/dip17/PovPlus/latest.zip` with its sibling manifest. The installer includes only the plugin DLL, manifest, LICENSE and NOTICE, with no Dalamud/game dependencies. Both channels use the root `PovPlus.json`; assembly versions are fixed in `src/Properties/AssemblyInfo.cs`.
+
+`src/packages.lock.json` 必须随依赖变更提交。`IsPlogonBuild=True` 自动开启锁定还原。修改依赖时重新生成锁文件，再运行上述命令。`--baseline` 只适用于本次保持 DLL 不变的构建适配；功能版本升级后应省略或更换为对应已测试版本。<br>
+Commit `src/packages.lock.json` with dependency changes. `IsPlogonBuild=True` enables locked restore. Regenerate the lockfile when changing dependencies and rerun the checks above. `--baseline` is for this build-only revision with an unchanged DLL; omit it or supply the matching tested release after feature changes.
+
+离线功能与语言检查：<br>
+Offline regression and localization checks:
+
+```text
+dotnet run --project tests/PovPlus.Tests.csproj -c Release -p:DalamudLibPath="<Dalamud reference directory>"
+python scripts/verify_localization.py
+```
+
+国服提交材料及 AI 使用范围见 [CN_SUBMISSION.md](CN_SUBMISSION.md) 和 [AI_USAGE.md](AI_USAGE.md)。<br>
+See [CN_SUBMISSION.md](CN_SUBMISSION.md) and [AI_USAGE.md](AI_USAGE.md) for the CN review notes and AI disclosure.
+
 ## 简体中文
 
 需要 Windows x64、.NET SDK 10、Python 3，以及已安装的国服 Dalamud **15.0.4.0 / API 15** 依赖目录。依赖从自己的 Dalamud 安装取得，不包含在源码包内。发布基线的游戏版本为 `2026.11.03.0000.0000`。

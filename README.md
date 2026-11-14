@@ -121,6 +121,9 @@ Please include plugin, game and Dalamud versions, relevant settings and reproduc
 
 ## 开发 / Development
 
+国服主库构建与首次审核材料见 [CN_SUBMISSION.md](docs/CN_SUBMISSION.md)，AI 辅助开发及图像使用说明见 [AI_USAGE.md](docs/AI_USAGE.md)。<br>
+See [CN_SUBMISSION.md](docs/CN_SUBMISSION.md) for CN repository build/review notes and [AI_USAGE.md](docs/AI_USAGE.md) for AI-assisted development and artwork disclosure.
+
 当前可构建源码在 [`src/`](src)，离线回归在 [`tests/`](tests)。参阅[构建说明](docs/BUILD.md)、[更新记录](CHANGELOG.md)及[验证记录](docs/VALIDATION.md)。<br>
 Buildable source is in [`src/`](src), with offline regressions in [`tests/`](tests). See the [build guide](docs/BUILD.md), [changelog](CHANGELOG.md) and [validation record](docs/VALIDATION.md).
 

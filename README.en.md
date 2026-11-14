@@ -8,6 +8,8 @@ See your body, turn and lean naturally, and keep your head's shadow.
 
 A community fork of [Tiraesias's POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta for FFXIV CN / Dalamud. Current version: **1.6.1.4**. Original attribution, Git history and the AGPL-3.0-or-later license are retained.
 
+See [CN repository review notes](docs/CN_SUBMISSION.md), [standard build instructions](docs/BUILD.md) and [AI usage disclosure](docs/AI_USAGE.md) for submission details and the scope of AI-assisted development and artwork.
+
 ## Installation
 
 1. Open Dalamud Settings → **Experimental** → **Custom Plugin Repositories**. Add, enable and save:

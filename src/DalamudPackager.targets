@@ -1,0 +1,11 @@
+<Project>
+  <Target Name="PackagePlugin" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <!-- Keep the root manifest as the single source for both distribution channels. -->
+    <DalamudPackager ProjectDir="$(MSBuildProjectDirectory)/.."
+                    OutputPath="$(TargetDir)"
+                    AssemblyName="$(AssemblyName)"
+                    ManifestType="json"
+                    MakeZip="true"
+                    Include="PovPlus.dll;PovPlus.json;LICENSE.md;NOTICE.md" />
+  </Target>
+</Project>

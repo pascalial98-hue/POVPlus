@@ -8,6 +8,10 @@
     <RepositoryUrl>https://github.com/pascalial98-hue/POVPlus</RepositoryUrl>
     <PathMap>$(MSBuildProjectDirectory)=/_/src</PathMap>
     <DebugType>none</DebugType>
+    <IsPackable>false</IsPackable>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode Condition="'$(IsPlogonBuild)' == 'True'">true</RestoreLockedMode>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
   <PropertyGroup>
     <LangVersion>14.0</LangVersion>
@@ -16,7 +20,10 @@
     <Nullable>annotations</Nullable>
     <DalamudLibPath Condition="'$(DalamudLibPath)' == ''">$(APPDATA)\XIVLauncherCN\addon\Hooks\15.0.4.0</DalamudLibPath>
   </PropertyGroup>
-  <PropertyGroup />
+  <ItemGroup>
+    <PackageReference Include="DalamudPackager" Version="15.0.0" PrivateAssets="all" />
+    <None Include="../LICENSE.md;../NOTICE.md" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="PovPlus\Assets\calibration-heads.png" LogicalName="PovPlus.Assets.calibration-heads.png" />
     <EmbeddedResource Include="PovPlus\Translations\en.json" LogicalName="PovPlus.Translations.en.json" />

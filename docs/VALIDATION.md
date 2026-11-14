@@ -1,5 +1,16 @@
 # Validation / 验证记录
 
+## 国服主库构建适配 / CN repository build integration — 2026-11-14
+
+- 接入 DalamudPackager 15.0.0 和依赖锁文件，在独立源码目录、独立 NuGet 包目录中完成锁定还原与 Release 构建。输出使用 Plogon 所需的 `PovPlus/latest.zip` 布局。0 个错误、56 条既有恢复源码警告；没有修改功能源码或隐藏警告。<br>
+  Integrate DalamudPackager 15.0.0 and a dependency lockfile. Locked restore and Release compilation pass in separate source and NuGet package directories, producing the `PovPlus/latest.zip` layout expected by Plogon. Zero errors and 56 existing recovered-source warnings; no feature source changes or warning suppression.
+- 本地引用仍为国服 Dalamud 15.0.4.0，SDK 为 10.0.100。标准输出的 DLL 与已发布/测试的 1.6.1.4 DLL 字节完全相同，SHA-256 为 `56e137dfb825eb39ec2f8b045636fd1be7b15ef52458027125dfd8d73089530a`。<br>
+  Local references remain Dalamud CN 15.0.4.0 with SDK 10.0.100. The standard-build DLL is byte-identical to the published/tested 1.6.1.4 DLL, with the SHA-256 shown above.
+- `verify_dip17.py` 验证 ZIP 完整性、清单与源码一致、DLL 与发布基线一致、无额外依赖 DLL，以及 512×512 图标和 730×380 预览。标准 ZIP 仅包含 DLL、JSON、LICENSE 和 NOTICE。<br>
+  `verify_dip17.py` checks ZIP integrity, manifest/source equality, DLL equality with the release baseline, absence of dependency DLLs, and 512×512 icon / 730×380 preview dimensions. The standard ZIP contains only the DLL, JSON, LICENSE and NOTICE.
+- 重新运行全部 146,981 项离线断言及 129 条英文翻译覆盖检查，均通过。本次没有进行新的游戏内测试；人工反馈沿用下方各版本记录。国服主库远端 CI 和人工审核结果应以提交 PR 上的实际状态为准。<br>
+  All 146,981 offline assertions and coverage of 129 English translations pass again. No new in-game test was performed for this build integration; human feedback is recorded below by version. Consult the submission PR for actual CN remote CI and human review status.
+
 ## 1.6.1.4 — 2026-11-12
 
 - 本地两轮游戏测试确认身体姿态视角工作正常。首次反馈静止姿态良好，但跑步躯干摆动明显；加入移动旋转平滑后再次确认可用，并明确要求注明此选项不适合移动时使用。默认关闭，保存过的选择继续保留。<br>
