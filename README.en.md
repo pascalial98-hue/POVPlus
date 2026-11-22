@@ -6,7 +6,7 @@
 
 See your body, turn and lean naturally, and keep your head's shadow.
 
-A community fork of [Tiraesias's POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta for FFXIV CN / Dalamud. Current version: **1.7.0.0**. Original attribution, Git history and the AGPL-3.0-or-later license are retained.
+A community fork of [Tiraesias's POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta for FFXIV CN / Dalamud. Current version: **1.8.0.0**. Original attribution, Git history and the AGPL-3.0-or-later license are retained.
 
 See [CN repository review notes](docs/CN_SUBMISSION.md), [standard build instructions](docs/BUILD.md) and [AI usage disclosure](docs/AI_USAGE.md) for submission details and the scope of AI-assisted development and artwork.
 
@@ -33,6 +33,9 @@ Manual packages are available in [Releases](https://github.com/pascalial98-hue/P
 | --- | --- |
 | Optional shoulder view | Enable shoulder view in the General page of /pov to cycle through third person, shoulder view and first person with the game's perspective toggle. Shoulder view is off by default. |
 | On-foot and mounted cameras | On-foot and mounted views remember their own zoom distance and have separate framing and zoom limits. Mounts also have adjustable tracking lag, recovery when stopping, and cornering sway. |
+| Combat framing | On foot, set shoulder position, height and distance offsets for combat, with separate transition times for entering and leaving combat. |
+| Speed-based zoom | Enable speed-based zoom separately on foot and on mounts. The camera pulls back slightly at cruising speed and farther as you accelerate, then returns to your chosen zoom when you stop. |
+| Flight motion | Adjust camera sway and turn banking on flying mounts. The camera settles smoothly when hovering or landing. |
 | First-use guide | A movable window, FFXIV character front/side diagrams, live viewpoint marker and three-axis fine adjustment. Save to apply; closing or cancelling discards draft offsets. |
 | Head hiding and camera transitions | Hides the head as the camera approaches, and restores it only after the camera has moved away. Enabled by default for new configurations. |
 | Complete head shadow, on by default | Excludes face, hair, headgear and related models from the main view while keeping their native shadow rendering. No duplicate actor is created. |
@@ -45,7 +48,7 @@ Manual packages are available in [Releases](https://github.com/pascalial98-hue/P
 | Close-up visibility | NearPlane defaults to 0.015 for new configurations and supports values down to 0.001; optional near-object visibility, selected hair/ear details and attenuation of nearby self-targeted effects. |
 | Bilingual settings | New configurations default to **中英对照 / 中文 + English**, pairing each Chinese item with English. **Auto / 简体中文 / English** remain available on the General page. Changes apply immediately. Auto follows Dalamud's UI language, using English for non-Chinese languages. |
 
-Use `/pov toggle` to enable or disable the plugin. Ordinary settings save automatically; calibration offsets require **Save and finish**. Existing configurations are not interrupted with automatic onboarding, and their offsets and NearPlane remain unchanged. Head hiding and full head shadows default to on for new configurations. Existing choices, including language selections, are retained. Full head shadows remain experimental and can be disabled; near-object visibility, appearance details and self-effect attenuation still default to off.
+Use `/pov toggle` to enable or disable the plugin. Ordinary settings save automatically; calibration offsets require **Save and finish**. Existing configurations are not interrupted with automatic onboarding, and their offsets and NearPlane remain unchanged. Head hiding and full head shadows default to on for new configurations. Existing choices, including language selections, are retained. You can turn full head shadows off. Near-object visibility, appearance details and self-effect attenuation default to off.
 
 ## Body-relative view
 
@@ -62,7 +65,7 @@ Enable under `/pov → View & tracking → Body-relative view → Body-relative 
 - Complete head shadows require the game's self-shadow option. This mode hides entire head-related models, so hair tips/ear accessories cannot be selectively retained; neck geometry belonging to the face model may also disappear. Unusual mods may use different model slots.
 - Near-object visibility affects only the relevant distance-based visibility check, not every static map object, backface-culling case or unloaded resource.
 - Pose protection recognizes fixed/looped game states; it does not promise to protect every short emote, cast, mount state or custom animation. Cursor hotkeys still reach the game, so avoid binding conflicts.
-- Core features received in-game feedback during development. Version 1.6.1.0 passed compilation, offline regressions and calibration-camera field-layout checks. The new guide, illustration layout and actual viewpoint alignment still need in-game verification.
+- During calibration, check the marker between the eyes from both the front and the side. Recalibrate after changing faces or using a mod that alters head proportions.
 
 ## Source and feedback
 

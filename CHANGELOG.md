@@ -1,5 +1,22 @@
 # Changelog / 更新记录
 
+## 1.8.0.0 — 2026-11-22
+
+- 步行越肩可单独设置战斗肩位、高度和距离，并分别调整进战、脱战的过渡时间。<br>
+  On foot, set shoulder position, height and distance offsets for combat, with separate transition times for entering and leaving combat.
+
+- 步行和骑乘可分别开启随速度拉远。常速移动时只稍微拉远，加速后变化更明显，停稳后回到滚轮选定的距离。<br>
+  Enable speed-based zoom separately on foot and on mounts. The camera pulls back slightly at cruising speed and farther as you accelerate, then returns to your chosen zoom when you stop.
+
+- 飞行坐骑可调镜头晃动强度和转弯侧倾角，悬停或落地后平滑回稳。<br>
+  Adjust camera sway and turn banking on flying mounts. The camera settles smoothly when hovering or landing.
+
+- 改善步行上下长台阶时的高度跟随，让角色在画面中保持同一高度。<br>
+  Improved on-foot tracking on long staircases keeps the character at a more consistent height in the frame.
+
+- 精简第一人称外观和特效设置的中英文名称，补充完整头影和近物件的适用条件。<br>
+  Simplified the Chinese and English appearance and effect settings and clarified when full head shadows and nearby object visibility apply.
+
 ## 1.7.0.0 — 2026-11-22
 
 - 在 /pov 的「通用」页开启越肩后，用游戏原有的视角切换键依次切换第三人称、越肩和第一人称。越肩默认关闭。<br>

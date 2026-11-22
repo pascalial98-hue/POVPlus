@@ -127,10 +127,10 @@ public class MainWindow : Window, IDisposable
         ImGui.TextWrapped(L.T("切到第三人称，用图示和实时标记调整两眼之间的视点。请在正常场景、非战斗状态下使用。"));
         Heading("视角切换");
         Toggle("将越肩视角加入视角切换循环", ref Config.ShoulderCycleEnabled);
-        ImGui.TextWrapped(L.T("用游戏原有的视角切换键，依次切换第三人称、越肩和第一人称。"));
+        ImGui.TextWrapped(L.T("开启越肩后，按游戏的视角切换键可依次切换第三人称、越肩和第一人称。"));
         if (Config.ShoulderCycleEnabled)
             Slider("进入越肩的过渡时间（秒）", ref Config.ShoulderEntryTime, 0, 0.6f, ShoulderRig.DefaultEntryTime, "%.2f");
-        if (ImGui.CollapsingHeader(L.Label("其他模式与调试")))
+        if (ImGui.CollapsingHeader(L.Label("其他模式与视点辅助线")))
         {
             Toggle("第三人称也启用视点绑定", ref Config.Setting_FirstPersonOnly);
             Toggle("集体动作（GPose）中启用视点绑定", ref Config.Setting_GposeEnabled);
@@ -319,20 +319,20 @@ public class MainWindow : Window, IDisposable
         Toggle("隐藏自己的头部", ref Config.FirstPersonHideHead);
         if (plugin.HeadHidingStatus.Length > 0) ImGui.TextWrapped(plugin.HeadHidingStatus);
         ImGui.BeginDisabled(!Config.FirstPersonHideHead);
-        Toggle("保留完整头影（整块隐藏脸、头发和头饰，试验）", ref Config.FirstPersonFullHeadShadow);
+        Toggle("保留完整头影", ref Config.FirstPersonFullHeadShadow);
         if (Config.FirstPersonFullHeadShadow)
         {
-            ImGui.TextWrapped(L.T("保留正常骨骼，只在主画面隐藏对应模型。发梢和饰品不再局部保留，脸部模型内的颈部也可能消失。独立兔耳按资源识别；特殊改模可能仍有遮挡。游戏需开启自身阴影。"));
+            ImGui.TextWrapped(L.T("请在游戏中开启自身阴影。主画面会隐藏整张脸、头发和头饰，影子保留完整轮廓。脸部模型自带的颈部也会一并隐藏。独立兔耳按模型识别，部分改模仍可能遮挡视线。"));
             if (plugin.HeadShadowStatus.Length > 0) ImGui.TextWrapped(plugin.HeadShadowStatus);
         }
-        else ImGui.TextWrapped(L.T("原骨骼隐藏方式：保留颈部，头影会随头部隐藏。"));
+        else ImGui.TextWrapped(L.T("关闭完整头影时，镜头保留颈部，头部和头影一同隐藏。"));
         Toggle("进入时，镜头接近后再隐藏", ref Config.FirstPersonDelayHeadHide);
         if (Config.FirstPersonDelayHeadHide)
             Slider("进入隐藏距离", ref Config.FirstPersonHeadHideDistance, 0.05f, 0.75f, 0.25f, "%.2f");
         Slider("退出恢复距离", ref Config.FirstPersonHeadShowDistance, 0.2f, 1, 0.35f, "%.2f");
         ImGui.TextWrapped(L.T("进入距离越小，隐藏越晚；退出距离越大，恢复越晚。"));
 
-        Heading("保留外观细节（试验）");
+        Heading("保留发梢与耳部细节");
         ImGui.BeginDisabled(Config.FirstPersonFullHeadShadow);
         Toggle("保留远离镜头的发梢", ref Config.FirstPersonPreserveHair);
         Toggle("保留远离镜头的耳部及关联饰物", ref Config.FirstPersonPreserveEars);
@@ -345,12 +345,12 @@ public class MainWindow : Window, IDisposable
         ImGui.EndDisabled();
 
         Heading("近处物件");
-        Toggle("保留近镜头的其他角色与物件（试验）", ref Config.FirstPersonKeepNearObjects);
+        Toggle("保留近镜头的其他角色与物件", ref Config.FirstPersonKeepNearObjects);
         if (plugin.NearObjectsStatus.Length > 0) ImGui.TextWrapped(plugin.NearObjectsStatus);
         if (Config.FirstPersonKeepNearObjects)
-            ImGui.TextWrapped(L.T("解除另一层按距离隐藏整个对象的判断，仅在第一人称生效。针对走该判断的角色与物件；部分地图静态模型、未加载物体及背面不可见不在此项覆盖范围内。"));
+            ImGui.TextWrapped(L.T("第一人称下，贴近镜头的角色和物件仍可见。仅对游戏按距离整体隐藏的对象生效，部分静态场景、未加载的物体及模型背面仍可能不可见。"));
 
-        Heading("近处自身特效（试验）");
+        Heading("近处自身特效");
         Toggle("减弱贴近镜头的自身特效", ref Config.FirstPersonReduceSelfVfx);
         if (plugin.VfxStatus.Length > 0) ImGui.TextWrapped(plugin.VfxStatus);
         if (Config.FirstPersonReduceSelfVfx)

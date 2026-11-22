@@ -1,5 +1,12 @@
 # Validation / 验证记录
 
+## 1.8.0.0 — 2026-11-22
+
+- 使用国服 Dalamud 15.0.4.0 引用完成 Release 构建。158,708 项离线断言通过，181 条英文翻译覆盖全部现用中文界面和状态文本。<br>
+  Built in Release against Dalamud CN 15.0.4.0. All 158,708 offline assertions passed. The 181 English translations cover the active Chinese UI and status strings.
+- 标准构建包与自定义仓库安装包中的 DLL 完全一致。这轮核对覆盖构建和打包，未重新在游戏内验收镜头手感。<br>
+  The standard and custom-repository packages contain identical DLLs. This release check covered the build and packaging. Camera feel was not retested in game.
+
 ## 国服主库构建适配 / CN repository build integration — 2026-11-14
 
 - 接入 DalamudPackager 15.0.0 和依赖锁文件，在独立源码目录、独立 NuGet 包目录中完成锁定还原与 Release 构建。输出使用 Plogon 所需的 `PovPlus/latest.zip` 布局。0 个错误、56 条既有恢复源码警告；没有修改功能源码或隐藏警告。<br>

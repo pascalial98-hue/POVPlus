@@ -45,8 +45,8 @@ See [CN_SUBMISSION.md](CN_SUBMISSION.md) and [AI_USAGE.md](AI_USAGE.md) for the 
 
 脚本会校验 129 条英文翻译、编译 `src/PovPlus.csproj`、运行离线回归，并生成：
 
-- `artifacts/PovPlus-Enhanced-1.7.0.0.zip`：安装包。
-- `artifacts/PovPlus-Enhanced-1.7.0.0-source.zip`：完整对应源码、测试和构建说明。
+- `artifacts/PovPlus-Enhanced-1.8.0.0.zip`：安装包。
+- `artifacts/PovPlus-Enhanced-1.8.0.0-source.zip`：完整对应源码、测试和构建说明。
 - `artifacts/SHA256SUMS.txt`：下载校验值。
 - `artifacts/POVPlus_Enhanced_XMA_Release_Kit.zip`：逐段中英对照的发布正文、单语备用正文、发布字段及预览图标。
 - 根目录 `PovPlus.Enhanced.zip` 和 `repo.json`：自定义仓库安装/更新入口。

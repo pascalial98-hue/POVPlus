@@ -31,7 +31,7 @@ internal sealed unsafe class FirstPersonHeadVisibility : IDisposable
     private Vector3 detailEye;
     private FirstPersonHeadShadow? headShadow;
     private bool shadowUnavailable;
-    internal string ShadowStatus => shadowUnavailable ? L.T("完整头影试验不可用，已使用原骨骼隐藏方式。") : "";
+    internal string ShadowStatus => shadowUnavailable ? L.T("完整头影不可用，已切换为骨骼隐藏。") : "";
     internal bool Failed => failed;
 
     private sealed record BonePlan(nint Skeleton, nint Names, nint Parents, int Count,

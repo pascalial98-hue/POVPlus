@@ -2,7 +2,7 @@
 
 ![POV+ Enhanced](https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/docs/images/povplus-enhanced-preview-v2.png)
 
-**中文 / English · 1.7.0.0** · [English only](README.en.md)
+**中文 / English · 1.8.0.0** · [English only](README.en.md)
 
 基于 Tiraesias 的 POV+ Beta 制作的国服第一人称增强分支。<br>
 An immersive first-person camera for FFXIV CN, built on Tiraesias's POV+ Beta.
@@ -20,6 +20,15 @@ CURRENT TARGET: Chinese client, Dalamud API 15. Latest build baseline: CN 2026.1
 
 - 步行和骑乘分别记住滚轮距离，可独立调整肩位和缩放范围。骑乘时还可调整跟随滞后、停步回正和转弯惯性。<br>
   On-foot and mounted views remember their own zoom distance and have separate framing and zoom limits. Mounts also have adjustable tracking lag, recovery when stopping, and cornering sway.
+
+- 步行越肩可单独设置战斗肩位、高度和距离，并分别调整进战、脱战的过渡时间。<br>
+  On foot, set shoulder position, height and distance offsets for combat, with separate transition times for entering and leaving combat.
+
+- 步行和骑乘可分别开启随速度拉远。常速移动时只稍微拉远，加速后变化更明显，停稳后回到滚轮选定的距离。<br>
+  Enable speed-based zoom separately on foot and on mounts. The camera pulls back slightly at cruising speed and farther as you accelerate, then returns to your chosen zoom when you stop.
+
+- 飞行坐骑可调镜头晃动强度和转弯侧倾角，悬停或落地后平滑回稳。<br>
+  Adjust camera sway and turn banking on flying mounts. The camera settles smoothly when hovering or landing.
 
 - 第一人称显示身体，默认隐藏自己的头部并保留完整头影；镜头接近头部后才隐藏，切回第三人称、离开头部后再恢复。<br>
   Visible body in first person. Head hiding and full head shadows are enabled by default; the head disappears as the camera approaches and returns after it moves away.
@@ -47,7 +56,7 @@ CURRENT TARGET: Chinese client, Dalamud API 15. Latest build baseline: CN 2026.1
 
 ### 身体姿态视角 / Body-relative view
 
-新增可独立开启的“视角与限位跟随身体姿态”，默认关闭。以躯干作为正视基准，弯腰 90° 时正视地面，抬头 90° 可看向前方；转头范围和探头方向随身体姿态变化。<br>
+“视角与限位跟随身体姿态”可独立开启，默认关闭。以躯干作为正视基准，弯腰 90° 时正视地面，抬头 90° 可看向前方；转头范围和探头方向随身体姿态变化。<br>
 Add an independent, default-off Body-relative view and look limits option. The torso defines the neutral view: a 90° bow looks at the ground, while looking up 90° reaches the horizon. Look limits and leaning directions follow body posture.
 
 **此选项适合静止姿态观察，不适合移动时使用；即使有平滑处理，跑动时仍可能明显晃动。**<br>
@@ -89,8 +98,8 @@ Already using this repository? Update through the installer; your settings are r
 - 新配置 NearPlane 默认 0.015，旧值保留，仍可手动设置 0.001。过低时，水雾等粒子可能透过地形显示。<br>
   New configurations default to NearPlane 0.015. Existing values are retained; 0.001 remains available. Very low values can cause mist/particles to show through terrain.
 
-- 新配置默认开启隐藏头部与完整头影，已有配置保留手动选择。完整头影仍为可关闭的试验项，需要游戏启用自身阴影；主画面整块隐藏对应头部模型，属于脸部模型的部分颈部也可能被隐藏。近物体保留、发梢/耳部细节及自身特效减弱仍默认关闭。<br>
-  Head hiding and full head shadows default to on for new configurations; saved choices are retained. Full head shadows remain an experiment you can disable. Enable your own character shadows in the game; complete head-related models are hidden in the main view, including neck geometry belonging to the face model. Near-object visibility, hair/ear details and self-effect attenuation still default to off.
+- 新配置默认开启隐藏头部与完整头影，已有配置保留手动选择。完整头影可在设置中关闭。请在游戏中开启自身阴影。主画面整块隐藏对应头部模型，属于脸部模型的部分颈部也可能被隐藏。近物体保留、发梢/耳部细节及自身特效减弱仍默认关闭。<br>
+  Head hiding and full head shadows default to on for new configurations; saved choices are retained. You can turn full head shadows off in the plugin settings. Enable your own character shadows in the game; complete head-related models are hidden in the main view, including neck geometry belonging to the face model. Near-object visibility, hair/ear details and self-effect attenuation still default to off.
 
 - 服装、脸型和动作模组会影响遮挡及对齐。插件沿用角色现有动作，不另附第一人称动作套组；预览中的外观模组不包含在插件中。<br>
   Outfit, face and animation mods can affect clipping and alignment. The plugin uses your character's existing animations; it does not supply a separate first-person animation set. The cosmetic mods shown in the preview are not included.
@@ -98,8 +107,8 @@ Already using this repository? Update through the installer; your settings are r
 - 固定姿势保护覆盖相应循环状态，不保证每个动作都适用；近物体保留也不覆盖所有地图静态模型或尚未加载的物体。<br>
   Fixed-pose protection covers the relevant looped game states, not every emote or custom animation. Near-object visibility does not cover every static map model or unloaded object.
 
-- 核心功能已在开发过程中获得游戏内反馈。新增校准与中英对照界面经过离线检查，实际游戏表现仍需确认；没有宣称已验证全部种族、改模或未来版本。<br>
-  Core features received in-game feedback during development. The new calibration and paired bilingual interface are checked offline but still need in-game confirmation; not every race, mod or future client build has been verified.
+- 校准时请从正面和侧面确认标记位于两眼之间。更换脸型或使用改变头部比例的模组后，可重新校准视点。<br>
+  During calibration, check the marker between the eyes from both the front and the side. Recalibrate after changing faces or using a mod that alters head proportions.
 
 ## 署名与源码 / Credits & Source
 

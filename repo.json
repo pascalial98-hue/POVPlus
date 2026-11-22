@@ -3,8 +3,8 @@
     "Author": "Tiraesias; Enhanced fork: pascalial98-hue",
     "Name": "POV+ Enhanced",
     "InternalName": "PovPlus",
-    "AssemblyVersion": "1.7.0.0",
-    "Description": "看见自己的身体，自由观察、探头，用引导校准到适合自己的视点。\nSee your body, look around and lean, with guided viewpoint calibration.\n\n在 /pov 的「通用」页开启越肩后，用游戏原有的视角切换键依次切换第三人称、越肩和第一人称。越肩默认关闭。\nEnable shoulder view in the General page of /pov to cycle through third person, shoulder view and first person with the game's perspective toggle. Shoulder view is off by default.\n\n新配置默认隐藏头部、保留完整头影，并逐项显示中英对照。已有设置保留；也可选择单语界面和鼠标直控。\nNew configurations enable head hiding, full head shadows and paired Chinese/English text. Saved settings are retained; single-language UI and direct mouse look are also available.\n\n可选“视角与限位跟随身体姿态”，默认关闭。此选项适合静止姿态观察，不适合移动时使用；即使有平滑处理，跑动时仍可能明显晃动。\nOptional body-relative view and limits, off by default. This option is intended for viewing stationary poses, not for use while moving. Running may still cause noticeable camera sway even with smoothing.\n\n面向国服 / Dalamud API 15，国际服尚未验证。\nTargets FFXIV CN / Dalamud API 15; international clients are unverified.",
+    "AssemblyVersion": "1.8.0.0",
+    "Description": "看见自己的身体，自由观察、探头，用引导校准到适合自己的视点。\nSee your body, look around and lean, with guided viewpoint calibration.\n\n在 /pov 的「通用」页开启越肩后，用游戏原有的视角切换键依次切换第三人称、越肩和第一人称。越肩默认关闭。\nEnable shoulder view in the General page of /pov to cycle through third person, shoulder view and first person with the game's perspective toggle. Shoulder view is off by default.\n\n步行越肩可叠加战斗构图，步行和坐骑可分别按速度拉远。飞行时可调整镜头晃动与转弯侧倾。\nOn-foot shoulder view supports combat framing. Speed-based zoom is adjustable separately on foot and on mounts. Flying mounts can add camera sway and bank into turns.\n\n新配置默认隐藏头部、保留完整头影，并逐项显示中英对照。已有设置保留；也可选择单语界面和鼠标直控。\nNew configurations enable head hiding, full head shadows and paired Chinese/English text. Saved settings are retained; single-language UI and direct mouse look are also available.\n\n可选“视角与限位跟随身体姿态”，默认关闭。此选项适合静止姿态观察，不适合移动时使用；即使有平滑处理，跑动时仍可能明显晃动。\nOptional body-relative view and limits, off by default. This option is intended for viewing stationary poses, not for use while moving. Running may still cause noticeable camera sway even with smoothing.\n\n面向国服 / Dalamud API 15，国际服尚未验证。\nTargets FFXIV CN / Dalamud API 15; international clients are unverified.",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/pascalial98-hue/POVPlus",
     "Tags": [
@@ -21,19 +21,19 @@
     "CanUnloadAsync": false,
     "LoadPriority": 0,
     "Punchline": "第一人称与可选越肩镜头 / First-person and optional shoulder cameras",
-    "Changelog": "1.7\n在 /pov 的「通用」页开启越肩后，用游戏原有的视角切换键依次切换第三人称、越肩和第一人称。越肩默认关闭。\nEnable shoulder view in the General page of /pov to cycle through third person, shoulder view and first person with the game's perspective toggle. Shoulder view is off by default.\n\n步行和骑乘分别记住滚轮距离，可独立调整肩位和缩放范围。骑乘时还可调整跟随滞后、停步回正和转弯惯性。\nOn-foot and mounted views remember their own zoom distance and have separate framing and zoom limits. Mounts also have adjustable tracking lag, recovery when stopping, and cornering sway.\n\n设置按通用、第一人称、越肩分组。窗口较窄时，通过顶部菜单切换页面。\nSettings are grouped by general, first-person and shoulder controls. In narrower windows, use the menu at the top to switch pages.",
+    "Changelog": "1.8\n步行越肩可单独设置战斗肩位、高度和距离，并分别调整进战、脱战的过渡时间。\nOn foot, set shoulder position, height and distance offsets for combat, with separate transition times for entering and leaving combat.\n\n步行和骑乘可分别开启随速度拉远。常速移动时只稍微拉远，加速后变化更明显，停稳后回到滚轮选定的距离。\nEnable speed-based zoom separately on foot and on mounts. The camera pulls back slightly at cruising speed and farther as you accelerate, then returns to your chosen zoom when you stop.\n\n飞行坐骑可调镜头晃动强度和转弯侧倾角，悬停或落地后平滑回稳。\nAdjust camera sway and turn banking on flying mounts. The camera settles smoothly when hovering or landing.\n\n改善步行上下长台阶时的高度跟随，让角色在画面中保持同一高度。\nImproved on-foot tracking on long staircases keeps the character at a more consistent height in the frame.\n\n精简第一人称外观和特效设置的中英文名称，补充完整头影和近物件的适用条件。\nSimplified the Chinese and English appearance and effect settings and clarified when full head shadows and nearby object visibility apply.",
     "AcceptsFeedback": false,
     "IconUrl": "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/docs/images/povplus-enhanced-icon-v1.png",
     "ImageUrls": [
       "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/docs/images/povplus-enhanced-store-preview-v2.png"
     ],
-    "TestingAssemblyVersion": "1.7.0.0",
+    "TestingAssemblyVersion": "1.8.0.0",
     "TestingDalamudApiLevel": 15,
     "DownloadLinkInstall": "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/PovPlus.Enhanced.zip",
     "DownloadLinkUpdate": "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/PovPlus.Enhanced.zip",
     "DownloadLinkTesting": "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/PovPlus.Enhanced.zip",
     "IsHide": false,
     "IsTestingExclusive": false,
-    "LastUpdate": 1795333190
+    "LastUpdate": 1795347099
   }
 ]

@@ -309,7 +309,7 @@ public class Plugin : IDalamudPlugin, IDisposable
             catch (Exception ex)
             {
                 shoulderUnavailable = true;
-                Service.Log.Error(ex, "POV+ could not initialize the experimental shoulder camera.");
+                Service.Log.Error(ex, "POV+ could not initialize the shoulder camera.");
             }
         }
         Shoulder?.Update();
