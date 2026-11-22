@@ -6,7 +6,7 @@
 
 See your body, turn and lean naturally, and keep your head's shadow.
 
-A community fork of [Tiraesias's POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta for FFXIV CN / Dalamud. Current version: **1.8.0.0**. Original attribution, Git history and the AGPL-3.0-or-later license are retained.
+A community fork of [Tiraesias's POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta for FFXIV CN / Dalamud. Current version **1.81** (1.8.1.0). Original attribution, Git history and the AGPL-3.0-or-later license are retained.
 
 See [CN repository review notes](docs/CN_SUBMISSION.md), [standard build instructions](docs/BUILD.md) and [AI usage disclosure](docs/AI_USAGE.md) for submission details and the scope of AI-assisted development and artwork.
 
@@ -36,6 +36,8 @@ Manual packages are available in [Releases](https://github.com/pascalial98-hue/P
 | Combat framing | On foot, set shoulder position, height and distance offsets for combat, with separate transition times for entering and leaving combat. |
 | Speed-based zoom | Enable speed-based zoom separately on foot and on mounts. The camera pulls back slightly at cruising speed and farther as you accelerate, then returns to your chosen zoom when you stop. |
 | Flight motion | Adjust camera sway and turn banking on flying mounts. The camera settles smoothly when hovering or landing. |
+| Glide field of view | Use Mounted Camera → Flight Camera in /pov to enable glide FOV. Add up to 60° of field of view, with separate delays and transition times for starting and ending a glide. |
+| Camera presets | Manage camera setups on the Presets page in /pov. Presets include viewpoint calibration and first-person, on-foot and mounted shoulder settings. Import JSON and export one preset or all of them. |
 | First-use guide | A movable window, FFXIV character front/side diagrams, live viewpoint marker and three-axis fine adjustment. Save to apply; closing or cancelling discards draft offsets. |
 | Head hiding and camera transitions | Hides the head as the camera approaches, and restores it only after the camera has moved away. Enabled by default for new configurations. |
 | Complete head shadow, on by default | Excludes face, hair, headgear and related models from the main view while keeping their native shadow rendering. No duplicate actor is created. |

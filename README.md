@@ -2,7 +2,7 @@
 
 ![POV+ Enhanced](https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/docs/images/povplus-enhanced-preview-v2.png)
 
-**中文 / English · 1.8.0.0** · [English only](README.en.md)
+**中文 / English · 1.81** · [English only](README.en.md)
 
 基于 Tiraesias 的 POV+ Beta 制作的国服第一人称增强分支。<br>
 An immersive first-person camera for FFXIV CN, built on Tiraesias's POV+ Beta.
@@ -14,6 +14,12 @@ Look down to see your body and clothes, look around naturally, and adjust the vi
 CURRENT TARGET: Chinese client, Dalamud API 15. Latest build baseline: CN 2026.11.03.0000.0000 / Dalamud 15.0.4.0. International clients have not been verified.
 
 ## 功能 / Features
+
+- 在 /pov 的「预设」页管理多套镜头设置。预设包含视点校准、第一人称、步行和骑乘越肩参数。支持导入 JSON，以及导出单套或全部预设。<br>
+  Manage camera setups on the Presets page in /pov. Presets include viewpoint calibration and first-person, on-foot and mounted shoulder settings. Import JSON and export one preset or all of them.
+
+- 在 /pov 的「骑乘越肩 → 飞行镜头」中，可开启滑翔广角。额外视场角可调 0–60°，也可分别调整进出滑翔的延迟与过渡时间。<br>
+  Use Mounted Camera → Flight Camera in /pov to enable glide FOV. Add up to 60° of field of view, with separate delays and transition times for starting and ending a glide.
 
 - 在 /pov 的「通用」页开启越肩后，用游戏原有的视角切换键依次切换第三人称、越肩和第一人称。越肩默认关闭。<br>
   Enable shoulder view in the General page of /pov to cycle through third person, shoulder view and first person with the game's perspective toggle. Shoulder view is off by default.

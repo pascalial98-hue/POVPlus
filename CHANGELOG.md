@@ -1,5 +1,16 @@
 # Changelog / 更新记录
 
+## 1.81 (1.8.1.0) — 2026-11-22
+
+- 在 /pov 的「预设」页保存、应用和管理多套镜头设置。支持把单套或全部预设导出为 JSON。导入后可从列表选择并应用，同名会自动加编号。<br>
+  Use the Presets page in /pov to save, apply and manage multiple camera setups. Export one preset or all of them to JSON. Imported presets are added to the list, with duplicate names numbered automatically.
+
+- 骑乘越肩新增可选的滑翔广角，额外视场角可调 0–60°。进入和退出滑翔分别可设延迟和过渡时间。过渡设为 0 时沿用游戏自带缓动。<br>
+  Mounted shoulder view can widen the field of view by up to 60° when the mount glides. Glide entry and exit have separate delays and transition times. A transition of 0 uses the game’s camera easing.
+
+- 修复第三人称近距离缩放会影响越肩视场角的问题。进入越肩时采用常规视场角，回到第三人称时恢复原有缩放。<br>
+  Fixed shoulder view inheriting the optical zoom from close-range third person. Shoulder view uses the normal field of view and restores your optical zoom when you return to third person.
+
 ## 1.8.0.0 — 2026-11-22
 
 - 步行越肩可单独设置战斗肩位、高度和距离，并分别调整进战、脱战的过渡时间。<br>

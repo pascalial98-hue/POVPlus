@@ -7,6 +7,10 @@ CURRENT TARGET: Chinese client, Dalamud API 15. Latest build baseline: CN 2026.1
 
 FEATURES
 
+• Manage camera setups on the Presets page in /pov. Presets include viewpoint calibration and first-person, on-foot and mounted shoulder settings. Import JSON and export one preset or all of them.
+
+• Use Mounted Camera → Flight Camera in /pov to enable glide FOV. Add up to 60° of field of view, with separate delays and transition times for starting and ending a glide.
+
 • Enable shoulder view in the General page of /pov to cycle through third person, shoulder view and first person with the game's perspective toggle. Shoulder view is off by default.
 • On-foot and mounted views remember their own zoom distance and have separate framing and zoom limits. Mounts also have adjustable tracking lag, recovery when stopping, and cornering sway.
 
