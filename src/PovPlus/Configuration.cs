@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Dalamud.Configuration;
 
 namespace PovPlus;
@@ -7,6 +8,7 @@ namespace PovPlus;
 public class Configuration : IPluginConfiguration
 {
     public PluginLanguage Language = PluginLanguage.Bilingual;
+    public List<CameraPreset> Presets { get; set; } = new();
     public bool ShoulderCycleEnabled;
     public bool ShoulderFlightMotionEnabled = true;
     public float ShoulderFlightSwayPercent = ShoulderFlightMotion.DefaultSway;

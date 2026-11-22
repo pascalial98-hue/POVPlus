@@ -6,7 +6,7 @@ using Dalamud.Interface.Windowing;
 
 namespace PovPlus.Windows;
 
-public class MainWindow : Window, IDisposable
+public partial class MainWindow : Window, IDisposable
 {
     private readonly Plugin plugin;
     private Configuration Config => plugin.Configuration;
@@ -14,7 +14,7 @@ public class MainWindow : Window, IDisposable
     private int pendingModifier;
     private static readonly ShoulderProfile WalkingDefaults = new(), RidingDefaults = ShoulderProfile.Riding();
 
-    private enum Page { General, View, Controls, Appearance, Walking, Mounted }
+    private enum Page { General, Presets, View, Controls, Appearance, Walking, Mounted }
 
     private static readonly Page[] Pages = Enum.GetValues<Page>();
     private Page page;
@@ -22,6 +22,7 @@ public class MainWindow : Window, IDisposable
     private static string PageTitle(Page item) => item switch
     {
         Page.General => "通用",
+        Page.Presets => "预设",
         Page.View => "视点与跟随",
         Page.Controls => "操作与探头",
         Page.Appearance => "外观与特效",
@@ -42,8 +43,13 @@ public class MainWindow : Window, IDisposable
         };
     }
 
-    public void Dispose() { }
-    public override void OnClose() => recordingKey = false;
+    public void Dispose() => presetFiles.Reset();
+    public override void OnClose()
+    {
+        recordingKey = false;
+        presetFiles.Reset();
+        pendingPresetEdit = PresetEdit.None;
+    }
     public override void PreDraw() => WindowName = L.T("POV+ Enhanced 设置###PovPlus");
 
     public override void Draw()
@@ -78,6 +84,7 @@ public class MainWindow : Window, IDisposable
             switch (page)
             {
                 case Page.General: General(); break;
+                case Page.Presets: PresetsPage(); break;
                 case Page.View: FirstPersonView(); break;
                 case Page.Controls: Controls(); break;
                 case Page.Appearance: Appearance(); break;
@@ -86,6 +93,7 @@ public class MainWindow : Window, IDisposable
             }
         }
         ImGui.EndChild();
+        presetFiles.Draw();
     }
 
     private void DrawNavigation(bool compact)

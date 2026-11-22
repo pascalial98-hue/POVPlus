@@ -231,12 +231,21 @@ internal sealed unsafe class ShoulderView : IDisposable
             ShoulderZoom.ApplyFloor(ref orbitFloor, ref owner->minZoom, ShoulderZoom.PhysicalDistance(range.Min, distanceOffset));
         }
         var inputDistance = owner->currentZoom;
-        if (!wheel && !processingWheel && inputDistance != zoom.LastWritten)
+        if (!wheel && !processingWheel)
         {
-            // A new territory's preset can arrive after our first world tick.
-            // Keep it for returning to third person, outside the wheel memory.
-            originalDistance = inputDistance;
-            inputDistance = zoom.LastWritten;
+            if (inputDistance != zoom.LastWritten)
+            {
+                // A new territory's preset can arrive after our first world tick.
+                // Keep it for returning to third person, outside the wheel memory.
+                originalDistance = inputDistance;
+                inputDistance = zoom.LastWritten;
+            }
+            if (profile.Distance != zoom.Selected)
+            {
+                zoom.Begin(owner->currentZoom, profile.Distance);
+                inputDistance = zoom.LastWritten;
+                zoomTime = 0;
+            }
         }
         owner->currentZoom = zoom.Update(inputDistance, owner->minZoom, owner->maxZoom,
             profile.MinDistance, profile.MaxDistance, ShoulderRig.EntryBlend(zoomTime, Config.ShoulderEntryTime), distanceOffset);
