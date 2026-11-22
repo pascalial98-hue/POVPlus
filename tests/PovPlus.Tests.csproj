@@ -14,6 +14,7 @@
     <Compile Include="..\src\PovPlus\ShoulderSpeedZoom.cs" Link="ShoulderSpeedZoom.cs" />
     <Compile Include="..\src\PovPlus\ShoulderFlightMotion.cs" Link="ShoulderFlightMotion.cs" />
     <Compile Include="..\src\PovPlus\ShoulderWheelScope.cs" Link="ShoulderWheelScope.cs" />
+    <Compile Include="..\src\PovPlus\ShoulderLens.cs" Link="ShoulderLens.cs" />
     <Compile Include="..\src\PovPlus\CameraValueOverride.cs" Link="CameraValueOverride.cs" />
     <Compile Include="..\src\PovPlus\ShoulderMountAnchor.cs" Link="ShoulderMountAnchor.cs" />
     <Compile Include="..\src\PovPlus\ShoulderWalkingHeight.cs" Link="ShoulderWalkingHeight.cs" />

@@ -383,6 +383,13 @@ public class MainWindow : Window, IDisposable
                 Slider("转弯最大侧倾角", ref Config.ShoulderFlightBankDegrees, 0, ShoulderFlightMotion.MaxBankDegrees, ShoulderFlightMotion.DefaultBankDegrees, "%.1f°");
                 ImGui.TextWrapped(L.T("飞得越快，镜头起伏越明显。转弯时向弯内侧倾，悬停或落地后逐渐回稳。"));
             }
+            Toggle("滑翔时扩大视场角", ref Config.ShoulderGlideFovEnabled);
+            if (Config.ShoulderGlideFovEnabled)
+            {
+                Slider("滑翔额外视场角", ref Config.ShoulderGlideFovDegrees, 0, ShoulderLens.MaxGlideDegrees,
+                    ShoulderLens.DefaultGlideDegrees, "%.0f°");
+                ImGui.TextWrapped(L.T("坐骑进入滑翔动作时逐渐展开视野，结束滑翔后平滑收回。"));
+            }
         }
         else
         {

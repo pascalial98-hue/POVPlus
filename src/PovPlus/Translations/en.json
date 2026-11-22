@@ -1,4 +1,7 @@
 {
+  "滑翔时扩大视场角": "Widen field of view while gliding",
+  "滑翔额外视场角": "Extra field of view while gliding",
+  "坐骑进入滑翔动作时逐渐展开视野，结束滑翔后平滑收回。": "The view widens smoothly when your mount starts its glide animation and eases back when gliding ends.",
   "飞行镜头": "Flight camera",
   "启用飞行晃动与侧倾": "Enable flight sway and banking",
   "飞行晃动强度": "Flight sway strength",

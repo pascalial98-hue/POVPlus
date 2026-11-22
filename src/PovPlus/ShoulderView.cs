@@ -24,6 +24,7 @@ internal sealed unsafe class ShoulderView : IDisposable
     private delegate byte CanChangePerspective(GameCamera* camera);
     private readonly Hook<CanChangePerspective> gate;
     private readonly Hook<Camera.Delegates.UpdateState> inputUpdate;
+    private readonly Hook<Camera.Delegates.Update> cameraUpdate;
     private readonly GameCamera* owner;
     private readonly nint table;
     private readonly ShoulderCycle cycle;
@@ -60,10 +61,13 @@ internal sealed unsafe class ShoulderView : IDisposable
         {
             inputUpdate = Service.GameInteropProvider.HookFromAddress<Camera.Delegates.UpdateState>(
                 (nint)((Camera*)camera)->VirtualTable->UpdateState, UpdateCameraInput);
+            cameraUpdate = Service.GameInteropProvider.HookFromAddress<Camera.Delegates.Update>(
+                (nint)((Camera*)camera)->VirtualTable->Update, UpdateCamera);
+            cameraUpdate.Enable();
             inputUpdate.Enable();
             gate.Enable();
         }
-        catch { inputUpdate?.Dispose(); gate.Dispose(); throw; }
+        catch { cameraUpdate?.Dispose(); inputUpdate?.Dispose(); gate.Dispose(); throw; }
     }
 
     private bool SameCamera() => Common.CameraManager != null && Common.CameraManager->worldCamera == owner &&
@@ -112,6 +116,38 @@ internal sealed unsafe class ShoulderView : IDisposable
                 catch (Exception ex) { Stop(ex); }
             }
         }
+    }
+
+    private void UpdateCamera(Camera* camera)
+    {
+        var fov = default(CameraValueOverride);
+        if ((GameCamera*)camera == owner && Active && owner->mode == 1)
+        {
+            try
+            {
+                if (InWorld() && Service.ObjectTable.LocalPlayer!.Address == actor &&
+                    ShoulderLens.Valid(camera->FoV, camera->MinFoV, camera->MaxFoV))
+                {
+                    // Update consumes FoV as the target of the native lens
+                    // interpolation. Keep the optical zoom value for UpdateState.
+                    var gliding = Config.ShoulderGlideFovEnabled && IsRiding() && IsGliding((NativeCharacter*)actor);
+                    fov.Apply(ref camera->FoV, ShoulderLens.Target(camera->MaxFoV, gliding, Config.ShoulderGlideFovDegrees));
+                }
+            }
+            catch (Exception ex) { Stop(ex); }
+        }
+        try { cameraUpdate.Original(camera); }
+        finally { fov.Restore(ref camera->FoV); }
+    }
+
+    private static bool IsGliding(NativeCharacter* rider)
+    {
+        var conditions = Service.Condition;
+        if (!conditions[ConditionFlag.InFlight] || conditions[ConditionFlag.Diving]) return false;
+        var mount = rider->Mount.MountObject;
+        return ShoulderLens.IsGlideTimeline(
+            mount == null ? null : mount->Timeline.TimelineSequencer.TimelineIds[ShoulderLens.MountGlideSlot],
+            rider->Timeline.TimelineSequencer.TimelineIds[ShoulderLens.RiderGlideSlot]);
     }
 
     private byte OnPermission(GameCamera* camera)
@@ -375,6 +411,7 @@ internal sealed unsafe class ShoulderView : IDisposable
 
     public void Dispose()
     {
+        cameraUpdate.Dispose();
         inputUpdate.Dispose();
         gate.Dispose();
         RestoreZoom(preserveExternal: true);

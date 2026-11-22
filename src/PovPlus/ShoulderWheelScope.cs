@@ -10,15 +10,15 @@ internal readonly unsafe struct ShoulderWheelScope
 {
     private readonly bool active;
     private readonly float min, max, lens, minDistance, inputMinDistance;
+    private readonly CameraValueOverride fov;
 
     internal ShoulderWheelScope(Camera* camera)
     {
-        if (camera == null || !float.IsFinite(camera->FoV) || !float.IsFinite(camera->MinFoV) ||
-            !float.IsFinite(camera->MaxFoV) || camera->MinFoV > camera->MaxFoV ||
+        if (camera == null || !ShoulderLens.Valid(camera->FoV, camera->MinFoV, camera->MaxFoV) ||
             !float.IsFinite(camera->MinDistance) || camera->MinDistance <= 0) return;
         min = camera->MinFoV;
         max = camera->MaxFoV;
-        lens = Math.Clamp(camera->FoV, min, max);
+        lens = max;
         minDistance = camera->MinDistance;
         // Native scroll-to-first-person checks the orbit floor before zooming.
         // Keep that threshold just below the actual floor during this call,
@@ -26,13 +26,15 @@ internal readonly unsafe struct ShoulderWheelScope
         inputMinDistance = MathF.BitDecrement(minDistance);
         camera->MinDistance = inputMinDistance;
         camera->MinFoV = camera->MaxFoV = lens;
-        camera->FoV = lens;
+        fov.Apply(ref camera->FoV, lens);
         active = true;
     }
 
     internal void Restore(Camera* camera)
     {
         if (!active) return;
+        var originalFov = fov;
+        originalFov.Restore(ref camera->FoV);
         if (camera->MinFoV == lens) camera->MinFoV = min;
         if (camera->MaxFoV == lens) camera->MaxFoV = max;
         if (camera->MinDistance == inputMinDistance) camera->MinDistance = minDistance;

@@ -11,6 +11,8 @@ public class Configuration : IPluginConfiguration
     public bool ShoulderFlightMotionEnabled = true;
     public float ShoulderFlightSwayPercent = ShoulderFlightMotion.DefaultSway;
     public float ShoulderFlightBankDegrees = ShoulderFlightMotion.DefaultBankDegrees;
+    public bool ShoulderGlideFovEnabled;
+    public float ShoulderGlideFovDegrees = ShoulderLens.DefaultGlideDegrees;
     private ShoulderCombatSettings combatShoulder = new();
     public ShoulderCombatSettings CombatShoulder
     {

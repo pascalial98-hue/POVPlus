@@ -9,6 +9,7 @@ internal static partial class Program
         TestShoulderCombat();
         TestShoulderSpeedZoom();
         TestCameraLensOwnership();
+        TestGlideLens();
         TestShoulderFlight();
         TestWalkingStairHeight();
         TestFlightSwayAndBank();
@@ -306,21 +307,44 @@ internal static partial class Program
             camera.MaxFoV = 1.209f;
             camera.FoV = 0.78f;
             var scope = new ShoulderWheelScope(&camera);
-            Check(camera.Distance > camera.MinDistance && camera.FoV == camera.MaxFoV,
+            Check(camera.Distance > camera.MinDistance && Near(camera.FoV, 1.209f) && camera.FoV == camera.MaxFoV,
                 "At shoulder floor native input can increase physical distance on the next outward step");
             camera.FoV = Math.Clamp(camera.FoV - 0.6f, camera.MinFoV, camera.MaxFoV);
-            Check(camera.FoV == 0.78f, "Inward wheel cannot perform a second, optical zoom");
+            Check(Near(camera.FoV, 1.209f), "Inward wheel cannot perform a second, optical zoom");
             scope.Restore(&camera);
-            Check(camera.MinFoV == 0.0547f && camera.MaxFoV == 1.209f && camera.MinDistance == nativeFloor,
-                "Cammy or native bounds restored before the camera renders");
+            Check(camera.FoV == 0.78f && camera.MinFoV == 0.0547f && camera.MaxFoV == 1.209f && camera.MinDistance == nativeFloor,
+                "The third-person optical zoom and native bounds are restored after shoulder input");
         }
         var changed = new ShoulderWheelScope(&camera);
         camera.MinFoV = 0.7f;
         camera.MaxFoV = 0.9f;
+        camera.FoV = 0.9f;
         camera.MinDistance = 2;
         changed.Restore(&camera);
-        Check(camera.MinFoV == 0.7f && camera.MaxFoV == 0.9f && camera.MinDistance == 2,
+        Check(camera.FoV == 0.9f && camera.MinFoV == 0.7f && camera.MaxFoV == 0.9f && camera.MinDistance == 2,
             "Concurrent preset change survives scoped input");
+    }
+
+    private static void TestGlideLens()
+    {
+        Check(ShoulderLens.IsGlideTimeline(4049, 0), "Mount glide timeline activates the boost");
+        Check(!ShoulderLens.IsGlideTimeline(4043, 6703), "The mount's flight animation takes priority over a stale rider glide");
+        Check(!ShoulderLens.IsGlideTimeline(4040, 0) && !ShoulderLens.IsGlideTimeline(5005, 0),
+            "Hovering and underwater glide do not activate the boost");
+        Check(ShoulderLens.IsGlideTimeline(null, 6703) && !ShoulderLens.IsGlideTimeline(null, 4048),
+            "The rider glide is a fallback when the mount is unavailable");
+        const float normal = 1.209f;
+        Check(Near(ShoulderLens.Target(normal, false, 8), normal) &&
+              Near(ShoulderLens.Target(normal, true, 0), normal), "Regular shoulder view uses the current third-person preset");
+        Check(Near(ShoulderLens.Target(normal, true, 8), normal + 8 * MathF.PI / 180),
+            "Only gliding adds the configured angular amount");
+        Check(Near(ShoulderLens.Target(2, true, 20), 120 * MathF.PI / 180) &&
+              Near(ShoulderLens.Target(2.2f, true, 20), 2.2f), "Do not over-widen or narrow an already wide lens");
+        var nativeFov = 0.1f;
+        CameraValueOverride lens = default;
+        lens.Apply(ref nativeFov, ShoulderLens.Target(normal, true, 8));
+        lens.Restore(ref nativeFov);
+        Check(nativeFov == 0.1f, "Rendering the glide preserves the stored third-person optical zoom");
     }
 
     private static void TestShoulderZoom()
