@@ -22,6 +22,7 @@ internal sealed unsafe class ShoulderView : IDisposable
     private const string GateSignature = "40 53 48 83 EC 20 48 8B D9 48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 84 C0 75 ?? 38 83 ?? ?? ?? ?? 75 ?? B0 01";
     private delegate byte CanChangePerspective(GameCamera* camera);
     private readonly Hook<CanChangePerspective> gate;
+    private readonly Hook<Camera.Delegates.UpdateState> inputUpdate;
     private readonly GameCamera* owner;
     private readonly nint table;
     private readonly ShoulderCycle cycle = new();
@@ -44,8 +45,14 @@ internal sealed unsafe class ShoulderView : IDisposable
             BGCollisionModule.MemberFunctionPointers.RaycastMaterialFilter == null)
             throw new InvalidOperationException("World camera or input/collision bindings are unavailable.");
         gate = Service.GameInteropProvider.HookFromAddress<CanChangePerspective>(camera->vtbl[23], OnPermission);
-        try { gate.Enable(); }
-        catch { gate.Dispose(); throw; }
+        try
+        {
+            inputUpdate = Service.GameInteropProvider.HookFromAddress<Camera.Delegates.UpdateState>(
+                (nint)((Camera*)camera)->VirtualTable->UpdateState, UpdateCameraInput);
+            inputUpdate.Enable();
+            gate.Enable();
+        }
+        catch { inputUpdate?.Dispose(); gate.Dispose(); throw; }
     }
 
     private bool SameCamera() => Common.CameraManager != null && Common.CameraManager->worldCamera == owner &&
@@ -61,6 +68,24 @@ internal sealed unsafe class ShoulderView : IDisposable
             c[ConditionFlag.WatchingCutscene78] || c[ConditionFlag.OccupiedInCutSceneEvent]) return false;
         var scene = SceneManager.Instance();
         return scene != null && scene->CurrentCamera == &((CameraBase*)owner)->SceneCamera;
+    }
+
+    private void UpdateCameraInput(Camera* camera)
+    {
+        var scope = default(ShoulderWheelScope);
+        if (Active && (GameCamera*)camera == owner && owner->mode == 1)
+        {
+            try
+            {
+                // A real perspective toggle must see the original lens bounds
+                // when the game saves the third-person view on its way out.
+                if (InWorld() && !InputManager.Instance()->GetInputStatus(TogglePerspective))
+                    scope = new ShoulderWheelScope(camera);
+            }
+            catch (Exception ex) { Stop(ex); }
+        }
+        try { inputUpdate.Original(camera); }
+        finally { scope.Restore(camera); }
     }
 
     private byte OnPermission(GameCamera* camera)
@@ -235,6 +260,7 @@ internal sealed unsafe class ShoulderView : IDisposable
 
     public void Dispose()
     {
+        inputUpdate.Dispose();
         gate.Dispose();
         Reset();
         SaveDistance();

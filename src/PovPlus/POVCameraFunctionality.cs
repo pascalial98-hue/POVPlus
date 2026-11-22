@@ -32,7 +32,7 @@ public static class POVCameraFunctionality
 	private static bool POVEnabled;
     private static Hook<GameCamera.GameCameraVTable.GetCameraPositionDelegate>? positionHook;
     private static nint boundCamera, boundVTable;
-    private static bool cameraSettingsCaptured;
+    private static CameraSettingOverrides worldOverrides;
     internal static bool IsEnabled => POVEnabled;
 
 	private static float PreviousBoneYaw;
@@ -109,12 +109,20 @@ public static class POVCameraFunctionality
 	private unsafe static void GetCameraPositionDetour(GameCamera* HypostasisCamera, GameObject* target, System.Numerics.Vector3* position, Bool swapPerson)
 	{
         var shoulder = Plugin.P.Shoulder;
-        if (!POVEnabled || (shoulder?.Active == true && HypostasisCamera->mode == 1))
+        var world = (nint)HypostasisCamera == boundCamera;
+        var gpose = Service.ClientState.IsGPosing;
+        if ((!world && !gpose) || !POVEnabled || !Plugin.P.Configuration.Setting_ModEnabled ||
+            (!gpose && HypostasisCamera->mode != 0 &&
+             (HypostasisCamera->mode != 1 || !Plugin.P.Configuration.Setting_FirstPersonOnly || shoulder?.Active == true)))
         {
             positionHook!.Original(HypostasisCamera, target, position, swapPerson);
             shoulder?.OffsetPivot(HypostasisCamera, (nint)target, position);
             return;
         }
+        // GPose can call this shared routine on its own camera. Its settings
+        // must never replace the world camera's restoration values.
+        CameraSettingOverrides other = default;
+        ref var settings = ref (world ? ref worldOverrides : ref other);
         BodyRelativeLook.BeginPosition(HypostasisCamera);
         FirstPersonLimits.Apply(HypostasisCamera);
 		IPlayerCharacter localPlayer = Service.ObjectTable.LocalPlayer;
@@ -153,7 +161,10 @@ public static class POVCameraFunctionality
 		HasPreviousQuarternion = true;
 		num2 = MathF.Atan2(relForward.Z, relForward.X);
         UpdateNearPlane();
-		HypostasisCamera->minFoV = Plugin.P.Configuration.Setting_FOV;
+        if (world)
+            settings.Fov.Apply(ref HypostasisCamera->currentFoV, ref HypostasisCamera->minFoV, ref HypostasisCamera->maxFoV,
+                Plugin.P.Configuration.Setting_FOV);
+        else HypostasisCamera->minFoV = Plugin.P.Configuration.Setting_FOV;
 		System.Numerics.Quaternion quaternion2 = System.Numerics.Quaternion.Normalize(System.Numerics.Quaternion.Normalize(rotation) * quaternion);
 		System.Numerics.Vector3 position2 = new System.Numerics.Vector3(ptr->Translation.X, ptr->Translation.Y, ptr->Translation.Z);
 		FFXIVClientStructs.FFXIV.Common.Math.Vector3 position3 = skeleton->Transform.Position;
@@ -240,8 +251,8 @@ public static class POVCameraFunctionality
             Plugin.P.Configuration.HeadPitchWeight, Plugin.P.Configuration.PitchEnabled);
 		PreviousPitch = num13;
 		HasPreviousPitch = true;
-		HypostasisCamera->minVRotation = -90f;
-		HypostasisCamera->maxVRotation = 90f;
+        settings.MinPitch.Apply(ref HypostasisCamera->minVRotation, -90f);
+        settings.MaxPitch.Apply(ref HypostasisCamera->maxVRotation, 90f);
         // Clamp again after animation-driven yaw/pitch, before computing camera tilt.
         FirstPersonLimits.Apply(HypostasisCamera);
 		GlobalVars.BoneLocation += UpdateLookDownLean(HypostasisCamera, characterBase, localPlayer);
@@ -275,14 +286,7 @@ public static class POVCameraFunctionality
 		bool flag = (int)MathF.Floor((HypostasisCamera->currentVRotation + (float)Math.PI / 2f) / (float)Math.PI) % 2 == 0;
 		// Body mode supplies a pole-safe up vector to the render camera itself.
 		float num20 = (bodyFrame || flag ? 0f : ((float)Math.PI));
-		if (flag)
-		{
-			HypostasisCamera->tilt = num20 + Plugin.P.Configuration.CameraTiltOffset - num17;
-		}
-		else
-		{
-			HypostasisCamera->tilt = num20 + Plugin.P.Configuration.CameraTiltOffset - num17;
-		}
+        settings.Tilt.Apply(ref HypostasisCamera->tilt, num20 + Plugin.P.Configuration.CameraTiltOffset - num17);
 		PreviousHemisphere = flag;
 		HasPreviousHemisphere = true;
 		System.Numerics.Vector3 vector9 = GlobalVars.BoneLocation + ((System.Numerics.Vector3)target->Position - PrevCameraTargetPosition);
@@ -306,12 +310,6 @@ public static class POVCameraFunctionality
         BodyRelativeLook.Initialize(camera);
         boundCamera = (nint)camera;
         boundVTable = (nint)camera->vtbl;
-        GlobalVars.PreviousMaxVRotation = camera->maxVRotation;
-        GlobalVars.PreviousMinVRotation = camera->minVRotation;
-        GlobalVars.PreviousCurrentFoV = camera->currentFoV;
-        GlobalVars.PreviousTilt = camera->tilt;
-        GlobalVars.PreviousMinFOV = camera->minFoV;
-        cameraSettingsCaptured = true;
         POVEnabled = false;
         headSkeleton = 0;
         headIndex = -1;
@@ -330,7 +328,7 @@ public static class POVCameraFunctionality
         positionHook?.Dispose();
         positionHook = null;
         BodyRelativeLook.Dispose();
-        cameraSettingsCaptured = false;
+        worldOverrides = default;
         boundCamera = boundVTable = 0;
         headSkeleton = 0;
         headIndex = -1;
@@ -378,14 +376,13 @@ public static class POVCameraFunctionality
         else if (positionHook?.IsEnabled == true) positionHook.Disable();
         // Never restore title-screen settings or dereference a saved camera
         // pointer after the game has replaced that camera.
-        if (wasEnabled && cameraSettingsCaptured && RuntimeCameraMatches())
+        if (wasEnabled && RuntimeCameraMatches())
         {
             var camera = Common.CameraManager->worldCamera;
-            camera->maxVRotation = GlobalVars.PreviousMaxVRotation;
-            camera->minVRotation = GlobalVars.PreviousMinVRotation;
-            camera->tilt = GlobalVars.PreviousTilt;
-            camera->minFoV = GlobalVars.PreviousMinFOV;
-            camera->currentFoV = GlobalVars.PreviousCurrentFoV;
+            worldOverrides.MinPitch.Restore(ref camera->minVRotation);
+            worldOverrides.MaxPitch.Restore(ref camera->maxVRotation);
+            worldOverrides.Tilt.Restore(ref camera->tilt);
+            worldOverrides.Fov.Restore(ref camera->currentFoV, ref camera->minFoV, ref camera->maxFoV);
         }
         GlobalVars.HideOwnBody = false;
         if (wasEnabled) Service.Log.Information("===Disabled POV===");

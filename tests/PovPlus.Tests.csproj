@@ -10,6 +10,8 @@
   <ItemGroup>
     <Compile Include="..\src\PovPlus\ShoulderRig.cs" Link="ShoulderRig.cs" />
     <Compile Include="..\src\PovPlus\ShoulderZoom.cs" Link="ShoulderZoom.cs" />
+    <Compile Include="..\src\PovPlus\ShoulderWheelScope.cs" Link="ShoulderWheelScope.cs" />
+    <Compile Include="..\src\PovPlus\CameraValueOverride.cs" Link="CameraValueOverride.cs" />
     <Compile Include="..\src\PovPlus\ShoulderFlightHeight.cs" Link="ShoulderFlightHeight.cs" />
     <Compile Include="..\src\PovPlus\CalibrationState.cs" Link="CalibrationState.cs" />
     <Compile Include="..\src\PovPlus\Localization.cs" Link="Localization.cs" />

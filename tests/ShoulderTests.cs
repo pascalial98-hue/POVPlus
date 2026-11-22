@@ -6,6 +6,7 @@ internal static partial class Program
     private static void TestShoulder()
     {
         TestShoulderZoom();
+        TestCameraLensOwnership();
         TestShoulderFlight();
         var cycle = new ShoulderCycle();
         Check(ShoulderRig.EntryBlend(0, 0.2f) == 0 && Near(ShoulderRig.EntryBlend(0.1f, 0.2f), 0.5f) &&
@@ -56,6 +57,63 @@ internal static partial class Program
         Check(rig.Offset(0, 0, 0) == Vector3.Zero, "Suspending the game clears motion history");
         rig.Follow(new(float.NaN), 0.016f, 0.1f, 0.8f);
         Check(float.IsFinite(rig.Offset(0, float.NaN, float.NaN).Length()), "Corrupt positions and config keep the offset finite");
+    }
+
+    private static unsafe void TestCameraLensOwnership()
+    {
+        var camera = new FFXIVClientStructs.FFXIV.Client.Game.Camera();
+        var fov = new FirstPersonFov();
+        // Cammy unloaded after POV+ initialized, before first person was used.
+        camera.FoV = camera.MaxFoV = 0.78f;
+        camera.MinFoV = 0.69f;
+        fov.Apply(ref camera.FoV, ref camera.MinFoV, ref camera.MaxFoV, 1.25f);
+        Check(camera.MinFoV == camera.FoV && camera.FoV == camera.MaxFoV && camera.FoV == 1.25f,
+            "First-person lens above native maximum always has valid bounds");
+        fov.Restore(ref camera.FoV, ref camera.MinFoV, ref camera.MaxFoV);
+        Check(camera.MinFoV == 0.69f && camera.MaxFoV == 0.78f && camera.FoV == 0.78f,
+            "Returning leaves native limits captured at activation");
+        fov.Apply(ref camera.FoV, ref camera.MinFoV, ref camera.MaxFoV, 1.25f);
+        camera.MinFoV = 0.0547f;
+        camera.MaxFoV = 1.209f;
+        camera.FoV = 0.92f;
+        fov.Apply(ref camera.FoV, ref camera.MinFoV, ref camera.MaxFoV, 1.25f);
+        fov.Restore(ref camera.FoV, ref camera.MinFoV, ref camera.MaxFoV);
+        Check(camera.MinFoV == 0.0547f && camera.MaxFoV == 1.209f && camera.FoV == 0.92f,
+            "Preset applied while POV is active survives release");
+        fov.Apply(ref camera.FoV, ref camera.MinFoV, ref camera.MaxFoV, 1.25f);
+        camera.MinFoV = 0.69f;
+        camera.FoV = camera.MaxFoV = 0.78f;
+        fov.Restore(ref camera.FoV, ref camera.MinFoV, ref camera.MaxFoV);
+        Check(camera.MinFoV == 0.69f && camera.MaxFoV == 0.78f && camera.FoV == 0.78f,
+            "External writes just before leaving first person are preserved");
+        camera.FoV = camera.MaxFoV = 1.2f;
+        fov.Apply(ref camera.FoV, ref camera.MinFoV, ref camera.MaxFoV, 1.25f);
+        camera.MaxFoV = 0.9f;
+        fov.Restore(ref camera.FoV, ref camera.MinFoV, ref camera.MaxFoV);
+        Check(camera.FoV == 0.9f && camera.MinFoV == 0.69f && camera.MaxFoV == 0.9f,
+            "Restored lens respects a narrower third-person preset applied just before release");
+        foreach (var nativeFloor in new[] { 0.5f, 1.5f })
+        {
+            camera.MinDistance = camera.Distance = nativeFloor;
+            camera.MinFoV = 0.0547f;
+            camera.MaxFoV = 1.209f;
+            camera.FoV = 0.78f;
+            var scope = new ShoulderWheelScope(&camera);
+            Check(camera.Distance > camera.MinDistance && camera.FoV == camera.MaxFoV,
+                "At shoulder floor native input can increase physical distance on the next outward step");
+            camera.FoV = Math.Clamp(camera.FoV - 0.6f, camera.MinFoV, camera.MaxFoV);
+            Check(camera.FoV == 0.78f, "Inward wheel cannot perform a second, optical zoom");
+            scope.Restore(&camera);
+            Check(camera.MinFoV == 0.0547f && camera.MaxFoV == 1.209f && camera.MinDistance == nativeFloor,
+                "Cammy or native bounds restored before the camera renders");
+        }
+        var changed = new ShoulderWheelScope(&camera);
+        camera.MinFoV = 0.7f;
+        camera.MaxFoV = 0.9f;
+        camera.MinDistance = 2;
+        changed.Restore(&camera);
+        Check(camera.MinFoV == 0.7f && camera.MaxFoV == 0.9f && camera.MinDistance == 2,
+            "Concurrent preset change survives scoped input");
     }
 
     private static void TestShoulderZoom()

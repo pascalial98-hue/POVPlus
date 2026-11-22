@@ -75,16 +75,6 @@ internal static class GlobalVars
 
 	public static float PreviousRotationBeforeChanges = 0f;
 
-	public static float PreviousMaxVRotation;
-
-	public static float PreviousMinVRotation;
-
-	public static float PreviousCurrentFoV;
-
-	public static float PreviousTilt;
-
-	public static float PreviousMinFOV;
-
 	public static float BoneYaw_X;
 
 	public static float BoneRoll_Y;
