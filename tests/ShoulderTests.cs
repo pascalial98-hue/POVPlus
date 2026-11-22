@@ -10,6 +10,7 @@ internal static partial class Program
         TestShoulderSpeedZoom();
         TestCameraLensOwnership();
         TestShoulderFlight();
+        TestWalkingStairHeight();
         TestFlightSwayAndBank();
         TestShoulderTurning();
         TestRidingResponse();
@@ -452,6 +453,60 @@ internal static partial class Program
         Check(reversing.Offset(0, 0, 0).X < before.X + 0.015f, "Sudden reversal starts by gently unwinding the old offset");
         for (var i = 0; i < 150; i++) { pos.X -= 0.15f; Ride(1f / 60); }
         Check(reversing.Offset(0, 0, 0).X > 0.79f, "After reversal the full configured lag develops in the new direction");
+    }
+
+    private static void TestWalkingStairHeight()
+    {
+        foreach (int fps in new[] { 30, 60, 144 })
+        {
+            var height = new ShoulderWalkingHeight();
+            const float normalFraming = 1.35f;
+            float dt = 1f / fps;
+            uint frame = 0;
+            Vector3 root = new(2, 20, -3), drawn = root;
+            float native = root.Y + normalFraming;
+            float Correct() => height.Update(frame, dt, 1, root, drawn, native);
+            Check(Correct() == 0, "Entering walking shoulder preserves the current native framing");
+            foreach (var direction in new[] { 1, -1 })
+            {
+                for (int i = 0; i < 6 * fps; i++)
+                {
+                    frame++;
+                    root.Z += dt * 2;
+                    if (i % Math.Max(1, fps / 6) == 0) root.Y += direction * 0.16f;
+                    // The rendered model eases each discrete step. Simulate a native
+                    // pivot that also leads on ascent and undershoots on descent.
+                    drawn = new(root.X, float.Lerp(drawn.Y, root.Y, 1 - MathF.Exp(-dt / 0.09f)), root.Z);
+                    native = root.Y + normalFraming + direction * 0.3f;
+                    if (i % 11 == 8) continue; // some input frames do not query the pivot
+                    var delta = Correct();
+                    Check(Near(native + delta - drawn.Y, normalFraming), "Walking a long staircase keeps the original height relative to the visible model");
+                    Check(Correct() == delta, "Multiple pivot queries per frame apply the same stair correction");
+                }
+            }
+            for (int i = 0; i < 2 * fps; i++)
+            {
+                frame++;
+                drawn.Y = float.Lerp(drawn.Y, root.Y, 1 - MathF.Exp(-dt / 0.09f));
+                native = float.Lerp(native, root.Y + normalFraming, 1 - MathF.Exp(-dt / 0.07f));
+                Check(MathF.Abs(native + Correct() - drawn.Y - normalFraming) < 0.01f, "Stopping on a landing avoids a framing kick as native height settles");
+            }
+            frame++;
+            native += 0.4f;
+            Check(Correct() == 0, "A new flat-ground camera preset passes through");
+            frame++;
+            root.Y += 0.4f;
+            native += 0.4f;
+            Check(Correct() < -0.39f, "An ascending step tracks the lower rendered character immediately");
+            Check(height.Update(frame, dt, 2, root, drawn, native) == 0, "A replacement skeleton gets a fresh framing reference");
+            frame++;
+            root.Y += 20;
+            drawn = root;
+            Check(Correct() == 0, "A teleport discards stair history");
+            Check(height.Update(++frame, dt, 1, root, new(float.NaN), native) == 0, "Unavailable render data falls back to native height");
+            height.Reset();
+            Check(height.Update(++frame, dt, 1, root, drawn, native) == 0, "Mount, jump or scene transitions start fresh when returning to walking");
+        }
     }
 
     private static void TestShoulderFlight()

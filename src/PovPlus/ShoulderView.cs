@@ -11,6 +11,7 @@ using Hypostasis.Game.Structures;
 using SceneManager = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CameraManager;
 using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 using GameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
+using SceneObjectType = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.ObjectType;
 
 namespace PovPlus;
 
@@ -31,6 +32,7 @@ internal sealed unsafe class ShoulderView : IDisposable
     private readonly ShoulderSpeedZoom speedZoom = new();
     private readonly ShoulderFlightMotion flight = new();
     private readonly ShoulderMountAnchor mountAnchor = new();
+    private readonly ShoulderWalkingHeight walkingHeight = new();
     private CameraValueOverride orbitFloor;
     private float originalDistance, entryTime, zoomTime, blend, mountWeight;
     private float combatPhase;
@@ -232,6 +234,7 @@ internal sealed unsafe class ShoulderView : IDisposable
             var mountedNow = IsRiding();
             if (riding != mountedNow)
             {
+                walkingHeight.Reset();
                 riding = mountedNow;
                 zoom.Begin(owner->currentZoom, Profile.Distance);
                 zoomTime = 0;
@@ -268,6 +271,7 @@ internal sealed unsafe class ShoulderView : IDisposable
             var framework = Framework.Instance();
             var foot = Config.WalkingShoulder;
             var mounted = Config.MountedShoulder;
+            float walkHeightCorrection = 0;
             if (framework != null)
             {
                 var root = player.Position;
@@ -284,11 +288,21 @@ internal sealed unsafe class ShoulderView : IDisposable
                 var head = riding ? ReadRiderHead(root) : null;
                 var anchor = mountAnchor.Resolve(framework->FrameCounter, framework->FrameDeltaTime,
                     (nint)mount, riding, root, head, *position);
+                if (!riding && !Service.Condition[ConditionFlag.Jumping] && !Service.Condition[ConditionFlag.Jumping61] &&
+                    !Service.Condition[ConditionFlag.Swimming] && !Service.Condition[ConditionFlag.Diving])
+                {
+                    var model = player.GetCharacterBase();
+                    var skeleton = model != null && model->GetObjectType() == SceneObjectType.CharacterBase ? model->Skeleton : null;
+                    walkHeightCorrection = walkingHeight.Update(framework->FrameCounter, framework->FrameDeltaTime,
+                        (nint)skeleton, root, skeleton == null ? root : (Vector3)skeleton->Transform.Position, position->Y);
+                }
+                else walkingHeight.Reset();
                 *position = Vector3.Lerp(*position, anchor, blend);
             }
             var offset = blend * rig.Offset(camera->currentHRotation,
                 float.Lerp(Config.ShoulderSide, mounted.Side, mountWeight), float.Lerp(Config.ShoulderHeight, mounted.Height, mountWeight),
                 new Vector2(combatOffset.X, combatOffset.Y) + flight.Sway);
+            offset.Y += blend * (1 - mountWeight) * walkHeightCorrection;
             var length = offset.Length();
             if (length < 0.0001f) return;
             var direction = offset / length;
@@ -336,6 +350,7 @@ internal sealed unsafe class ShoulderView : IDisposable
         orbitFloor = default;
         rig.Reset();
         mountAnchor.Reset();
+        walkingHeight.Reset();
         // Flush on the next framework tick, outside the native permission call.
         if (saveDistanceAt.HasValue) saveDistanceAt = Environment.TickCount64;
     }

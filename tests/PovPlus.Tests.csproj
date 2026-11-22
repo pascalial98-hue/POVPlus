@@ -16,6 +16,7 @@
     <Compile Include="..\src\PovPlus\ShoulderWheelScope.cs" Link="ShoulderWheelScope.cs" />
     <Compile Include="..\src\PovPlus\CameraValueOverride.cs" Link="CameraValueOverride.cs" />
     <Compile Include="..\src\PovPlus\ShoulderMountAnchor.cs" Link="ShoulderMountAnchor.cs" />
+    <Compile Include="..\src\PovPlus\ShoulderWalkingHeight.cs" Link="ShoulderWalkingHeight.cs" />
     <Compile Include="..\src\PovPlus\CalibrationState.cs" Link="CalibrationState.cs" />
     <Compile Include="..\src\PovPlus\Localization.cs" Link="Localization.cs" />
     <EmbeddedResource Include="..\src\PovPlus\Translations\en.json" LogicalName="PovPlus.Translations.en.json" />
