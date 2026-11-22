@@ -33,6 +33,7 @@ internal sealed unsafe class ShoulderView : IDisposable
     private readonly ShoulderSpeedZoom speedZoom = new();
     private readonly ShoulderFlightMotion flight = new();
     private ShoulderGlideTransition glideFov;
+    private uint? glideFrame;
     private readonly ShoulderMountAnchor mountAnchor = new();
     private readonly ShoulderWalkingHeight walkingHeight = new();
     private CameraValueOverride orbitFloor;
@@ -131,13 +132,37 @@ internal sealed unsafe class ShoulderView : IDisposable
                 {
                     // Update consumes FoV as the target of the native lens
                     // interpolation. Keep the optical zoom value for UpdateState.
-                    fov.Apply(ref camera->FoV, camera->MaxFoV);
+                    var weight = UpdateGlideWeight();
+                    fov.Apply(ref camera->FoV, ShoulderLens.Widen(camera->MaxFoV, weight, Config.ShoulderGlideFovDegrees));
                 }
             }
             catch (Exception ex) { Stop(ex); }
         }
         try { cameraUpdate.Original(camera); }
         finally { fov.Restore(ref camera->FoV); }
+    }
+
+    private float UpdateGlideWeight()
+    {
+        if (!Config.ShoulderGlideFovEnabled || !IsRiding() || Service.Condition[ConditionFlag.Diving])
+        {
+            glideFov = default;
+            glideFrame = null;
+            return 0;
+        }
+
+        var framework = Framework.Instance();
+        if (framework == null) return 0;
+        if (glideFrame != framework->FrameCounter)
+        {
+            glideFrame = framework->FrameCounter;
+            var dt = ShoulderRig.Bound(framework->FrameDeltaTime, 0, 0.25f, 0);
+            var gliding = IsGliding((NativeCharacter*)actor);
+            glideFov.Update(gliding, dt,
+                gliding ? Config.ShoulderGlideEnterDelay : Config.ShoulderGlideExitDelay,
+                gliding ? Config.ShoulderGlideEnterSeconds : Config.ShoulderGlideExitSeconds);
+        }
+        return glideFov.Weight;
     }
 
     private static bool IsGliding(NativeCharacter* rider)
@@ -284,14 +309,6 @@ internal sealed unsafe class ShoulderView : IDisposable
                 flight.Update(player.Position, elapsed, Service.Condition[ConditionFlag.InFlight],
                     Config.ShoulderFlightSwayPercent, Config.ShoulderFlightBankDegrees);
             else flight.Reset();
-            if (Config.ShoulderGlideFovEnabled && riding && !Service.Condition[ConditionFlag.Diving])
-            {
-                var gliding = IsGliding((NativeCharacter*)actor);
-                glideFov.Update(gliding, dt,
-                    gliding ? Config.ShoulderGlideEnterDelay : Config.ShoulderGlideExitDelay,
-                    gliding ? Config.ShoulderGlideEnterSeconds : Config.ShoulderGlideExitSeconds);
-            }
-            else glideFov = default;
             UpdateDistance();
         }
         catch (Exception ex) { Stop(ex); }
@@ -358,13 +375,10 @@ internal sealed unsafe class ShoulderView : IDisposable
         catch (Exception ex) { Stop(ex); }
     }
 
-    internal (Vector3 Bank, float GlideWeight) FlightView(GameCamera* camera)
-    {
-        var weight = Config.ShoulderGlideFovEnabled ? glideFov.Weight : 0;
-        return (flight.Bank != Vector3.Zero || weight > 0) && camera == owner && Active && riding &&
+    internal Vector3 FlightBank(GameCamera* camera) =>
+        flight.Bank != Vector3.Zero && camera == owner && Active && riding &&
             camera->mode == 1 && InWorld() && Service.ObjectTable.LocalPlayer!.Address == actor
-            ? (flight.Bank * blend, weight) : default;
-    }
+            ? flight.Bank * blend : Vector3.Zero;
 
     private Vector3? ReadRiderHead(Vector3 root)
     {
@@ -395,6 +409,7 @@ internal sealed unsafe class ShoulderView : IDisposable
         speedZoom.Reset();
         flight.Reset();
         glideFov = default;
+        glideFrame = null;
         orbitFloor = default;
         rig.Reset();
         mountAnchor.Reset();

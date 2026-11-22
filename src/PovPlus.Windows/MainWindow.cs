@@ -394,7 +394,7 @@ public class MainWindow : Window, IDisposable
                 Slider("滑翔退出延迟（秒）", ref Config.ShoulderGlideExitDelay, 0, ShoulderGlideTransition.MaxSeconds, 0, "%.2f");
                 Slider("滑翔退出过渡（秒）", ref Config.ShoulderGlideExitSeconds, 0, ShoulderGlideTransition.MaxSeconds,
                     ShoulderGlideTransition.DefaultExitSeconds, "%.2f");
-                ImGui.TextWrapped(L.T("延迟决定等待多久再改变视场角，过渡决定改变要花多久。过渡设为 0 时立即改变。"));
+                ImGui.TextWrapped(L.T("延迟决定何时开始改变。过渡设为 0 时，镜头只沿用游戏自带的缓动。"));
             }
         }
         else
