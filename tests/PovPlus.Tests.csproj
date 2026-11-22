@@ -8,6 +8,7 @@
     <DalamudLibPath Condition="'$(DalamudLibPath)' == ''">$(APPDATA)\XIVLauncherCN\addon\Hooks\15.0.4.0</DalamudLibPath>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\src\PovPlus\ShoulderRig.cs" Link="ShoulderRig.cs" />
     <Compile Include="..\src\PovPlus\CalibrationState.cs" Link="CalibrationState.cs" />
     <Compile Include="..\src\PovPlus\Localization.cs" Link="Localization.cs" />
     <EmbeddedResource Include="..\src\PovPlus\Translations\en.json" LogicalName="PovPlus.Translations.en.json" />

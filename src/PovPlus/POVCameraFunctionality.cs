@@ -108,6 +108,13 @@ public static class POVCameraFunctionality
 
 	private unsafe static void GetCameraPositionDetour(GameCamera* HypostasisCamera, GameObject* target, System.Numerics.Vector3* position, Bool swapPerson)
 	{
+        var shoulder = Plugin.P.Shoulder;
+        if (!POVEnabled || (shoulder?.Active == true && HypostasisCamera->mode == 1))
+        {
+            positionHook!.Original(HypostasisCamera, target, position, swapPerson);
+            shoulder?.OffsetPivot(HypostasisCamera, (nint)target, position);
+            return;
+        }
         BodyRelativeLook.BeginPosition(HypostasisCamera);
         FirstPersonLimits.Apply(HypostasisCamera);
 		IPlayerCharacter localPlayer = Service.ObjectTable.LocalPlayer;
@@ -363,7 +370,12 @@ public static class POVCameraFunctionality
         ResetLookDownLean();
         FirstPersonLimits.ResetLean();
         if (Plugin.P.ExecuteEmoteHook2?.IsEnabled == true) Plugin.P.ExecuteEmoteHook2.Disable();
-        if (positionHook?.IsEnabled == true) positionHook.Disable();
+        // The optional third-person rig uses only the native target pivot.
+        if (Plugin.P.Shoulder is { Failed: false } && !Plugin.P.CalibrationActive)
+        {
+            if (positionHook?.IsEnabled == false) positionHook.Enable();
+        }
+        else if (positionHook?.IsEnabled == true) positionHook.Disable();
         // Never restore title-screen settings or dereference a saved camera
         // pointer after the game has replaced that camera.
         if (wasEnabled && cameraSettingsCaptured && RuntimeCameraMatches())

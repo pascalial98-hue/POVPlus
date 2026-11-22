@@ -33,7 +33,7 @@ internal class TickManager
 			}
 			else if (Common.CameraManager->worldCamera->mode == 1)
 			{
-				if (!Plugin.P.Configuration.Setting_FirstPersonOnly)
+				if (!Plugin.P.Configuration.Setting_FirstPersonOnly || Plugin.P.Shoulder?.Active == true)
 				{
 					CameraState_CURRENT = 0;
 				}

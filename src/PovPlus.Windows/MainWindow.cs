@@ -59,6 +59,20 @@ public class MainWindow : Window, IDisposable
 
     private void Common()
     {
+        Heading("越肩视角");
+        Toggle("将越肩视角加入视角切换循环（本地测试）", ref Config.ShoulderCycleEnabled);
+        if (Config.ShoulderCycleEnabled)
+        {
+            ImGui.TextWrapped(L.T("用游戏原有的视角切换键，依次切换第三人称、越肩和第一人称。"));
+            if (plugin.ShoulderUnavailable) ImGui.TextWrapped(L.T("当前客户端无法启用越肩视角，请查看 Dalamud 日志。"));
+            Slider("肩位偏移（负值左肩，正值右肩）", ref Config.ShoulderSide, -1, 1, ShoulderRig.DefaultSide, "%.2f");
+            Slider("肩位高度", ref Config.ShoulderHeight, -0.6f, 0.8f, ShoulderRig.DefaultHeight, "%.2f");
+            Slider("越肩距离", ref Config.ShoulderDistance, 1, 5, ShoulderRig.DefaultDistance, "%.2f");
+            Slider("进入越肩的过渡时间（秒）", ref Config.ShoulderEntryTime, 0, 0.6f, ShoulderRig.DefaultEntryTime, "%.2f");
+            Slider("移动跟随滞后（秒）", ref Config.ShoulderLag, 0, 0.4f, ShoulderRig.DefaultLag, "%.2f");
+            Slider("最大滞后距离", ref Config.ShoulderMaxLag, 0, 0.8f, ShoulderRig.DefaultMaxLag, "%.2f");
+            ImGui.TextWrapped(L.T("移动滞后只跟随角色的水平位移。调大时，镜头在起步和停步时会稍慢一些；设为零可关闭。转动视角始终即时响应。"));
+        }
         MouseLookSettings();
         Heading("转头范围");
         Toggle("视角与限位跟随身体姿态", ref Config.FirstPersonBodyRelativeLook);

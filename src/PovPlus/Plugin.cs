@@ -26,6 +26,9 @@ public class Plugin : IDalamudPlugin, IDisposable
 
 	private TickManager tickManager = new TickManager();
     private readonly DeferredInitialization initialization = new();
+    internal ShoulderView? Shoulder { get; private set; }
+    private bool shoulderUnavailable;
+    internal bool ShoulderUnavailable => shoulderUnavailable || Shoulder?.Failed == true;
     private FirstPersonHeadVisibility? headVisibility;
     private NearSelfVfx? selfVfx;
     private NearObjectVisibility? nearObjects;
@@ -109,6 +112,7 @@ public class Plugin : IDalamudPlugin, IDisposable
             ex => Service.Log.Error(ex, "POV+ runtime initialization failed; retrying after login readiness."))) return;
         headVisibility?.Restore();
         UpdateCalibration();
+        UpdateShoulder();
 		tickManager.TickUpdate();
         POVCameraFunctionality.RestoreNearPlaneIfInactive();
         POVCameraFunctionality.ResetLookDownLeanIfInactive();
@@ -158,6 +162,9 @@ public class Plugin : IDalamudPlugin, IDisposable
     private void CleanupRuntime()
     {
         calibrationWindow.Cancel();
+        Shoulder?.Dispose();
+        Shoulder = null;
+        shoulderUnavailable = false;
         nearObjects?.Dispose();
         nearObjects = null;
         nearObjectsUnavailable = false;
@@ -244,6 +251,7 @@ public class Plugin : IDalamudPlugin, IDisposable
     internal unsafe bool StartCalibration()
     {
         if (CalibrationActive || !CanStartCalibration) return false;
+        Shoulder?.Reset();
         var camera = Hypostasis.Game.Common.CameraManager->worldCamera;
         calibrationWindow.Begin(Service.ObjectTable.LocalPlayer!.Address, (nint)camera);
         POVCameraFunctionality.DisablePOVCamera();
@@ -273,6 +281,27 @@ public class Plugin : IDalamudPlugin, IDisposable
             return;
         }
         if (Configuration.HasSeenCalibrationGuide == false && CanStartCalibration) StartCalibration();
+    }
+
+    private unsafe void UpdateShoulder()
+    {
+        if (!Configuration.Setting_ModEnabled || !Configuration.ShoulderCycleEnabled)
+        {
+            Shoulder?.Dispose();
+            Shoulder = null;
+            shoulderUnavailable = false;
+            return;
+        }
+        if (Shoulder == null && !shoulderUnavailable)
+        {
+            try { Shoulder = new ShoulderView(Hypostasis.Game.Common.CameraManager->worldCamera); }
+            catch (Exception ex)
+            {
+                shoulderUnavailable = true;
+                Service.Log.Error(ex, "POV+ could not initialize the experimental shoulder camera.");
+            }
+        }
+        Shoulder?.Update();
     }
 
     private unsafe bool RuntimeAvailable()

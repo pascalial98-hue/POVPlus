@@ -7,6 +7,13 @@ namespace PovPlus;
 public class Configuration : IPluginConfiguration
 {
     public PluginLanguage Language = PluginLanguage.Bilingual;
+    public bool ShoulderCycleEnabled;
+    public float ShoulderSide = ShoulderRig.DefaultSide;
+    public float ShoulderHeight = ShoulderRig.DefaultHeight;
+    public float ShoulderDistance = ShoulderRig.DefaultDistance;
+    public float ShoulderEntryTime = ShoulderRig.DefaultEntryTime;
+    public float ShoulderLag = ShoulderRig.DefaultLag;
+    public float ShoulderMaxLag = ShoulderRig.DefaultMaxLag;
     // Null distinguishes pre-guide configurations from new/pending installations.
     public bool? HasSeenCalibrationGuide;
     public bool FirstPersonHideHead = true;
