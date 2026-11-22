@@ -14,10 +14,26 @@ public class MainWindow : Window, IDisposable
     private int pendingModifier;
     private static readonly ShoulderProfile WalkingDefaults = new(), RidingDefaults = ShoulderProfile.Riding();
 
-    public MainWindow(Plugin plugin) : base(L.T("POV+ Enhanced 第一人称设置###PovPlus"), ImGuiWindowFlags.AlwaysVerticalScrollbar)
+    private enum Page { General, View, Controls, Appearance, Walking, Mounted }
+
+    private static readonly Page[] Pages = Enum.GetValues<Page>();
+    private Page page;
+
+    private static string PageTitle(Page item) => item switch
+    {
+        Page.General => "通用",
+        Page.View => "视点与跟随",
+        Page.Controls => "操作与探头",
+        Page.Appearance => "外观与特效",
+        Page.Walking => "步行越肩",
+        Page.Mounted => "骑乘越肩",
+        _ => throw new ArgumentOutOfRangeException(nameof(item))
+    };
+
+    public MainWindow(Plugin plugin) : base(L.T("POV+ Enhanced 设置###PovPlus"), ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
     {
         this.plugin = plugin;
-        Size = new Vector2(660, 720);
+        Size = new Vector2(790, 690);
         SizeCondition = ImGuiCond.FirstUseEver;
         SizeConstraints = new WindowSizeConstraints
         {
@@ -28,73 +44,163 @@ public class MainWindow : Window, IDisposable
 
     public void Dispose() { }
     public override void OnClose() => recordingKey = false;
-    public override void PreDraw() => WindowName = L.T("POV+ Enhanced 第一人称设置###PovPlus");
+    public override void PreDraw() => WindowName = L.T("POV+ Enhanced 设置###PovPlus");
 
     public override void Draw()
     {
         DrawAxes();
+        if (ImGui.Checkbox(L.Label("启用插件"), ref Config.Setting_ModEnabled)) Config.Save();
+        if (plugin.RuntimeStatus.Length > 0) ImGui.TextWrapped(plugin.RuntimeStatus);
+        ImGui.Separator();
+
+        var em = ImGui.GetFontSize();
+        var navWidth = em * 10;
+        if (ImGui.GetContentRegionAvail().X < navWidth + em * 24)
+        {
+            ImGui.SetNextItemWidth(-1);
+            if (ImGui.BeginCombo("##settingsPage", L.T(PageTitle(page), inline: true), ImGuiComboFlags.HeightLargest))
+            {
+                DrawNavigation(compact: true);
+                ImGui.EndCombo();
+            }
+        }
+        else
+        {
+            if (ImGui.BeginChild("settings-nav", new Vector2(navWidth, 0), border: true))
+                DrawNavigation(compact: false);
+            ImGui.EndChild();
+            ImGui.SameLine();
+        }
+
+        // Each page owns its scroll position and widget IDs, including the two profiles.
+        if (ImGui.BeginChild(PageTitle(page), Vector2.Zero, border: false))
+        {
+            switch (page)
+            {
+                case Page.General: General(); break;
+                case Page.View: FirstPersonView(); break;
+                case Page.Controls: Controls(); break;
+                case Page.Appearance: Appearance(); break;
+                case Page.Walking: ShoulderPage(riding: false); break;
+                case Page.Mounted: ShoulderPage(riding: true); break;
+            }
+        }
+        ImGui.EndChild();
+    }
+
+    private void DrawNavigation(bool compact)
+    {
+        foreach (var item in Pages)
+        {
+            if (item is Page.View or Page.Walking)
+            {
+                ImGui.Spacing();
+                ImGui.Separator();
+                ImGui.PushTextWrapPos(0);
+                ImGui.TextDisabled(L.T(item == Page.View ? "第一人称" : "越肩视角", inline: compact));
+                ImGui.PopTextWrapPos();
+            }
+            if (ImGui.Selectable(L.Label(PageTitle(item), stacked: !compact), item == page) && page != item)
+            {
+                recordingKey = false;
+                page = item;
+            }
+            if (compact && item == page) ImGui.SetItemDefaultFocus();
+        }
+    }
+
+    private void General()
+    {
         var language = Enum.IsDefined(Config.Language) ? (int)Config.Language : 0;
-        ImGui.SetNextItemWidth(260 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(Math.Min(260 * ImGuiHelpers.GlobalScale, ImGui.GetContentRegionAvail().X * 0.65f));
         if (ImGui.Combo("语言 / Language###language", ref language, "自动 / Auto\0简体中文\0English\0中英对照 / 中文 + English\0"))
         {
             Config.Language = (PluginLanguage)language;
             Config.Save();
             plugin.RefreshLanguage();
         }
-        ImGui.TextWrapped(L.T("中英对照逐项显示中文和英文；自动模式跟随 Dalamud 语言。修改立即生效。"));
-        Toggle("启用 POV+ Enhanced", ref Config.Setting_ModEnabled);
-        ImGui.TextDisabled(L.T("/pov toggle 可切换启用状态"));
-        if (plugin.RuntimeStatus.Length > 0) ImGui.TextWrapped(plugin.RuntimeStatus);
+        Heading("视点校准");
         ImGui.BeginDisabled(!plugin.CanStartCalibration);
         var calibrate = ImGui.Button(L.Label("视点校准引导"));
         ImGui.EndDisabled();
         if (calibrate && plugin.StartCalibration()) return;
         ImGui.TextWrapped(L.T("切到第三人称，用图示和实时标记调整两眼之间的视点。请在正常场景、非战斗状态下使用。"));
-        ImGui.Separator();
-        if (!ImGui.BeginTabBar("PovSettings")) return;
-        if (ImGui.BeginTabItem(L.Label("常用"))) { Common(); ImGui.EndTabItem(); }
-        if (ImGui.BeginTabItem(L.Label("头部与特效"))) { Appearance(); ImGui.EndTabItem(); }
-        if (ImGui.BeginTabItem(L.Label("高级"))) { Advanced(); ImGui.EndTabItem(); }
-        ImGui.EndTabBar();
+        Heading("视角切换");
+        Toggle("将越肩视角加入视角切换循环（本地测试）", ref Config.ShoulderCycleEnabled);
+        ImGui.TextWrapped(L.T("用游戏原有的视角切换键，依次切换第三人称、越肩和第一人称。"));
+        if (Config.ShoulderCycleEnabled)
+            Slider("进入越肩的过渡时间（秒）", ref Config.ShoulderEntryTime, 0, 0.6f, ShoulderRig.DefaultEntryTime, "%.2f");
+        if (ImGui.CollapsingHeader(L.Label("其他模式与调试")))
+        {
+            Toggle("第三人称也启用视点绑定", ref Config.Setting_FirstPersonOnly);
+            Toggle("集体动作（GPose）中启用视点绑定", ref Config.Setting_GposeEnabled);
+            Toggle("显示头部位置与方向辅助线", ref Config.SETTINGS_ShowCameraLocation);
+            ImGui.TextWrapped(L.T("辅助线需同时启用第三人称视点绑定，并保持此设置窗口打开。"));
+        }
+        if (ImGui.CollapsingHeader(L.Label("使用说明")))
+        {
+            ImGui.TextWrapped(L.T("/pov toggle 可切换启用状态"));
+            ImGui.TextWrapped(L.T("中英对照逐项显示中文和英文；自动模式跟随 Dalamud 语言。修改立即生效。"));
+            ImGui.TextWrapped(L.T("请在游戏的角色设置中，将第一人称视角自动调整（1st Person Camera Auto Adjustment）设为 Never。左键自由观察、右键回正沿用游戏操作。设置修改后自动保存。"));
+        }
     }
 
-    private void Common()
+    private void FirstPersonView()
     {
-        Heading("越肩视角");
-        Toggle("将越肩视角加入视角切换循环（本地测试）", ref Config.ShoulderCycleEnabled);
-        if (Config.ShoulderCycleEnabled)
+        Heading("画面");
+        Slider("视野（FOV）", ref Config.Setting_FOV, 0, 5, 0.75f, "%.2f");
+        Slider("近裁剪距离（NearPlane）", ref Config.CameraNearPlane, 0.001f, 1, NearPlanePatch.Default, "%.3f");
+        if (ImGui.Button(L.Label("设为 0.001"))) { Config.CameraNearPlane = 0.001f; Config.Save(); }
+        ImGui.TextWrapped(L.T("数值越小，近处衣服越完整；水雾等粒子可能穿过地形显示。此项只作用于第一人称。"));
+        if (ImGui.CollapsingHeader(L.Label("视点偏移")))
         {
-            ImGui.TextWrapped(L.T("用游戏原有的视角切换键，依次切换第三人称、越肩和第一人称。"));
-            if (plugin.ShoulderUnavailable) ImGui.TextWrapped(L.T("当前客户端无法启用越肩视角，请查看 Dalamud 日志。"));
-            if (ImGui.BeginTabBar("ShoulderProfiles"))
-            {
-                if (ImGui.BeginTabItem(L.Label("步行")))
-                {
-                    DrawShoulderProfile(Config.WalkingShoulder, WalkingDefaults, false);
-                    ImGui.EndTabItem();
-                }
-                if (ImGui.BeginTabItem(L.Label("骑乘")))
-                {
-                    ImGui.TextWrapped(L.T("上坐骑后自动使用这组参数。镜头跟随骑手肩位，地面骑行与飞行共用。"));
-                    DrawShoulderProfile(Config.MountedShoulder, RidingDefaults, true);
-                    ImGui.EndTabItem();
-                }
-                ImGui.EndTabBar();
-            }
-            ImGui.TextWrapped(L.T("越肩时用滚轮在区间内拉近或拉远，下次进入时沿用上次的距离。两个值相同可固定距离，靠墙时镜头仍会自动收近。"));
-            Slider("进入越肩的过渡时间（秒）", ref Config.ShoulderEntryTime, 0, 0.6f, ShoulderRig.DefaultEntryTime, "%.2f");
-            ImGui.TextWrapped(L.T("移动滞后保留前后与左右的跟随感。上下滞后影响跳跃和坐骑升降，设为零时镜头同步升降。"));
+            Slider("左右偏移", ref Config.SETTINGS_CameraOffsetX, -1, 1, 0, "%.3f");
+            Slider("上下偏移", ref Config.SETTINGS_CameraOffsetY, -1, 1, 0, "%.3f");
+            Slider("前后偏移", ref Config.SETTINGS_CameraOffsetZ, -1, 1, 0, "%.3f");
+            Slider("额外倾斜", ref Config.CameraTiltOffset, -3, 3, 0, "%.2f");
         }
-        MouseLookSettings();
-        Heading("转头范围");
+        Heading("身体姿态");
         Toggle("视角与限位跟随身体姿态", ref Config.FirstPersonBodyRelativeLook);
         ImGui.TextWrapped(L.T("此选项适合静止姿态观察，不适合移动时使用；即使有平滑处理，跑动时仍可能明显晃动。"));
         if (Config.FirstPersonBodyRelativeLook)
         {
-            ImGui.TextWrapped(L.T("以躯干姿态作为正视方向。弯腰 90° 时正视地面，抬头 90° 可看向前方；继续低头可越过垂直方向。转头限位和探头都相对身体计算，头部跟随只叠加头颈相对躯干的动作。"));
-            ImGui.TextWrapped(L.T("移动时自动减弱步伐引起的快速旋转晃动，保留持续的身体倾斜；停下后平滑恢复。鼠标转头和视点位置不受此平滑影响。"));
+            if (ImGui.CollapsingHeader(L.Label("身体姿态说明")))
+            {
+                ImGui.TextWrapped(L.T("以躯干姿态作为正视方向。弯腰 90° 时正视地面，抬头 90° 可看向前方；继续低头可越过垂直方向。转头限位和探头都相对身体计算，头部跟随只叠加头颈相对躯干的动作。"));
+                ImGui.TextWrapped(L.T("移动时自动减弱步伐引起的快速旋转晃动，保留持续的身体倾斜；停下后平滑恢复。鼠标转头和视点位置不受此平滑影响。"));
+            }
             if (BodyRelativeLook.Status.Length > 0) ImGui.TextWrapped(BodyRelativeLook.Status);
         }
+        if (ImGui.CollapsingHeader(L.Label("跟随头部旋转")))
+        {
+            ImGui.TextWrapped(L.T("视点位置始终跟随头部。以下开关额外让画面方向跟随头部动画。"));
+            ImGui.TextWrapped(L.T("关联度控制转动幅度，平滑控制跟随速度。50% 表示头部转动 60°，镜头跟随约 30°；仍受转头限位约束。鼠标灵敏度不受关联度影响。"));
+            Toggle("跟随左右转动", ref Config.YawEnabled);
+            if (Config.YawEnabled)
+            {
+                Slider("左右关联度", ref Config.HeadYawWeight, 0, 100, 100, "%.0f%%");
+                Slider("左右平滑", ref Config.Settings_YawSmoothing, 0, 100, 60, "%.0f%%");
+            }
+            Toggle("跟随上下转动", ref Config.PitchEnabled);
+            if (Config.PitchEnabled)
+            {
+                Slider("上下关联度", ref Config.HeadPitchWeight, 0, 100, 100, "%.0f%%");
+                Slider("上下平滑", ref Config.Settings_PitchSmoothing, 0, 100, 60, "%.0f%%");
+            }
+            Toggle("跟随侧倾", ref Config.RollEnabled);
+            if (Config.RollEnabled)
+            {
+                Slider("侧倾关联度", ref Config.HeadRollWeight, 0, 100, 100, "%.0f%%");
+                Slider("侧倾平滑", ref Config.Settings_RollSmoothing, 0, 100, 60, "%.0f%%");
+                ImGui.TextWrapped(L.T("部分动作可能产生较大的画面倾斜。"));
+            }
+        }
+    }
+
+    private void Controls()
+    {
+        MouseLookSettings();
+        Heading("转头范围");
         Toggle("限制转头角度", ref Config.FirstPersonLimitLook);
         ImGui.BeginDisabled(!Config.FirstPersonLimitLook);
         Slider("左右各", ref Config.FirstPersonYawDegrees, 5, 85, 80, "%.0f°");
@@ -108,6 +214,8 @@ public class MainWindow : Window, IDisposable
         }
         ImGui.EndDisabled();
         Heading("限位探头");
+        if (!Config.FirstPersonLimitLook) ImGui.TextWrapped(L.T("需开启转头角度限制。幅度为游戏距离单位，设为 0 可分别关闭。"));
+        ImGui.BeginDisabled(!Config.FirstPersonLimitLook);
         Toggle("到达转头限制后，继续拖动来探头", ref Config.FirstPersonLookDownLean);
         if (Config.FirstPersonLookDownLean)
         {
@@ -119,33 +227,33 @@ public class MainWindow : Window, IDisposable
                 Config.FirstPersonLeanSensitivity = sensitivity / 100;
                 Config.Save();
             }
-            ImGui.TextWrapped(L.T("顶到向下或左右上限后，继续拖动才伸展。位移直接跟随鼠标，停下保持，反向拖动先收回。伸展灵敏度只影响伸展和回收，正常转头速度不变；35% 时约需额外 43° 的拖动量伸到最大。"));
-            ImGui.TextWrapped(L.T("需开启转头角度限制。幅度为游戏距离单位，设为 0 可分别关闭。"));
             Slider("前伸时额外低头", ref Config.FirstPersonLeanExtraDownDegrees, 0, 20, 10, "%.0f°");
-            ImGui.TextWrapped(L.T("到原低头限位后，前伸与额外低头同时进行，反向同时收回。最多越过垂直向下 5°（总计 95°）。设为 0 仅保留前伸；两者沿用伸展灵敏度。"));
             Slider("侧伸时额外转头（左右各）", ref Config.FirstPersonLeanExtraSideDegrees, 0, 20, 10, "%.0f°");
-            ImGui.TextWrapped(L.T("到原左右限位后，侧伸距离与额外转角同步变化。默认每侧多转 10°，原限位 80° 时可到 90°；设为 0 仅保留侧伸。反向同时收回距离和额外转角。"));
+            if (ImGui.CollapsingHeader(L.Label("探头说明")))
+            {
+                ImGui.TextWrapped(L.T("顶到向下或左右上限后，继续拖动才伸展。位移直接跟随鼠标，停下保持，反向拖动先收回。伸展灵敏度只影响伸展和回收，正常转头速度不变；35% 时约需额外 43° 的拖动量伸到最大。"));
+                ImGui.TextWrapped(L.T("需开启转头角度限制。幅度为游戏距离单位，设为 0 可分别关闭。"));
+                ImGui.TextWrapped(L.T("到原低头限位后，前伸与额外低头同时进行，反向同时收回。最多越过垂直向下 5°（总计 95°）。设为 0 仅保留前伸；两者沿用伸展灵敏度。"));
+                ImGui.TextWrapped(L.T("到原左右限位后，侧伸距离与额外转角同步变化。默认每侧多转 10°，原限位 80° 时可到 90°；设为 0 仅保留侧伸。反向同时收回距离和额外转角。"));
+            }
             if (FirstPersonLimits.LeanStatus.Length > 0) ImGui.TextWrapped(FirstPersonLimits.LeanStatus);
         }
-        Heading("画面");
-        Slider("视野（FOV）", ref Config.Setting_FOV, 0, 5, 0.75f, "%.2f");
-        Slider("近裁剪距离（NearPlane）", ref Config.CameraNearPlane, 0.001f, 1, NearPlanePatch.Default, "%.3f");
-        if (ImGui.Button(L.Label("设为 0.001"))) { Config.CameraNearPlane = 0.001f; Config.Save(); }
-        ImGui.TextWrapped(L.T("数值越小，近处衣服越完整；水雾等粒子可能穿过地形显示。此项只作用于第一人称。"));
-        Toggle("保留近镜头的其他角色与物件（试验）", ref Config.FirstPersonKeepNearObjects);
-        if (plugin.NearObjectsStatus.Length > 0) ImGui.TextWrapped(plugin.NearObjectsStatus);
-        if (Config.FirstPersonKeepNearObjects)
-            ImGui.TextWrapped(L.T("解除另一层按距离隐藏整个对象的判断，仅在第一人称生效。针对走该判断的角色与物件；部分地图静态模型、未加载物体及背面不可见不在此项覆盖范围内。"));
+        ImGui.EndDisabled();
     }
 
     private void MouseLookSettings()
     {
         Heading("镜头操作");
-        ImGui.TextWrapped(L.T("坐下、躺下及同类固定/循环动作期间，手柄右摇杆、普通右键和鼠标直控都只转镜头，避免转身打断动作。左摇杆和移动键仍可正常起身。"));
         if (plugin.StationaryCameraStatus.Length > 0) ImGui.TextWrapped(plugin.StationaryCameraStatus);
         if (plugin.MouseLookStatus.Length > 0) ImGui.TextWrapped(plugin.MouseLookStatus);
         Toggle("第一人称下，移动鼠标直接转动视角", ref Config.FirstPersonMouseLook);
-        if (!Config.FirstPersonMouseLook) { recordingKey = false; return; }
+        if (!Config.FirstPersonMouseLook)
+        {
+            recordingKey = false;
+            if (ImGui.CollapsingHeader(L.Label("固定动作与手柄")))
+                ImGui.TextWrapped(L.T("坐下、躺下及同类固定/循环动作期间，手柄右摇杆、普通右键和鼠标直控都只转镜头，避免转身打断动作。左摇杆和移动键仍可正常起身。"));
+            return;
+        }
         var mode = Config.FirstPersonCursorToggle ? 1 : 0;
         ImGui.TextWrapped(L.T("呼出鼠标方式"));
         ImGui.SetNextItemWidth(-1);
@@ -173,9 +281,13 @@ public class MainWindow : Window, IDisposable
         ImGui.TextWrapped(Config.FirstPersonCursorToggle
             ? L.T("默认锁定视角；按一次快捷键呼出鼠标，再按一次恢复转视角。")
             : L.T("默认锁定视角；按住快捷键呼出鼠标，松开后恢复转视角。"));
-        ImGui.TextWrapped(L.T("直控时按住左键可自由观察，镜头转动不带动人物朝向；松开左键恢复右键式直控。自由观察仍遵守转头与探头范围。"));
-        ImGui.TextWrapped(L.T("支持单键或 Ctrl / Alt / Shift 组合。录制单独修饰键时，按下再松开。请避开常用游戏快捷键；原游戏按键绑定仍生效。锁定时需先呼出鼠标再点击界面。"));
-        ImGui.TextWrapped(L.T("设置窗口、文字输入或切出游戏时自动释放；关闭设置、结束输入或返回游戏后恢复。退出第一人称恢复普通操作。"));
+        if (ImGui.CollapsingHeader(L.Label("操作说明")))
+        {
+            ImGui.TextWrapped(L.T("坐下、躺下及同类固定/循环动作期间，手柄右摇杆、普通右键和鼠标直控都只转镜头，避免转身打断动作。左摇杆和移动键仍可正常起身。"));
+            ImGui.TextWrapped(L.T("直控时按住左键可自由观察，镜头转动不带动人物朝向；松开左键恢复右键式直控。自由观察仍遵守转头与探头范围。"));
+            ImGui.TextWrapped(L.T("支持单键或 Ctrl / Alt / Shift 组合。录制单独修饰键时，按下再松开。请避开常用游戏快捷键；原游戏按键绑定仍生效。锁定时需先呼出鼠标再点击界面。"));
+            ImGui.TextWrapped(L.T("设置窗口、文字输入或切出游戏时自动释放；关闭设置、结束输入或返回游戏后恢复。退出第一人称恢复普通操作。"));
+        }
     }
 
     private void RecordMouseLookKey()
@@ -232,6 +344,12 @@ public class MainWindow : Window, IDisposable
         ImGui.EndDisabled();
         ImGui.EndDisabled();
 
+        Heading("近处物件");
+        Toggle("保留近镜头的其他角色与物件（试验）", ref Config.FirstPersonKeepNearObjects);
+        if (plugin.NearObjectsStatus.Length > 0) ImGui.TextWrapped(plugin.NearObjectsStatus);
+        if (Config.FirstPersonKeepNearObjects)
+            ImGui.TextWrapped(L.T("解除另一层按距离隐藏整个对象的判断，仅在第一人称生效。针对走该判断的角色与物件；部分地图静态模型、未加载物体及背面不可见不在此项覆盖范围内。"));
+
         Heading("近处自身特效（试验）");
         Toggle("减弱贴近镜头的自身特效", ref Config.FirstPersonReduceSelfVfx);
         if (plugin.VfxStatus.Length > 0) ImGui.TextWrapped(plugin.VfxStatus);
@@ -243,52 +361,24 @@ public class MainWindow : Window, IDisposable
         }
     }
 
-    private void Advanced()
+    private void ShoulderPage(bool riding)
     {
-        if (ImGui.CollapsingHeader(L.Label("使用说明")))
-            ImGui.TextWrapped(L.T("请在游戏的角色设置中，将第一人称视角自动调整（1st Person Camera Auto Adjustment）设为 Never。左键自由观察、右键回正沿用游戏操作。设置修改后自动保存。"));
-        if (ImGui.CollapsingHeader(L.Label("视点偏移")))
+        if (!Config.ShoulderCycleEnabled)
         {
-            Slider("左右偏移", ref Config.SETTINGS_CameraOffsetX, -1, 1, 0, "%.3f");
-            Slider("上下偏移", ref Config.SETTINGS_CameraOffsetY, -1, 1, 0, "%.3f");
-            Slider("前后偏移", ref Config.SETTINGS_CameraOffsetZ, -1, 1, 0, "%.3f");
-            Slider("额外倾斜", ref Config.CameraTiltOffset, -3, 3, 0, "%.2f");
+            Toggle("将越肩视角加入视角切换循环（本地测试）", ref Config.ShoulderCycleEnabled);
+            if (!Config.ShoulderCycleEnabled) return;
         }
-        if (ImGui.CollapsingHeader(L.Label("跟随头部旋转")))
-        {
-            ImGui.TextWrapped(L.T("视点位置始终跟随头部。以下开关额外让画面方向跟随头部动画。"));
-            ImGui.TextWrapped(L.T("关联度控制转动幅度，平滑控制跟随速度。50% 表示头部转动 60°，镜头跟随约 30°；仍受转头限位约束。鼠标灵敏度不受关联度影响。"));
-            Toggle("跟随左右转动", ref Config.YawEnabled);
-            if (Config.YawEnabled)
-            {
-                Slider("左右关联度", ref Config.HeadYawWeight, 0, 100, 100, "%.0f%%");
-                Slider("左右平滑", ref Config.Settings_YawSmoothing, 0, 100, 60, "%.0f%%");
-            }
-            Toggle("跟随上下转动", ref Config.PitchEnabled);
-            if (Config.PitchEnabled)
-            {
-                Slider("上下关联度", ref Config.HeadPitchWeight, 0, 100, 100, "%.0f%%");
-                Slider("上下平滑", ref Config.Settings_PitchSmoothing, 0, 100, 60, "%.0f%%");
-            }
-            Toggle("跟随侧倾", ref Config.RollEnabled);
-            if (Config.RollEnabled)
-            {
-                Slider("侧倾关联度", ref Config.HeadRollWeight, 0, 100, 100, "%.0f%%");
-                Slider("侧倾平滑", ref Config.Settings_RollSmoothing, 0, 100, 60, "%.0f%%");
-                ImGui.TextWrapped(L.T("部分动作可能产生较大的画面倾斜。"));
-            }
-        }
-        if (ImGui.CollapsingHeader(L.Label("其他模式与调试")))
-        {
-            Toggle("第三人称也启用视点绑定", ref Config.Setting_FirstPersonOnly);
-            Toggle("集体动作（GPose）中启用视点绑定", ref Config.Setting_GposeEnabled);
-            Toggle("显示头部位置与方向辅助线", ref Config.SETTINGS_ShowCameraLocation);
-            ImGui.TextWrapped(L.T("辅助线需同时启用第三人称视点绑定，并保持此设置窗口打开。"));
-        }
+        if (plugin.ShoulderUnavailable) ImGui.TextWrapped(L.T("当前客户端无法启用越肩视角，请查看 Dalamud 日志。"));
+        var profile = riding ? Config.MountedShoulder : Config.WalkingShoulder;
+        var defaults = riding ? RidingDefaults : WalkingDefaults;
+        if (riding) DrawShoulderMotion(profile, defaults, riding);
+        DrawShoulderFraming(profile, defaults, riding);
+        if (!riding) DrawShoulderMotion(profile, defaults, riding);
     }
 
-    private void DrawShoulderProfile(ShoulderProfile profile, ShoulderProfile defaults, bool riding)
+    private void DrawShoulderFraming(ShoulderProfile profile, ShoulderProfile defaults, bool riding)
     {
+        Heading("肩位与距离");
         Slider("肩位偏移（负值左肩，正值右肩）", ref profile.Side, riding ? -2 : -1, riding ? 2 : 1, defaults.Side, "%.2f");
         Slider("肩位高度", ref profile.Height, riding ? -1.5f : -0.6f, riding ? 2 : 0.8f, defaults.Height, "%.2f");
         var (min, max) = ShoulderZoom.Range(profile.MinDistance, profile.MaxDistance);
@@ -304,22 +394,37 @@ public class MainWindow : Window, IDisposable
             profile.MaxDistance = max;
             Config.Save();
         }
+        if (ImGui.CollapsingHeader(L.Label("滚轮缩放说明")))
+            ImGui.TextWrapped(L.T("越肩时用滚轮在区间内拉近或拉远，下次进入时沿用上次的距离。两个值相同可固定距离，靠墙时镜头仍会自动收近。"));
+    }
+
+    private void DrawShoulderMotion(ShoulderProfile profile, ShoulderProfile defaults, bool riding)
+    {
+        Heading(riding ? "跟随与回正" : "移动跟随");
         Slider("移动跟随滞后（秒）", ref profile.Lag, 0, riding ? ShoulderRig.MaxRidingLagTime : 0.4f, defaults.Lag, "%.2f");
         if (riding)
         {
             Slider("减速与停步回正时间（秒）", ref profile.RecoverySeconds, ShoulderRig.MinRecovery, ShoulderRig.MaxRecovery, defaults.RecoverySeconds, "%.2f");
             Slider("转弯惯性强度", ref profile.TurnInertiaPercent, 0, 100, defaults.TurnInertiaPercent, "%.0f%%");
-            ImGui.TextWrapped(L.T("加长回正时间，减速或停步时镜头会更缓地收回。转弯惯性让镜头在坐骑拐弯时轻轻偏向弯外，设为零可关闭。"));
         }
         Slider("最大滞后距离", ref profile.MaxLag, 0, riding ? ShoulderRig.MaxRidingLagDistance : 0.8f, defaults.MaxLag, "%.2f");
         Slider("上下滞后权重", ref profile.VerticalLagPercent, 0, 100, defaults.VerticalLagPercent, "%.0f%%");
+        if (ImGui.CollapsingHeader(L.Label("跟随说明")))
+        {
+            if (riding)
+            {
+                ImGui.TextWrapped(L.T("上坐骑后自动使用这组参数。镜头跟随骑手肩位，地面骑行与飞行共用。"));
+                ImGui.TextWrapped(L.T("加长回正时间，减速或停步时镜头会更缓地收回。转弯惯性让镜头在坐骑拐弯时轻轻偏向弯外，设为零可关闭。"));
+            }
+            ImGui.TextWrapped(L.T("移动滞后保留前后与左右的跟随感。上下滞后影响跳跃和坐骑升降，设为零时镜头同步升降。"));
+        }
     }
 
     private static void Heading(string text)
     {
         ImGui.Spacing();
+        ImGui.TextWrapped(L.T(text, inline: true));
         ImGui.Separator();
-        ImGui.TextUnformatted(L.T(text));
     }
 
     private void Toggle(string label, ref bool value)
@@ -337,7 +442,17 @@ public class MainWindow : Window, IDisposable
     private bool Slider(string label, ref float value, float min, float max, float reset, string format, bool save = true)
     {
         ImGui.PushID(label);
+        var columns = ImGui.GetContentRegionAvail().X >= 29 * ImGui.GetFontSize() &&
+            ImGui.BeginTable("##sliderRow", 2, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.NoSavedSettings | ImGuiTableFlags.NoPadOuterX);
+        if (columns)
+        {
+            ImGui.TableSetupColumn("##label", ImGuiTableColumnFlags.WidthStretch, 0.46f);
+            ImGui.TableSetupColumn("##control", ImGuiTableColumnFlags.WidthStretch, 0.54f);
+            ImGui.TableNextRow();
+            ImGui.TableSetColumnIndex(0);
+        }
         ImGui.TextWrapped(L.T(label));
+        if (columns) ImGui.TableSetColumnIndex(1);
         var resetWidth = ImGui.CalcTextSize(L.T("重置", inline: true)).X + ImGui.GetStyle().FramePadding.X * 2;
         ImGui.SetNextItemWidth(-resetWidth - ImGui.GetStyle().ItemSpacing.X);
         var changed = ImGui.SliderFloat("##value", ref value, min, max, format, ImGuiSliderFlags.AlwaysClamp);
@@ -348,6 +463,7 @@ public class MainWindow : Window, IDisposable
             value = float.IsFinite(value) ? Math.Clamp(value, min, max) : reset;
             if (save) Config.Save();
         }
+        if (columns) ImGui.EndTable();
         ImGui.PopID();
         return changed;
     }

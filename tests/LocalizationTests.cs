@@ -22,7 +22,7 @@ internal static partial class Program
         }
         var combo = UiText.Translate("按住快捷键\0按一下切换\0", PluginLanguage.English, "zh");
         Check(combo == "Hold hotkey\0Press to toggle\0", "Combo retains separators");
-        Check(UiText.Translate("POV+ Enhanced 第一人称设置###PovPlus", PluginLanguage.English, "zh").EndsWith("###PovPlus"), "Stable window identity");
+        Check(UiText.Translate("POV+ Enhanced 设置###PovPlus", PluginLanguage.English, "zh").EndsWith("###PovPlus"), "Stable window identity");
         Check(UiText.Translate("unknown", PluginLanguage.English, "en") == "unknown", "Unknown text remains readable");
         Check((int)PluginLanguage.Automatic == 0 && (int)PluginLanguage.SimplifiedChinese == 1 &&
             (int)PluginLanguage.English == 2 && (int)PluginLanguage.Bilingual == 3, "Saved language values remain compatible");
@@ -34,8 +34,8 @@ internal static partial class Program
             "隐藏自己的头部\nHide your own head###隐藏自己的头部", "Stacked checkbox retains identity");
         Check(UiText.Translate("按住快捷键\0按一下切换\0", PluginLanguage.Bilingual, "en") ==
             "按住快捷键 / Hold hotkey\0按一下切换 / Press to toggle\0", "Bilingual combo pairs each option and preserves sentinel");
-        Check(UiText.Translate("POV+ Enhanced 第一人称设置###PovPlus", PluginLanguage.Bilingual, "en") ==
-            "POV+ Enhanced 第一人称设置 / First-person Settings###PovPlus", "Bilingual title retains one brand and one window ID");
+        Check(UiText.Translate("POV+ Enhanced 设置###PovPlus", PluginLanguage.Bilingual, "en") ==
+            "POV+ Enhanced 设置 / Settings###PovPlus", "Bilingual title retains one brand and one window ID");
         Check(UiText.Translate("unknown", PluginLanguage.Bilingual, "en") == "unknown", "Bilingual unknown text is not duplicated");
         foreach (var (key, _) in UiText.Catalog)
         {
