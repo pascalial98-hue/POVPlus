@@ -9,6 +9,7 @@ internal static partial class Program
         TestCameraLensOwnership();
         TestShoulderFlight();
         TestShoulderTurning();
+        TestRidingResponse();
         var cycle = new ShoulderCycle();
         Check(ShoulderRig.EntryBlend(0, 0.2f) == 0 && Near(ShoulderRig.EntryBlend(0.1f, 0.2f), 0.5f) &&
             ShoulderRig.EntryBlend(5, 0.2f) == 1, "Entry blend eases between original and shoulder framing");
@@ -183,6 +184,92 @@ internal static partial class Program
         pos.X -= 0.025f;
         reversal.Follow(pos, 1f / 60, 0.2f, 0.8f);
         Check(Vector3.Distance(previous, reversal.Offset(0, 0, 0)) < 0.03f, "Strafing reversal changes lag continuously");
+    }
+
+    private static void TestRidingResponse()
+    {
+        static (float onset, float tail, float end) StartAndStop(int fps, float follow, float recovery)
+        {
+            var rig = new ShoulderRig();
+            var position = Vector3.Zero;
+            var dt = 1f / fps;
+            float onset = 0, tail = 0;
+            void Step() => rig.Follow(position, dt, follow, 0.8f, 0, 0, 1, recovery, 35);
+            Step();
+            for (var i = 1; i <= 4 * fps; i++)
+            {
+                position.Z += 12 * dt;
+                Step();
+                if (i == fps / 6) onset = -rig.Offset(0, 0, 0).Z;
+            }
+            var previous = -rig.Offset(0, 0, 0).Z;
+            for (var i = 1; i <= 3 * fps; i++)
+            {
+                Step();
+                var current = -rig.Offset(0, 0, 0).Z;
+                Check(current >= -0.000001f && current <= previous + 0.000002f, "Mounted stop is monotonic through the entire return");
+                if (i == 1 && recovery >= 1) Check(current > previous * 0.96f, "Stopping avoids a one-frame snap even at 30 FPS");
+                if (i == fps / 2) tail = current;
+                previous = current;
+            }
+            return (onset, tail, previous);
+        }
+        var referenceTail = StartAndStop(60, 0.1f, 1.5f).tail;
+        foreach (var fps in new[] { 30, 60, 144 })
+        {
+            var fast = StartAndStop(fps, 0.1f, 0.3f);
+            var gentle = StartAndStop(fps, 0.1f, 1.5f);
+            var longFollow = StartAndStop(fps, 0.8f, 1.5f);
+            Check(Near(fast.onset, gentle.onset) && gentle.onset > longFollow.onset + 0.22f,
+                "The mounted follow slider changes onset even at the travel limit, independently of recovery");
+            Check(fast.tail < 0.025f && gentle.tail > 0.30f && Math.Abs(gentle.tail - longFollow.tail) < 0.001f,
+                "The recovery slider controls the return independently of the follow slider");
+            Check(Math.Abs(gentle.tail - referenceTail) < 0.001f && gentle.end < 0.004f,
+                "Mounted recovery timing is stable across frame rates");
+        }
+
+        static Vector3 RideCurve(float signedRate, float strength, bool move = true)
+        {
+            var rig = new ShoulderRig();
+            Vector3 position = default;
+            float yaw = 0;
+            const float dt = 1f / 60;
+            for (var i = 0; i <= 300; i++)
+            {
+                var rate = i < 100 ? 0 : signedRate;
+                var step = rate * dt;
+                if (move) position += Vector3.Transform(Vector3.UnitZ * (7 * dt),
+                    Quaternion.CreateFromAxisAngle(Vector3.UnitY, yaw + step / 2));
+                yaw += step;
+                rig.Follow(position, dt, 0.15f, 1.5f, yaw, 0, 1, 1, strength);
+            }
+            return Vector3.Transform(rig.Offset(yaw, 0, 0), Quaternion.CreateFromAxisAngle(Vector3.UnitY, -yaw));
+        }
+        var right = RideCurve(0.9f, 100);
+        var left = RideCurve(-0.9f, 100);
+        var subtle = RideCurve(0.9f, 35);
+        var off = RideCurve(0.9f, 0);
+        Check(right.X < subtle.X - 0.1f && subtle.X < off.X - 0.06f && Math.Abs(right.X + left.X) < 0.002f,
+            "Ground-track acceleration gives proportional, mirrored outside-of-turn sway");
+        Check(RideCurve(1.9f, 100, false) == Vector3.Zero && Vector3.Distance(RideCurve(0, 100), RideCurve(0, 0)) < 0.00001f,
+            "Orbiting a stopped mount and travelling straight generate no artificial sway");
+        Check(right.Length() <= 1.501f, "Cornering stays within the configured lag distance");
+
+        var reversing = new ShoulderRig();
+        var pos = Vector3.Zero;
+        void Ride(float dt) => reversing.Follow(pos, dt, 0.4f, 0.8f, 0, 100, 1, 1, 35);
+        for (var i = 0; i < 180; i++) { pos.X += 0.15f; Ride(1f / 60); }
+        var before = reversing.Offset(0, 0, 0);
+        Ride(0);
+        Check(before == reversing.Offset(0, 0, 0), "Duplicate timestamps preserve the mounted spring");
+        pos.X += 3.6f;
+        Ride(0.3f);
+        Check(Vector3.Distance(before, reversing.Offset(0, 0, 0)) < 0.001f, "A long riding frame preserves a plausible flight movement");
+        pos.X -= 0.15f;
+        Ride(1f / 60);
+        Check(reversing.Offset(0, 0, 0).X < before.X + 0.015f, "Sudden reversal starts by gently unwinding the old offset");
+        for (var i = 0; i < 150; i++) { pos.X -= 0.15f; Ride(1f / 60); }
+        Check(reversing.Offset(0, 0, 0).X > 0.79f, "After reversal the full configured lag develops in the new direction");
     }
 
     private static void TestShoulderFlight()

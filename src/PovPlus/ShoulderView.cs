@@ -262,7 +262,8 @@ internal sealed unsafe class ShoulderView : IDisposable
                     motionFrame = framework->FrameCounter;
                     rig.Follow(root, framework->FrameDeltaTime,
                         float.Lerp(foot.Lag, mounted.Lag, mountWeight), float.Lerp(foot.MaxLag, mounted.MaxLag, mountWeight),
-                        camera->currentHRotation, float.Lerp(foot.VerticalLagPercent, mounted.VerticalLagPercent, mountWeight));
+                        camera->currentHRotation, float.Lerp(foot.VerticalLagPercent, mounted.VerticalLagPercent, mountWeight),
+                        mountWeight, mounted.RecoverySeconds, mounted.TurnInertiaPercent);
                 }
                 var head = riding ? ReadRiderHead(root) : null;
                 var anchor = mountAnchor.Resolve(framework->FrameCounter, framework->FrameDeltaTime,

@@ -304,8 +304,14 @@ public class MainWindow : Window, IDisposable
             profile.MaxDistance = max;
             Config.Save();
         }
-        Slider("移动跟随滞后（秒）", ref profile.Lag, 0, 0.4f, defaults.Lag, "%.2f");
-        Slider("最大滞后距离", ref profile.MaxLag, 0, 0.8f, defaults.MaxLag, "%.2f");
+        Slider("移动跟随滞后（秒）", ref profile.Lag, 0, riding ? ShoulderRig.MaxRidingLagTime : 0.4f, defaults.Lag, "%.2f");
+        if (riding)
+        {
+            Slider("减速与停步回正时间（秒）", ref profile.RecoverySeconds, ShoulderRig.MinRecovery, ShoulderRig.MaxRecovery, defaults.RecoverySeconds, "%.2f");
+            Slider("转弯惯性强度", ref profile.TurnInertiaPercent, 0, 100, defaults.TurnInertiaPercent, "%.0f%%");
+            ImGui.TextWrapped(L.T("加长回正时间，减速或停步时镜头会更缓地收回。转弯惯性让镜头在坐骑拐弯时轻轻偏向弯外，设为零可关闭。"));
+        }
+        Slider("最大滞后距离", ref profile.MaxLag, 0, riding ? ShoulderRig.MaxRidingLagDistance : 0.8f, defaults.MaxLag, "%.2f");
         Slider("上下滞后权重", ref profile.VerticalLagPercent, 0, 100, defaults.VerticalLagPercent, "%.0f%%");
     }
 
