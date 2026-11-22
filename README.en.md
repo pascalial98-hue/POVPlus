@@ -6,7 +6,7 @@
 
 See your body, turn and lean naturally, and keep your head's shadow.
 
-A community fork of [Tiraesias's POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta for FFXIV CN / Dalamud. Current version: **1.6.1.4**. Original attribution, Git history and the AGPL-3.0-or-later license are retained.
+A community fork of [Tiraesias's POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta for FFXIV CN / Dalamud. Current version: **1.7.0.0**. Original attribution, Git history and the AGPL-3.0-or-later license are retained.
 
 See [CN repository review notes](docs/CN_SUBMISSION.md), [standard build instructions](docs/BUILD.md) and [AI usage disclosure](docs/AI_USAGE.md) for submission details and the scope of AI-assisted development and artwork.
 
@@ -21,7 +21,7 @@ See [CN repository review notes](docs/CN_SUBMISSION.md), [standard build instruc
 2. Refresh the plugin installer, search for **POV+ Enhanced**, and install it. Future updates use the same installer; the testing channel is not required.
 3. In Character Configuration → Control Settings → General, set **1st Person Camera Auto Adjustment** to **Never**.
 4. On first use, calibration opens automatically in third person. Use the front/side character diagrams to align the cyan viewpoint marker with the surface of the nose bridge between the eyes. Save, then enter first person with the normal game controls.
-5. Reopen **Viewpoint calibration** at the top of `/pov` anytime during normal gameplay, outside combat.
+5. Reopen **Viewpoint calibration** on the General page of `/pov` anytime during normal gameplay, outside combat.
 
 **Migrating from upstream or a personal test build:** back up your `PovPlus` configuration, disable the old plugin, and remove its development-plugin entry if present. Disable the original POV+ custom repository before installing this fork. The internal name remains `PovPlus` to preserve settings. Do not load two copies at once; deleting your configuration is normally unnecessary.
 
@@ -31,6 +31,8 @@ Manual packages are available in [Releases](https://github.com/pascalial98-hue/P
 
 | Feature | Behavior |
 | --- | --- |
+| Optional shoulder view | Enable shoulder view in the General page of /pov to cycle through third person, shoulder view and first person with the game's perspective toggle. Shoulder view is off by default. |
+| On-foot and mounted cameras | On-foot and mounted views remember their own zoom distance and have separate framing and zoom limits. Mounts also have adjustable tracking lag, recovery when stopping, and cornering sway. |
 | First-use guide | A movable window, FFXIV character front/side diagrams, live viewpoint marker and three-axis fine adjustment. Save to apply; closing or cancelling discards draft offsets. |
 | Head hiding and camera transitions | Hides the head as the camera approaches, and restores it only after the camera has moved away. Enabled by default for new configurations. |
 | Complete head shadow, on by default | Excludes face, hair, headgear and related models from the main view while keeping their native shadow rendering. No duplicate actor is created. |
@@ -41,7 +43,7 @@ Manual packages are available in [Releases](https://github.com/pascalial98-hue/P
 | Stationary-pose protection | Gamepad right-stick look, ordinary RMB and direct mouse look preserve sitting, dozing and similar looped poses. The left stick and movement keys still end the pose. |
 | Head-animation weights | Independent 0–100% yaw, pitch and roll weights, separate from smoothing. |
 | Close-up visibility | NearPlane defaults to 0.015 for new configurations and supports values down to 0.001; optional near-object visibility, selected hair/ear details and attenuation of nearby self-targeted effects. |
-| Bilingual settings | New configurations default to **中英对照 / 中文 + English**, pairing each Chinese item with English. **Auto / 简体中文 / English** remain available at the top of settings. Changes apply immediately. Auto follows Dalamud's UI language, using English for non-Chinese languages. |
+| Bilingual settings | New configurations default to **中英对照 / 中文 + English**, pairing each Chinese item with English. **Auto / 简体中文 / English** remain available on the General page. Changes apply immediately. Auto follows Dalamud's UI language, using English for non-Chinese languages. |
 
 Use `/pov toggle` to enable or disable the plugin. Ordinary settings save automatically; calibration offsets require **Save and finish**. Existing configurations are not interrupted with automatic onboarding, and their offsets and NearPlane remain unchanged. Head hiding and full head shadows default to on for new configurations. Existing choices, including language selections, are retained. Full head shadows remain experimental and can be disabled; near-object visibility, appearance details and self-effect attenuation still default to off.
 
@@ -51,7 +53,7 @@ Add an independent, default-off Body-relative view and look limits option. The t
 
 **This option is intended for viewing stationary poses, not for use while moving. Running may still cause noticeable camera sway even with smoothing.**
 
-Enable under `/pov → General → Look Limits → Body-relative view and look limits`. Movement smoothing reduces animation rotation but does not make this option suitable for running. Mouse input and viewpoint position bypass that smoothing.
+Enable under `/pov → View & tracking → Body-relative view → Body-relative view and look limits`. Movement smoothing reduces animation rotation but does not make this option suitable for running. Mouse input and viewpoint position bypass that smoothing.
 
 ## Compatibility and limitations
 

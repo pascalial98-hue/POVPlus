@@ -2,7 +2,7 @@
 
 ![POV+ Enhanced](https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/docs/images/povplus-enhanced-preview-v2.png)
 
-**中文 / English · 1.6.1.4** · [English only](README.en.md)
+**中文 / English · 1.7.0.0** · [English only](README.en.md)
 
 基于 Tiraesias 的 POV+ Beta 制作的国服第一人称增强分支。<br>
 An immersive first-person camera for FFXIV CN, built on Tiraesias's POV+ Beta.
@@ -14,6 +14,12 @@ Look down to see your body and clothes, look around naturally, and adjust the vi
 CURRENT TARGET: Chinese client, Dalamud API 15. Latest build baseline: CN 2026.11.03.0000.0000 / Dalamud 15.0.4.0. International clients have not been verified.
 
 ## 功能 / Features
+
+- 在 /pov 的「通用」页开启越肩后，用游戏原有的视角切换键依次切换第三人称、越肩和第一人称。越肩默认关闭。<br>
+  Enable shoulder view in the General page of /pov to cycle through third person, shoulder view and first person with the game's perspective toggle. Shoulder view is off by default.
+
+- 步行和骑乘分别记住滚轮距离，可独立调整肩位和缩放范围。骑乘时还可调整跟随滞后、停步回正和转弯惯性。<br>
+  On-foot and mounted views remember their own zoom distance and have separate framing and zoom limits. Mounts also have adjustable tracking lag, recovery when stopping, and cornering sway.
 
 - 第一人称显示身体，默认隐藏自己的头部并保留完整头影；镜头接近头部后才隐藏，切回第三人称、离开头部后再恢复。<br>
   Visible body in first person. Head hiding and full head shadows are enabled by default; the head disappears as the camera approaches and returns after it moves away.
@@ -30,14 +36,14 @@ CURRENT TARGET: Chinese client, Dalamud API 15. Latest build baseline: CN 2026.1
 - 手柄右摇杆、普通右键和鼠标直控转镜头均保护坐下、躺下等固定循环动作；左摇杆和移动键仍可正常结束动作。<br>
   Gamepad right-stick look, ordinary right-drag and direct mouse look preserve sitting, dozing and similar fixed/looped poses. The left stick and movement keys still end the pose normally.
 
-- 首次使用提供正侧面图示、实时视点标记和微调引导；正常场景、非战斗状态下，可从 /pov 顶部重新进入。<br>
+- 首次使用提供正侧面图示、实时视点标记和微调引导；正常场景、非战斗状态下，可从 /pov 的「通用」页重新进入。<br>
   First-use calibration with front/side diagrams, a live viewpoint marker and fine adjustment. Reopen it from /pov anytime outside combat during normal gameplay.
 
 - 左右、上下、侧倾分别设置跟随关联度；另有可选近物体保留和近处自身特效减弱。<br>
   Independent yaw, pitch and roll follow weights, plus optional nearby object visibility and attenuation of close self-effects.
 
-- 新配置默认中英对照：每项中文后紧接英文。也可选择自动、简体中文或 English；旧配置保留语言选择，可在 /pov 顶部切换为“中英对照”。<br>
-  New configurations show Chinese followed by English for each item. Auto, Chinese-only and English-only modes remain available. Existing language selections are retained; select the bilingual option at the top of /pov to switch.
+- 新配置默认中英对照：每项中文后紧接英文。也可选择自动、简体中文或 English；旧配置保留语言选择，可在 /pov 的「通用」页切换为“中英对照”。<br>
+  New configurations show Chinese followed by English for each item. Auto, Chinese-only and English-only modes remain available. Existing language selections are retained; select the bilingual option on the General page of /pov to switch.
 
 ### 身体姿态视角 / Body-relative view
 
@@ -47,8 +53,8 @@ Add an independent, default-off Body-relative view and look limits option. The t
 **此选项适合静止姿态观察，不适合移动时使用；即使有平滑处理，跑动时仍可能明显晃动。**<br>
 **This option is intended for viewing stationary poses, not for use while moving. Running may still cause noticeable camera sway even with smoothing.**
 
-开启位置：`/pov → 常用 → 转头范围 → 视角与限位跟随身体姿态`。<br>
-Enable under `/pov → General → Look Limits → Body-relative view and look limits`.
+开启位置：`/pov → 视点与跟随 → 身体姿态 → 视角与限位跟随身体姿态`。<br>
+Enable under `/pov → View & tracking → Body-relative view → Body-relative view and look limits`.
 
 ## 安装 / Installation
 

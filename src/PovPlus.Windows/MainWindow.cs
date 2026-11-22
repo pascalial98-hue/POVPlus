@@ -126,7 +126,7 @@ public class MainWindow : Window, IDisposable
         if (calibrate && plugin.StartCalibration()) return;
         ImGui.TextWrapped(L.T("切到第三人称，用图示和实时标记调整两眼之间的视点。请在正常场景、非战斗状态下使用。"));
         Heading("视角切换");
-        Toggle("将越肩视角加入视角切换循环（本地测试）", ref Config.ShoulderCycleEnabled);
+        Toggle("将越肩视角加入视角切换循环", ref Config.ShoulderCycleEnabled);
         ImGui.TextWrapped(L.T("用游戏原有的视角切换键，依次切换第三人称、越肩和第一人称。"));
         if (Config.ShoulderCycleEnabled)
             Slider("进入越肩的过渡时间（秒）", ref Config.ShoulderEntryTime, 0, 0.6f, ShoulderRig.DefaultEntryTime, "%.2f");
@@ -365,7 +365,7 @@ public class MainWindow : Window, IDisposable
     {
         if (!Config.ShoulderCycleEnabled)
         {
-            Toggle("将越肩视角加入视角切换循环（本地测试）", ref Config.ShoulderCycleEnabled);
+            Toggle("将越肩视角加入视角切换循环", ref Config.ShoulderCycleEnabled);
             if (!Config.ShoulderCycleEnabled) return;
         }
         if (plugin.ShoulderUnavailable) ImGui.TextWrapped(L.T("当前客户端无法启用越肩视角，请查看 Dalamud 日志。"));

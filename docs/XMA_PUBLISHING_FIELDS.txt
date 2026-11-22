@@ -1,12 +1,12 @@
 POV+ Enhanced — XMA 发布字段建议（未提交 XMA）
 
 Name: POV+ Enhanced
-Version: 1.6.1.4
+Version: 1.7.0.0
 Type: Dalamud Plugin
 Author display name: Pascalial
 Genders: Unisex
 Races: Unknown / Not applicable（镜头插件不替换指定种族模型；正文说明种族及改模适配需自行校准，不把标签写成已全种族实测。）
-Affects / Replaces: First-person camera
+Affects / Replaces: First-person and over-the-shoulder cameras
 Tags: plugin, dalamud, camera, first person, immersion, body visibility, free look, leaning, roleplay
 Primary File or Link label: Repository (copy link into Dalamud settings)
 Primary URL: https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/repo.json
