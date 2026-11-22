@@ -9,7 +9,7 @@ using System.Security.Permissions;
 [assembly: AssemblyConfiguration("Release")]
 [assembly: AssemblyDescription("POV+ Enhanced first-person camera")]
 [assembly: AssemblyFileVersion("1.7.0.0")]
-[assembly: AssemblyInformationalVersion("1.7.0.0-speed-local.1")]
+[assembly: AssemblyInformationalVersion("1.7.0.0-speed-local.2")]
 [assembly: AssemblyProduct("POV+ Enhanced")]
 [assembly: AssemblyTitle("POV+ Enhanced")]
 [assembly: AssemblyMetadata("RepositoryUrl", "https://github.com/pascalial98-hue/POVPlus")]

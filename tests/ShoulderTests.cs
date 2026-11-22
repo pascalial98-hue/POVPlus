@@ -67,7 +67,8 @@ internal static partial class Program
     {
         var settings = new ShoulderCombatSettings { Side = -0.4f, Height = 0.2f, Distance = 1.2f, EnterSeconds = 1, ExitSeconds = 2 };
         float phase = 0;
-        Check(settings.Advance(ref phase, true, 0.25f) == Vector3.Zero, "Combat framing is opt-in for existing profiles");
+        Vector3 OnFoot(bool inCombat, float dt) => settings.Advance(ref phase, inCombat, dt, riding: false);
+        Check(OnFoot(true, 0.25f) == Vector3.Zero, "Combat framing is opt-in for existing profiles");
         settings.Enabled = true;
         var full = new Vector3(settings.Side, settings.Height, settings.Distance);
         foreach (var fps in new[] { 30, 60, 144 })
@@ -78,7 +79,7 @@ internal static partial class Program
             var distance = zoom.Update(8, 1, 20, 1, 4, 1);
             for (var i = 0; i < 3 * fps; ++i)
             {
-                var offset = settings.Advance(ref phase, i < fps, 1f / fps);
+                var offset = OnFoot(i < fps, 1f / fps);
                 distance = zoom.Update(distance, 1, 20, 1, 4, 1, offset.Z);
                 Check(Near(zoom.Selected, 2.5f) && Near(distance, 2.5f + offset.Z),
                     "Combat blend is independent of wheel memory and repeated camera queries");
@@ -90,22 +91,28 @@ internal static partial class Program
             Check(Near(distance, 2.5f), "Leaving combat restores the original shoulder zoom");
         }
         phase = 0;
-        var entering = settings.Advance(ref phase, true, 0.4f);
-        Check(settings.Advance(ref phase, false, 0) == entering && settings.Advance(ref phase, false, 0.1f).Z < entering.Z,
+        var entering = OnFoot(true, 0.4f);
+        Check(OnFoot(false, 0) == entering && OnFoot(false, 0.1f).Z < entering.Z,
             "A quick combat reversal continues from the current blend");
+        Check(settings.Advance(ref phase, true, 0, riding: true) == Vector3.Zero && phase == 0,
+            "Mounting clears the entire combat framing and its phase on the first tick");
+        Check(settings.Advance(ref phase, true, 1, riding: true) == Vector3.Zero && OnFoot(false, 0.1f) == Vector3.Zero,
+            "Remaining mounted cannot arm combat framing for a later dismount");
+        Check(Vector3.Distance(OnFoot(true, 0.5f), full * 0.5f) < 0.0001f,
+            "Dismounting into combat starts the normal on-foot entry blend");
         phase = 1;
         settings.Enabled = false;
-        Check(settings.Advance(ref phase, true, 0.1f).Z < full.Z && phase > 0, "Disabling mid-combat fades out");
+        Check(OnFoot(true, 0.1f).Z < full.Z && phase > 0, "Disabling mid-combat fades out");
         settings.Enabled = true;
         settings.EnterSeconds = settings.ExitSeconds = 0;
-        Check(settings.Advance(ref phase, true, 0) == full && settings.Advance(ref phase, false, 0) == Vector3.Zero,
+        Check(OnFoot(true, 0) == full && OnFoot(false, 0) == Vector3.Zero,
             "Zero duration is immediate in either direction");
         settings.Distance = float.NaN;
-        Check(float.IsFinite(settings.Advance(ref phase, true, 0).Z), "Invalid saved offsets are bounded");
+        Check(float.IsFinite(OnFoot(true, 0).Z), "Invalid saved offsets are bounded");
         var rig = new ShoulderRig();
         var pivot = rig.Offset(MathF.PI / 2, 2, 2, new Vector2(0.5f, 0.2f));
         Check(Vector3.Distance(pivot, new Vector3(0, 2.2f, -2.5f)) < 0.0001f,
-            "Combat framing adds to the mounted profile at its limit and rotates with the orbit");
+            "Additional framing at the rig limit rotates with the orbit");
 
         var wheel = new ShoulderZoom();
         wheel.Begin(6, 2.5f);
@@ -157,13 +164,16 @@ internal static partial class Program
         var zoom = new ShoulderZoom();
         zoom.Begin(8, 2.5f);
         float nativeZoom = 8;
+        var combat = new ShoulderCombatSettings { Enabled = true, Distance = 1, EnterSeconds = 0 };
+        float combatPhase = 1;
         for (int i = 0; i <= 120; i++)
         {
             speed.Update(Vector3.UnitY * (i * 0.25f), 1f / 60, true, mount);
-            nativeZoom = zoom.Update(nativeZoom, 0.25f, 20, 1, 4, 1, 1 + speed.Offset);
-            Check(Near(zoom.Selected, 2.5f) && Near(nativeZoom, 3.5f + speed.Offset), "Speed stacks with combat and leaves wheel memory alone");
+            var mountCombat = combat.Advance(ref combatPhase, true, 1f / 60, riding: true);
+            nativeZoom = zoom.Update(nativeZoom, 0.25f, 20, 1, 4, 1, mountCombat.Z + speed.Offset);
+            Check(Near(zoom.Selected, 2.5f) && Near(nativeZoom, 2.5f + speed.Offset), "Mounted zoom uses speed alone even with the combat flag set");
         }
-        nativeZoom = zoom.Update(nativeZoom + 0.25f, 0.25f, 20, 1, 4, 1, 1 + speed.Offset);
+        nativeZoom = zoom.Update(nativeZoom + 0.25f, 0.25f, 20, 1, 4, 1, speed.Offset);
         var moving = speed.Offset;
         for (int i = 0; i < 360; i++)
         {
@@ -171,7 +181,10 @@ internal static partial class Program
             nativeZoom = zoom.Update(nativeZoom, 0.25f, 20, 1, 4, 1, speed.Offset);
             if (i == 2) Check(speed.Offset > 0.9f * moving && speed.Offset < moving, "Stopping eases in without snapping");
         }
-        Check(speed.Offset == 0 && Near(zoom.Selected, 2.75f) && Near(nativeZoom, 2.75f), "Stopping and ending combat restore manual wheel changes");
+        Check(speed.Offset == 0 && Near(zoom.Selected, 2.75f) && Near(nativeZoom, 2.75f), "Stopping the mount preserves manual wheel changes");
+        var footCombat = combat.Advance(ref combatPhase, true, 1f / 60, riding: false);
+        Check(Near(zoom.Update(nativeZoom, 0.25f, 20, 1, 4, 1, footCombat.Z + run), 3.75f + run) && Near(zoom.Selected, 2.75f),
+            "On foot the speed and combat effects still add to the manual distance");
         speed.Update(Vector3.Zero, 1f / 60, false, foot);
         speed.Update(100 * Vector3.UnitX, 1f / 60, false, foot);
         speed.Update(102 * Vector3.UnitX, 1f / 60, true, mount);

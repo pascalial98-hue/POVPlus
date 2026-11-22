@@ -1,9 +1,9 @@
 {
   "随移动速度拉远镜头": "Pull the camera back with movement speed",
   "速度产生的最大额外距离": "Maximum extra distance at speed",
-  "骑行和飞行都按实际速度拉远，升降也计入。停稳后回到滚轮选定的距离，战斗偏移另行叠加。": "Riding and flying use actual speed, including climbs and descents. Stopping restores your wheel distance. Combat offsets apply separately.",
+  "骑行和飞行都按实际速度拉远，升降也计入。停稳后回到滚轮选定的距离。": "Riding and flying use actual speed, including climbs and descents. Stopping restores your wheel distance.",
   "按水平移速拉远，减速后平滑收回。滚轮仍调整基础距离，战斗偏移另行叠加。": "Horizontal speed pulls the camera back. Slowing down eases it in. The wheel controls the base distance and combat offsets apply separately.",
-  "战斗镜头（步行与骑乘共用）": "Combat camera (shared on foot and mounted)",
+  "战斗镜头": "Combat camera",
   "进战时叠加越肩镜头调整": "Apply shoulder camera offsets in combat",
   "额外肩位（左 / 右）": "Shoulder offset (left / right)",
   "额外高度（降低 / 抬高）": "Height offset (lower / higher)",

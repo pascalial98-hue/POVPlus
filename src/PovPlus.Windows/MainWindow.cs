@@ -373,13 +373,16 @@ public class MainWindow : Window, IDisposable
         var defaults = riding ? RidingDefaults : WalkingDefaults;
         if (riding) DrawShoulderMotion(profile, defaults, riding);
         DrawShoulderFraming(profile, defaults, riding);
-        if (!riding) DrawShoulderMotion(profile, defaults, riding);
-        DrawShoulderCombat();
+        if (!riding)
+        {
+            DrawShoulderMotion(profile, defaults, riding);
+            DrawShoulderCombat();
+        }
     }
 
     private void DrawShoulderCombat()
     {
-        Heading("战斗镜头（步行与骑乘共用）");
+        Heading("战斗镜头");
         var combat = Config.CombatShoulder;
         Toggle("进战时叠加越肩镜头调整", ref combat.Enabled);
         if (!combat.Enabled) return;
@@ -416,7 +419,7 @@ public class MainWindow : Window, IDisposable
         {
             Slider("速度产生的最大额外距离", ref profile.SpeedZoomDistance, 0, ShoulderSpeedZoom.MaxDistance, ShoulderSpeedZoom.DefaultDistance, "%.2f");
             ImGui.TextWrapped(L.T(riding
-                ? "骑行和飞行都按实际速度拉远，升降也计入。停稳后回到滚轮选定的距离，战斗偏移另行叠加。"
+                ? "骑行和飞行都按实际速度拉远，升降也计入。停稳后回到滚轮选定的距离。"
                 : "按水平移速拉远，减速后平滑收回。滚轮仍调整基础距离，战斗偏移另行叠加。"));
         }
     }

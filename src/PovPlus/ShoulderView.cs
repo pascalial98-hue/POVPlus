@@ -239,7 +239,7 @@ internal sealed unsafe class ShoulderView : IDisposable
             zoomTime += dt;
             blend = ShoulderRig.EntryBlend(entryTime, Config.ShoulderEntryTime);
             mountWeight = Math.Clamp(mountWeight + (riding ? dt : -dt) / 0.22f, 0, 1);
-            combatOffset = Config.CombatShoulder.Advance(ref combatPhase, Service.Condition[ConditionFlag.InCombat], dt);
+            combatOffset = Config.CombatShoulder.Advance(ref combatPhase, Service.Condition[ConditionFlag.InCombat], dt, riding);
             speedZoom.Update(player.Position, elapsed, riding, Profile);
             UpdateDistance();
         }

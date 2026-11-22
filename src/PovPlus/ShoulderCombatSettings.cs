@@ -13,8 +13,13 @@ public sealed class ShoulderCombatSettings
     public float EnterSeconds = DefaultEnter, ExitSeconds = DefaultExit;
 
     // The phase belongs to the active shoulder camera, never to saved settings.
-    internal Vector3 Advance(ref float phase, bool inCombat, float dt)
+    internal Vector3 Advance(ref float phase, bool inCombat, float dt, bool riding)
     {
+        if (riding)
+        {
+            phase = 0;
+            return Vector3.Zero;
+        }
         var entering = Enabled && inCombat;
         var seconds = entering ? ShoulderRig.Bound(EnterSeconds, 0, MaxSeconds, DefaultEnter)
                                : ShoulderRig.Bound(ExitSeconds, 0, MaxSeconds, DefaultExit);
