@@ -430,8 +430,8 @@ public class MainWindow : Window, IDisposable
         {
             Slider("速度产生的最大额外距离", ref profile.SpeedZoomDistance, 0, ShoulderSpeedZoom.MaxDistance, ShoulderSpeedZoom.DefaultDistance, "%.2f");
             ImGui.TextWrapped(L.T(riding
-                ? "骑行和飞行都按实际速度拉远，升降也计入。停稳后回到滚轮选定的距离。"
-                : "按水平移速拉远，减速后平滑收回。滚轮仍调整基础距离，战斗偏移另行叠加。"));
+                ? "常速骑行时轻微拉远，加速后更明显。飞行升降也计入，停稳后回到滚轮选定的距离。"
+                : "常速移动时轻微拉远，加速跑时拉远更明显。按水平移速计算，可与战斗偏移叠加。"));
         }
     }
 

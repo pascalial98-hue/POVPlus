@@ -206,6 +206,28 @@ internal static partial class Program
         Check(Near(Travel(18 * Vector3.Normalize(Vector3.One), true, mount, 30), climb), "Diagonal flight uses total speed once");
         Check(Travel(10 * Vector3.UnitY, false, foot, 60) == 0 && Travel(0.1f * Vector3.UnitX, true, mount, 60) == 0,
             "Standing jumps on foot and idle drift do not pull the camera back");
+        foreach (bool riding in new[] { false, true })
+        {
+            var profile = riding ? mount : foot;
+            float normal = riding ? 9.5f : 6f;
+            float full = riding ? 18f : 10f;
+            var last = 0f;
+            for (float v = 0; v <= full + 1; v += 0.25f)
+            {
+                var offset = Travel(v * Vector3.UnitX, riding, profile, 60);
+                Check(offset >= last - 0.00001f && offset <= profile.SpeedZoomDistance + 0.00001f,
+                    "Speed response is monotonic and bounded across both overlapping ramps");
+                last = offset;
+            }
+            foreach (int fps in new[] { 30, 60, 144 })
+            {
+                var ordinary = Travel(normal * Vector3.UnitX, riding, profile, fps);
+                var boosted = Travel((normal * 1.20f) * Vector3.UnitX, riding, profile, fps);
+                Check(ordinary > 0 && ordinary < 0.15f * profile.SpeedZoomDistance &&
+                    boosted - ordinary > 2.5f * ordinary && boosted < profile.SpeedZoomDistance,
+                    "A 20 percent pace increase produces a larger zoom change than starting from rest");
+            }
+        }
         mount.SpeedZoomDistance = 0.2f;
         Check(Near(Travel(25 * Vector3.UnitX, true, mount, 60), 0.2f) && Near(Travel(6 * Vector3.UnitZ, false, foot, 30), run),
             "Mounted cap is independent of the on-foot cap");
