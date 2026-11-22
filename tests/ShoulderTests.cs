@@ -10,6 +10,7 @@ internal static partial class Program
         TestShoulderSpeedZoom();
         TestCameraLensOwnership();
         TestShoulderFlight();
+        TestFlightSwayAndBank();
         TestShoulderTurning();
         TestRidingResponse();
         var cycle = new ShoulderCycle();
@@ -61,6 +62,54 @@ internal static partial class Program
         Check(rig.Offset(0, 0, 0) == Vector3.Zero, "Suspending the game clears motion history");
         rig.Follow(new(float.NaN), 0.016f, 0.1f, 0.8f);
         Check(float.IsFinite(rig.Offset(0, float.NaN, float.NaN).Length()), "Corrupt positions and config keep the offset finite");
+    }
+
+    private static void TestFlightSwayAndBank()
+    {
+        static Vector3 Arc(float time, float side) =>
+            16 * new Vector3(side * (1 - MathF.Cos(time)), 0, MathF.Sin(time));
+
+        static ShoulderFlightMotion Turn(int fps, float side, float sway, float bank, bool airborne = true)
+        {
+            var motion = new ShoulderFlightMotion();
+            for (int i = 0; i <= fps * 3; i++)
+                motion.Update(Arc(i / (float)fps, side), 1f / fps, airborne, sway, bank);
+            return motion;
+        }
+        var right = Turn(60, 1, 60, 5);
+        var left = Turn(60, -1, 60, 5);
+        var centerward = new Vector3(MathF.Cos(3), 0, -MathF.Sin(3));
+        Check(Vector3.Dot(right.Bank, centerward) > 0.05f && right.Bank.Length() <= 5 * MathF.PI / 180 + 0.0001f,
+            "Camera leans toward the center of the flight turn, within the configured angle");
+        Check(Near(left.Bank.X, -right.Bank.X) && Near(left.Bank.Z, right.Bank.Z), "Mirrored flight paths mirror the bank");
+        foreach (int fps in new[] { 30, 144 })
+        {
+            var other = Turn(fps, 1, 60, 5);
+            Check(Vector3.Distance(other.Bank, right.Bank) < 0.003f && Vector2.Distance(other.Sway, right.Sway) < 0.006f,
+                "Sway and banking are consistent across render rates");
+        }
+        Check(Turn(60, 1, 0, 5).Sway == Vector2.Zero && Turn(60, 1, 60, 0).Bank == Vector3.Zero,
+            "Flight sway and banking can be disabled independently");
+        var ground = Turn(60, 1, 100, 12, airborne: false);
+        Check(ground.Sway == Vector2.Zero && ground.Bank == Vector3.Zero, "Ground riding cannot generate flight motion");
+        var motion = new ShoulderFlightMotion();
+        float peak = 0;
+        for (int i = 0; i <= 180; i++)
+        {
+            motion.Update(Vector3.UnitY * (i / 4f), 1f / 60, true, 60, 5);
+            peak = MathF.Max(peak, motion.Sway.Length());
+        }
+        Check(peak > 0.02f && peak < 0.07f && motion.Bank == Vector3.Zero, "Straight climbs produce bounded sway without bank");
+        for (int i = 0; i < 240; i++) motion.Update(45 * Vector3.UnitY, 1f / 60, true, 60, 5);
+        Check(motion.Sway.Length() < 0.00001f && motion.Bank == Vector3.Zero, "Hovering settles even with flight mode active");
+        var beforeLanding = right.Bank;
+        right.Update(Arc(3, 1), 1f / 60, false, 60, 5);
+        Check(Vector3.Dot(beforeLanding, right.Bank) > 0 && right.Bank.Length() < beforeLanding.Length(),
+            "Landing eases out the previous bank without reversing it");
+        for (int i = 0; i < 120; i++) right.Update(Vector3.Zero, 1f / 60, false, 60, 5);
+        Check(right.Sway == Vector2.Zero && right.Bank == Vector3.Zero, "Landing fully releases all flight offsets");
+        left.Update(new(200, 0, 0), 1f / 60, true, 60, 5);
+        Check(left.Bank == Vector3.Zero && left.Sway == Vector2.Zero, "Teleports discard old flight motion");
     }
 
     private static void TestShoulderCombat()

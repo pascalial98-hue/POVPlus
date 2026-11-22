@@ -1,4 +1,9 @@
 {
+  "飞行镜头": "Flight camera",
+  "启用飞行晃动与侧倾": "Enable flight sway and banking",
+  "飞行晃动强度": "Flight sway strength",
+  "转弯最大侧倾角": "Maximum bank angle",
+  "飞得越快，镜头起伏越明显。转弯时向弯内侧倾，悬停或落地后逐渐回稳。": "Sway builds with airspeed. The camera banks into turns and settles as you hover or land.",
   "随移动速度拉远镜头": "Pull the camera back with movement speed",
   "速度产生的最大额外距离": "Maximum extra distance at speed",
   "骑行和飞行都按实际速度拉远，升降也计入。停稳后回到滚轮选定的距离。": "Riding and flying use actual speed, including climbs and descents. Stopping restores your wheel distance.",

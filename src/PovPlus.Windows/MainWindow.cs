@@ -373,7 +373,18 @@ public class MainWindow : Window, IDisposable
         var defaults = riding ? RidingDefaults : WalkingDefaults;
         if (riding) DrawShoulderMotion(profile, defaults, riding);
         DrawShoulderFraming(profile, defaults, riding);
-        if (!riding)
+        if (riding)
+        {
+            Heading("飞行镜头");
+            Toggle("启用飞行晃动与侧倾", ref Config.ShoulderFlightMotionEnabled);
+            if (Config.ShoulderFlightMotionEnabled)
+            {
+                Slider("飞行晃动强度", ref Config.ShoulderFlightSwayPercent, 0, 100, ShoulderFlightMotion.DefaultSway, "%.0f%%");
+                Slider("转弯最大侧倾角", ref Config.ShoulderFlightBankDegrees, 0, ShoulderFlightMotion.MaxBankDegrees, ShoulderFlightMotion.DefaultBankDegrees, "%.1f°");
+                ImGui.TextWrapped(L.T("飞得越快，镜头起伏越明显。转弯时向弯内侧倾，悬停或落地后逐渐回稳。"));
+            }
+        }
+        else
         {
             DrawShoulderMotion(profile, defaults, riding);
             DrawShoulderCombat();

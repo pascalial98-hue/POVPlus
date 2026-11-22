@@ -8,6 +8,9 @@ public class Configuration : IPluginConfiguration
 {
     public PluginLanguage Language = PluginLanguage.Bilingual;
     public bool ShoulderCycleEnabled;
+    public bool ShoulderFlightMotionEnabled = true;
+    public float ShoulderFlightSwayPercent = ShoulderFlightMotion.DefaultSway;
+    public float ShoulderFlightBankDegrees = ShoulderFlightMotion.DefaultBankDegrees;
     private ShoulderCombatSettings combatShoulder = new();
     public ShoulderCombatSettings CombatShoulder
     {

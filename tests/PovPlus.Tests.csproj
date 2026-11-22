@@ -12,6 +12,7 @@
     <Compile Include="..\src\PovPlus\ShoulderCombatSettings.cs" Link="ShoulderCombatSettings.cs" />
     <Compile Include="..\src\PovPlus\ShoulderZoom.cs" Link="ShoulderZoom.cs" />
     <Compile Include="..\src\PovPlus\ShoulderSpeedZoom.cs" Link="ShoulderSpeedZoom.cs" />
+    <Compile Include="..\src\PovPlus\ShoulderFlightMotion.cs" Link="ShoulderFlightMotion.cs" />
     <Compile Include="..\src\PovPlus\ShoulderWheelScope.cs" Link="ShoulderWheelScope.cs" />
     <Compile Include="..\src\PovPlus\CameraValueOverride.cs" Link="CameraValueOverride.cs" />
     <Compile Include="..\src\PovPlus\ShoulderMountAnchor.cs" Link="ShoulderMountAnchor.cs" />

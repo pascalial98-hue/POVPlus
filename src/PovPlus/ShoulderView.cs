@@ -29,6 +29,7 @@ internal sealed unsafe class ShoulderView : IDisposable
     private readonly ShoulderRig rig = new();
     private readonly ShoulderZoom zoom = new();
     private readonly ShoulderSpeedZoom speedZoom = new();
+    private readonly ShoulderFlightMotion flight = new();
     private readonly ShoulderMountAnchor mountAnchor = new();
     private CameraValueOverride orbitFloor;
     private float originalDistance, entryTime, zoomTime, blend, mountWeight;
@@ -241,6 +242,10 @@ internal sealed unsafe class ShoulderView : IDisposable
             mountWeight = Math.Clamp(mountWeight + (riding ? dt : -dt) / 0.22f, 0, 1);
             combatOffset = Config.CombatShoulder.Advance(ref combatPhase, Service.Condition[ConditionFlag.InCombat], dt, riding);
             speedZoom.Update(player.Position, elapsed, riding, Profile);
+            if (riding && Config.ShoulderFlightMotionEnabled && !Service.Condition[ConditionFlag.Diving])
+                flight.Update(player.Position, elapsed, Service.Condition[ConditionFlag.InFlight],
+                    Config.ShoulderFlightSwayPercent, Config.ShoulderFlightBankDegrees);
+            else flight.Reset();
             UpdateDistance();
         }
         catch (Exception ex) { Stop(ex); }
@@ -283,7 +288,7 @@ internal sealed unsafe class ShoulderView : IDisposable
             }
             var offset = blend * rig.Offset(camera->currentHRotation,
                 float.Lerp(Config.ShoulderSide, mounted.Side, mountWeight), float.Lerp(Config.ShoulderHeight, mounted.Height, mountWeight),
-                new Vector2(combatOffset.X, combatOffset.Y));
+                new Vector2(combatOffset.X, combatOffset.Y) + flight.Sway);
             var length = offset.Length();
             if (length < 0.0001f) return;
             var direction = offset / length;
@@ -295,6 +300,10 @@ internal sealed unsafe class ShoulderView : IDisposable
         }
         catch (Exception ex) { Stop(ex); }
     }
+
+    internal Vector3 FlightBank(GameCamera* camera) =>
+        flight.Bank != Vector3.Zero && camera == owner && Active && riding && camera->mode == 1 && InWorld()
+            ? flight.Bank * blend : Vector3.Zero;
 
     private Vector3? ReadRiderHead(Vector3 root)
     {
@@ -323,6 +332,7 @@ internal sealed unsafe class ShoulderView : IDisposable
         combatPhase = 0;
         combatOffset = Vector3.Zero;
         speedZoom.Reset();
+        flight.Reset();
         orbitFloor = default;
         rig.Reset();
         mountAnchor.Reset();

@@ -109,6 +109,17 @@ internal static partial class Program
                 scene.Position.Equals(original.Position) && scene.Flags == original.Flags && Near(scene.ViewMatrix.M11, 0.75f),
                 "Logical native camera restored, render output kept; no compounding");
         }
+        var banking = new BodyViewScope(&scene, Vector3.UnitX * (5 * r));
+        Check(Same(scene.Vector_1, new(MathF.Sin(5 * r), MathF.Cos(5 * r), 0)) &&
+            scene.Position.Equals(original.Position) && scene.LookAtVector.Equals(original.LookAtVector),
+            "Shoulder bank tilts the camera up vector toward the turn while preserving aim and eye position");
+        banking.Restore(&scene);
+        Check(scene.Vector_1.Equals(original.Vector_1), "Restoring flight bank leaves no roll in the next perspective");
+        scene.LookAtVector = new(3, 3, 4);
+        var sideView = new BodyViewScope(&scene, Vector3.UnitX * (5 * r));
+        Check(scene.Vector_1.Equals(original.Vector_1), "Looking along the turn acceleration produces no sideways screen roll");
+        sideView.Restore(&scene);
+        scene = original;
         scene.Flags = 0;
         var inactive = new BodyViewScope(&scene, 0, bow);
         Check(scene.LookAtVector.Equals(original.LookAtVector), "Non-look-at scene cameras untouched");

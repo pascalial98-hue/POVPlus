@@ -112,15 +112,15 @@ internal static unsafe class BodyRelativeLook
     {
         var manager = Common.CameraManager;
         var camera = manager == null ? null : manager->worldCamera;
-        if (!Active || !Plugin.P.Configuration.FirstPersonBodyRelativeLook || camera == null ||
-            scene != &((NativeCamera*)camera)->SceneCamera || !POVCameraFunctionality.FirstPersonViewActive() ||
-            ((NativeCamera*)camera)->IsEventCameraAutoControl ||
-            Stopwatch.GetElapsedTime(lastSample).TotalSeconds > 0.25)
+        var scope = default(BodyViewScope);
+        if (camera != null && scene == &((NativeCamera*)camera)->SceneCamera && !((NativeCamera*)camera)->IsEventCameraAutoControl)
         {
-            renderHook!.Original(scene);
-            return;
+            if (camera->mode == 1 && Plugin.P.Shoulder is { } shoulder)
+                scope = new BodyViewScope(scene, shoulder.FlightBank(camera));
+            else if (Active && Plugin.P.Configuration.FirstPersonBodyRelativeLook && POVCameraFunctionality.FirstPersonViewActive() &&
+                Stopwatch.GetElapsedTime(lastSample).TotalSeconds <= 0.25)
+                scope = new BodyViewScope(scene, camera->GameObjectHRotation, WorldRotation);
         }
-        var scope = new BodyViewScope(scene, camera->GameObjectHRotation, WorldRotation);
         try { renderHook!.Original(scene); }
         finally { scope.Restore(scene); }
     }
