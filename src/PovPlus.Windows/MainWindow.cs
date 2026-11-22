@@ -374,6 +374,21 @@ public class MainWindow : Window, IDisposable
         if (riding) DrawShoulderMotion(profile, defaults, riding);
         DrawShoulderFraming(profile, defaults, riding);
         if (!riding) DrawShoulderMotion(profile, defaults, riding);
+        DrawShoulderCombat();
+    }
+
+    private void DrawShoulderCombat()
+    {
+        Heading("战斗镜头（步行与骑乘共用）");
+        var combat = Config.CombatShoulder;
+        Toggle("进战时叠加越肩镜头调整", ref combat.Enabled);
+        if (!combat.Enabled) return;
+        Slider("额外肩位（左 / 右）", ref combat.Side, -ShoulderCombatSettings.MaxSide, ShoulderCombatSettings.MaxSide, 0, "%.2f");
+        Slider("额外高度（降低 / 抬高）", ref combat.Height, -ShoulderCombatSettings.MaxHeight, ShoulderCombatSettings.MaxHeight, ShoulderCombatSettings.DefaultHeight, "%.2f");
+        Slider("额外距离（拉近 / 拉远）", ref combat.Distance, -ShoulderCombatSettings.MaxDistance, ShoulderCombatSettings.MaxDistance, ShoulderCombatSettings.DefaultDistance, "%.2f");
+        Slider("进战过渡时间（秒）", ref combat.EnterSeconds, 0, ShoulderCombatSettings.MaxSeconds, ShoulderCombatSettings.DefaultEnter, "%.2f");
+        Slider("脱战过渡时间（秒）", ref combat.ExitSeconds, 0, ShoulderCombatSettings.MaxSeconds, ShoulderCombatSettings.DefaultExit, "%.2f");
+        ImGui.TextWrapped(L.T("战斗中滚轮范围随额外距离平移。脱战时移除偏移，保留你手动滚轮调整的距离。"));
     }
 
     private void DrawShoulderFraming(ShoulderProfile profile, ShoulderProfile defaults, bool riding)

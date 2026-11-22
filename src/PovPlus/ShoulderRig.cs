@@ -151,12 +151,13 @@ internal sealed class ShoulderRig
         }
     }
 
-    internal Vector3 Offset(float orbitYaw, float side, float height)
+    internal Vector3 Offset(float orbitYaw, float side, float height, Vector2 extraFraming = default)
     {
         if (!float.IsFinite(orbitYaw)) return Vector3.Zero;
         side = Bound(side, -2, 2, DefaultSide);
         height = Bound(height, -1.5f, 2, DefaultHeight);
-        return Vector3.Transform(lag + new Vector3(side, height, 0), Quaternion.CreateFromAxisAngle(Vector3.UnitY, orbitYaw));
+        return Vector3.Transform(lag + new Vector3(side + extraFraming.X, height + extraFraming.Y, 0),
+            Quaternion.CreateFromAxisAngle(Vector3.UnitY, orbitYaw));
     }
 }
 

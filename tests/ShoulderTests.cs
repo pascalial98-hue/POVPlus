@@ -6,6 +6,7 @@ internal static partial class Program
     private static void TestShoulder()
     {
         TestShoulderZoom();
+        TestShoulderCombat();
         TestCameraLensOwnership();
         TestShoulderFlight();
         TestShoulderTurning();
@@ -59,6 +60,65 @@ internal static partial class Program
         Check(rig.Offset(0, 0, 0) == Vector3.Zero, "Suspending the game clears motion history");
         rig.Follow(new(float.NaN), 0.016f, 0.1f, 0.8f);
         Check(float.IsFinite(rig.Offset(0, float.NaN, float.NaN).Length()), "Corrupt positions and config keep the offset finite");
+    }
+
+    private static void TestShoulderCombat()
+    {
+        var settings = new ShoulderCombatSettings { Side = -0.4f, Height = 0.2f, Distance = 1.2f, EnterSeconds = 1, ExitSeconds = 2 };
+        float phase = 0;
+        Check(settings.Advance(ref phase, true, 0.25f) == Vector3.Zero, "Combat framing is opt-in for existing profiles");
+        settings.Enabled = true;
+        var full = new Vector3(settings.Side, settings.Height, settings.Distance);
+        foreach (var fps in new[] { 30, 60, 144 })
+        {
+            phase = 0;
+            var zoom = new ShoulderZoom();
+            zoom.Begin(8, 2.5f);
+            var distance = zoom.Update(8, 1, 20, 1, 4, 1);
+            for (var i = 0; i < 3 * fps; ++i)
+            {
+                var offset = settings.Advance(ref phase, i < fps, 1f / fps);
+                distance = zoom.Update(distance, 1, 20, 1, 4, 1, offset.Z);
+                Check(Near(zoom.Selected, 2.5f) && Near(distance, 2.5f + offset.Z),
+                    "Combat blend is independent of wheel memory and repeated camera queries");
+                if (i == fps / 2 - 1 || i == 2 * fps - 1)
+                    Check(Vector3.Distance(offset, full * 0.5f) < 0.0001f, "Independent combat entry and exit times at different frame rates");
+                if (i == fps - 1)
+                    Check(Vector3.Distance(offset, full) < 0.0001f, "Combat framing reaches the configured offset");
+            }
+            Check(Near(distance, 2.5f), "Leaving combat restores the original shoulder zoom");
+        }
+        phase = 0;
+        var entering = settings.Advance(ref phase, true, 0.4f);
+        Check(settings.Advance(ref phase, false, 0) == entering && settings.Advance(ref phase, false, 0.1f).Z < entering.Z,
+            "A quick combat reversal continues from the current blend");
+        phase = 1;
+        settings.Enabled = false;
+        Check(settings.Advance(ref phase, true, 0.1f).Z < full.Z && phase > 0, "Disabling mid-combat fades out");
+        settings.Enabled = true;
+        settings.EnterSeconds = settings.ExitSeconds = 0;
+        Check(settings.Advance(ref phase, true, 0) == full && settings.Advance(ref phase, false, 0) == Vector3.Zero,
+            "Zero duration is immediate in either direction");
+        settings.Distance = float.NaN;
+        Check(float.IsFinite(settings.Advance(ref phase, true, 0).Z), "Invalid saved offsets are bounded");
+        var rig = new ShoulderRig();
+        var pivot = rig.Offset(MathF.PI / 2, 2, 2, new Vector2(0.5f, 0.2f));
+        Check(Vector3.Distance(pivot, new Vector3(0, 2.2f, -2.5f)) < 0.0001f,
+            "Combat framing adds to the mounted profile at its limit and rotates with the orbit");
+
+        var wheel = new ShoulderZoom();
+        wheel.Begin(6, 2.5f);
+        float Step(float input, float offset, float max = 20) => wheel.Update(input, 0.25f, max, 1, 4, 1, offset);
+        Check(Near(Step(6, 2), 4.5f) && Near(Step(5, 2), 5) && Near(wheel.Selected, 3),
+            "Manual wheel input in combat only saves its base-distance delta");
+        Check(Near(Step(5, 0), 3), "Exiting combat retains only the manual adjustment");
+        Check(Near(Step(3, 5, max: 4), 4) && Near(Step(3, 5, max: 4), 4) && Near(wheel.Selected, 3),
+            "An unreachable combat interval does not overwrite the saved distance");
+        Check(Near(Step(4, -3), 0.25f) && Near(wheel.Selected, 3), "A large negative offset respects the physical floor");
+        Check(Near(Step(0.5f, -3), 0.5f) && Near(wheel.Selected, 3.5f), "Wheel reverses immediately from the clipped combat floor");
+        wheel.Begin(8, 2);
+        Check(Near(wheel.Update(8, 0.25f, 20, 2, 2, 1, 2), 4) && Near(wheel.Selected, 2),
+            "Fixed-distance profiles still receive the combat offset");
     }
 
     private static unsafe void TestCameraLensOwnership()

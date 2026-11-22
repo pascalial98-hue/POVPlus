@@ -31,6 +31,8 @@ internal sealed unsafe class ShoulderView : IDisposable
     private readonly ShoulderMountAnchor mountAnchor = new();
     private CameraValueOverride orbitFloor;
     private float originalDistance, entryTime, zoomTime, blend, mountWeight;
+    private float combatPhase;
+    private Vector3 combatOffset;
     private bool riding, processingWheel;
     private ShoulderProfile Profile => riding ? Config.MountedShoulder : Config.WalkingShoulder;
     private long? saveDistanceAt;
@@ -159,7 +161,10 @@ internal sealed unsafe class ShoulderView : IDisposable
         if (!ValidZoomBounds()) return;
         var profile = Profile;
         if (!processingWheel)
-            ShoulderZoom.ApplyFloor(ref orbitFloor, ref owner->minZoom, ShoulderZoom.Range(profile.MinDistance, profile.MaxDistance).Min);
+        {
+            var range = ShoulderZoom.Range(profile.MinDistance, profile.MaxDistance);
+            ShoulderZoom.ApplyFloor(ref orbitFloor, ref owner->minZoom, ShoulderZoom.PhysicalDistance(range.Min, combatOffset.Z));
+        }
         var inputDistance = owner->currentZoom;
         if (!wheel && !processingWheel && inputDistance != zoom.LastWritten)
         {
@@ -169,7 +174,7 @@ internal sealed unsafe class ShoulderView : IDisposable
             inputDistance = zoom.LastWritten;
         }
         owner->currentZoom = zoom.Update(inputDistance, owner->minZoom, owner->maxZoom,
-            profile.MinDistance, profile.MaxDistance, ShoulderRig.EntryBlend(zoomTime, Config.ShoulderEntryTime));
+            profile.MinDistance, profile.MaxDistance, ShoulderRig.EntryBlend(zoomTime, Config.ShoulderEntryTime), combatOffset.Z);
         if (profile.Distance == zoom.Selected) return;
         profile.Distance = zoom.Selected;
         saveDistanceAt = Environment.TickCount64 + 450;
@@ -230,6 +235,7 @@ internal sealed unsafe class ShoulderView : IDisposable
             zoomTime += dt;
             blend = ShoulderRig.EntryBlend(entryTime, Config.ShoulderEntryTime);
             mountWeight = Math.Clamp(mountWeight + (riding ? dt : -dt) / 0.22f, 0, 1);
+            combatOffset = Config.CombatShoulder.Advance(ref combatPhase, Service.Condition[ConditionFlag.InCombat], dt);
             UpdateDistance();
         }
         catch (Exception ex) { Stop(ex); }
@@ -271,7 +277,8 @@ internal sealed unsafe class ShoulderView : IDisposable
                 *position = Vector3.Lerp(*position, anchor, blend);
             }
             var offset = blend * rig.Offset(camera->currentHRotation,
-                float.Lerp(Config.ShoulderSide, mounted.Side, mountWeight), float.Lerp(Config.ShoulderHeight, mounted.Height, mountWeight));
+                float.Lerp(Config.ShoulderSide, mounted.Side, mountWeight), float.Lerp(Config.ShoulderHeight, mounted.Height, mountWeight),
+                new Vector2(combatOffset.X, combatOffset.Y));
             var length = offset.Length();
             if (length < 0.0001f) return;
             var direction = offset / length;
@@ -308,6 +315,8 @@ internal sealed unsafe class ShoulderView : IDisposable
         }
         actor = 0;
         motionFrame = null;
+        combatPhase = 0;
+        combatOffset = Vector3.Zero;
         orbitFloor = default;
         rig.Reset();
         mountAnchor.Reset();

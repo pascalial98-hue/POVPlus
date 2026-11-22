@@ -1,4 +1,12 @@
 {
+  "战斗镜头（步行与骑乘共用）": "Combat camera (shared on foot and mounted)",
+  "进战时叠加越肩镜头调整": "Apply shoulder camera offsets in combat",
+  "额外肩位（左 / 右）": "Shoulder offset (left / right)",
+  "额外高度（降低 / 抬高）": "Height offset (lower / higher)",
+  "额外距离（拉近 / 拉远）": "Distance offset (closer / farther)",
+  "进战过渡时间（秒）": "Combat entry blend (seconds)",
+  "脱战过渡时间（秒）": "Combat exit blend (seconds)",
+  "战斗中滚轮范围随额外距离平移。脱战时移除偏移，保留你手动滚轮调整的距离。": "The combat distance offset shifts the wheel zoom range. Leaving combat removes the offset and keeps manual wheel adjustments.",
   "越肩视角": "Over-the-shoulder view",
   "步行越肩": "On-foot camera",
   "骑乘越肩": "Mounted camera",

@@ -33,20 +33,28 @@ internal sealed class ShoulderZoom
         wheelUsed = false;
     }
 
-    internal float Update(float nativeDistance, float nativeMin, float nativeMax, float min, float max, float blend)
+    internal static float PhysicalDistance(float baseDistance, float offset) => Math.Max(SliderMin, baseDistance + offset);
+
+    internal float Update(float nativeDistance, float nativeMin, float nativeMax, float min, float max, float blend,
+        float offset = 0)
     {
         (min, max) = Range(min, max);
         Selected = Math.Clamp(Selected, min, max);
-        var low = Math.Clamp(min, nativeMin, nativeMax);
-        var high = Math.Clamp(max, nativeMin, nativeMax);
+        var low = Math.Clamp(PhysicalDistance(min, offset), nativeMin, nativeMax);
+        var high = Math.Clamp(PhysicalDistance(max, offset), nativeMin, nativeMax);
+        var target = Math.Clamp(Selected + offset, low, high);
         var delta = Math.Clamp(nativeDistance, nativeMin, nativeMax) - Math.Clamp(lastWritten, nativeMin, nativeMax);
         if (MathF.Abs(delta) > 0.00001f)
         {
             wheelUsed = true;
-            if (low <= max && high >= min)
-                Selected = Math.Clamp(Math.Clamp(Selected, low, high) + delta, low, high);
+            var scrolled = Math.Clamp(target + delta, low, high);
+            if (scrolled != target)
+            {
+                // Convert actual wheel movement back into the unshifted profile.
+                Selected = Math.Clamp(scrolled - offset, min, max);
+                target = scrolled;
+            }
         }
-        var target = Math.Clamp(Selected, low, high);
         // Only the automatic approach can begin outside the shoulder interval.
         // A wheel step takes over from the remembered shoulder distance.
         lastWritten = wheelUsed || blend >= 1 ? target :

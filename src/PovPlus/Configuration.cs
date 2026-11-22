@@ -8,6 +8,12 @@ public class Configuration : IPluginConfiguration
 {
     public PluginLanguage Language = PluginLanguage.Bilingual;
     public bool ShoulderCycleEnabled;
+    private ShoulderCombatSettings combatShoulder = new();
+    public ShoulderCombatSettings CombatShoulder
+    {
+        get => combatShoulder;
+        set => combatShoulder = value ?? new ShoulderCombatSettings();
+    }
     // Preserve the walking profile's original JSON keys and saved wheel position.
     internal readonly ShoulderProfile WalkingShoulder = new();
     private ShoulderProfile mountedShoulder = ShoulderProfile.Riding();
