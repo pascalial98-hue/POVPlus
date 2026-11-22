@@ -10,6 +10,7 @@ internal static partial class Program
         TestShoulderSpeedZoom();
         TestCameraLensOwnership();
         TestGlideLens();
+        TestGlideTiming();
         TestShoulderFlight();
         TestWalkingStairHeight();
         TestFlightSwayAndBank();
@@ -334,17 +335,60 @@ internal static partial class Program
         Check(ShoulderLens.IsGlideTimeline(null, 6703) && !ShoulderLens.IsGlideTimeline(null, 4048),
             "The rider glide is a fallback when the mount is unavailable");
         const float normal = 1.209f;
-        Check(Near(ShoulderLens.Target(normal, false, 8), normal) &&
-              Near(ShoulderLens.Target(normal, true, 0), normal), "Regular shoulder view uses the current third-person preset");
-        Check(Near(ShoulderLens.Target(normal, true, 8), normal + 8 * MathF.PI / 180),
-            "Only gliding adds the configured angular amount");
-        Check(Near(ShoulderLens.Target(2, true, 20), 120 * MathF.PI / 180) &&
-              Near(ShoulderLens.Target(2.2f, true, 20), 2.2f), "Do not over-widen or narrow an already wide lens");
+        Check(Near(ShoulderLens.Widen(normal, 0, 8), normal) &&
+              Near(ShoulderLens.Widen(normal, 1, 0), normal), "Regular shoulder view uses the current third-person preset");
+        Check(Near(ShoulderLens.Widen(normal, 1, 60), normal + MathF.PI / 3) &&
+              Near(ShoulderLens.Widen(normal, 0.5f, 60), normal + MathF.PI / 6),
+            "Default FOV can use the full 60 degree boost and scaled blends");
+        Check(Near(ShoulderLens.Widen(2, 1, 60), 170 * MathF.PI / 180) &&
+              Near(ShoulderLens.Widen(3, 1, 60), 3), "Do not over-widen or narrow an already wide lens");
         var nativeFov = 0.1f;
         CameraValueOverride lens = default;
-        lens.Apply(ref nativeFov, ShoulderLens.Target(normal, true, 8));
+        lens.Apply(ref nativeFov, ShoulderLens.Widen(normal, 1, 8));
         lens.Restore(ref nativeFov);
-        Check(nativeFov == 0.1f, "Rendering the glide preserves the stored third-person optical zoom");
+        Check(nativeFov == 0.1f, "The FOV override restores the native lens");
+    }
+
+    private static void TestGlideTiming()
+    {
+        ShoulderGlideTransition phase = default;
+        void Enter(float dt) => phase.Update(true, dt, 0.25f, 0.5f);
+        void Exit(float dt) => phase.Update(false, dt, 0.5f, 0.25f);
+
+        Enter(0.125f);
+        Enter(0.125f);
+        Check(phase.Weight == 0, "Entering waits for its own delay");
+        Exit(0.125f);
+        Exit(0.125f);
+        Check(phase.Weight == 0, "A glide shorter than the entry delay leaves the view unchanged");
+
+        Enter(0.125f);
+        Enter(0.125f);
+        Enter(0.125f);
+        Enter(0.25f);
+        Check(Near(phase.Weight, 0.5f), "Glide FOV is halfway through its entry transition");
+        Enter(0.25f);
+        Check(phase.Weight == 1, "Entry reaches full strength at the configured time");
+
+        Exit(0.125f);
+        Exit(0.25f);
+        Check(phase.Weight == 1, "Exit delay holds the existing view");
+        Exit(0.25f);
+        Exit(0.125f);
+        Check(Near(phase.Weight, 0.5f), "Exit uses its own transition time");
+        Enter(0.125f);
+        Enter(0.125f);
+        Check(Near(phase.Weight, 0.5f), "Restarting glide preserves the partially widened view during entry delay");
+        Enter(0.125f);
+        Enter(0.25f);
+        Check(Near(phase.Weight, 0.75f), "A reversed transition blends from the current view");
+
+        phase.Update(false, 0.125f, 0, 0);
+        Check(phase.Weight == 0, "Zero exit delay and duration restore the view immediately");
+        phase.Update(true, 0.125f, 0.25f, 0);
+        Check(phase.Weight == 0, "Zero duration can still have an entry delay");
+        phase.Update(true, 0.25f, 0.25f, 0);
+        Check(phase.Weight == 1, "Zero duration snaps at the end of the delay");
     }
 
     private static void TestShoulderZoom()

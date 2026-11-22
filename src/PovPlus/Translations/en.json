@@ -1,7 +1,11 @@
 {
   "滑翔时扩大视场角": "Widen field of view while gliding",
   "滑翔额外视场角": "Extra field of view while gliding",
-  "坐骑进入滑翔动作时逐渐展开视野，结束滑翔后平滑收回。": "The view widens smoothly when your mount starts its glide animation and eases back when gliding ends.",
+  "滑翔进入延迟（秒）": "Glide entry delay (seconds)",
+  "滑翔进入过渡（秒）": "Glide entry transition (seconds)",
+  "滑翔退出延迟（秒）": "Glide exit delay (seconds)",
+  "滑翔退出过渡（秒）": "Glide exit transition (seconds)",
+  "延迟决定等待多久再改变视场角，过渡决定改变要花多久。过渡设为 0 时立即改变。": "Delay controls how long the camera waits before changing the field of view. Transition controls how long the change takes. Set the transition to 0 for an instant change.",
   "飞行镜头": "Flight camera",
   "启用飞行晃动与侧倾": "Enable flight sway and banking",
   "飞行晃动强度": "Flight sway strength",

@@ -13,6 +13,10 @@ public class Configuration : IPluginConfiguration
     public float ShoulderFlightBankDegrees = ShoulderFlightMotion.DefaultBankDegrees;
     public bool ShoulderGlideFovEnabled;
     public float ShoulderGlideFovDegrees = ShoulderLens.DefaultGlideDegrees;
+    public float ShoulderGlideEnterDelay;
+    public float ShoulderGlideEnterSeconds = ShoulderGlideTransition.DefaultEnterSeconds;
+    public float ShoulderGlideExitDelay;
+    public float ShoulderGlideExitSeconds = ShoulderGlideTransition.DefaultExitSeconds;
     private ShoulderCombatSettings combatShoulder = new();
     public ShoulderCombatSettings CombatShoulder
     {

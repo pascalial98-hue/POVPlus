@@ -113,15 +113,31 @@ internal static unsafe class BodyRelativeLook
         var manager = Common.CameraManager;
         var camera = manager == null ? null : manager->worldCamera;
         var scope = default(BodyViewScope);
+        var lens = default(CameraValueOverride);
+        var renderCamera = scene->RenderCamera;
         if (camera != null && scene == &((NativeCamera*)camera)->SceneCamera && !((NativeCamera*)camera)->IsEventCameraAutoControl)
         {
             if (camera->mode == 1 && Plugin.P.Shoulder is { } shoulder)
-                scope = new BodyViewScope(scene, shoulder.FlightBank(camera));
+            {
+                var (bank, glideWeight) = shoulder.FlightView(camera);
+                scope = new BodyViewScope(scene, bank);
+                if (glideWeight > 0 && renderCamera != null && !renderCamera->IsOrtho)
+                {
+                    // The native camera has already smoothed its base lens.
+                    // Add the timed glide effect when it builds the projection.
+                    lens.Apply(ref renderCamera->FoV, ShoulderLens.Widen(renderCamera->FoV, glideWeight,
+                        Plugin.P.Configuration.ShoulderGlideFovDegrees));
+                }
+            }
             else if (Active && Plugin.P.Configuration.FirstPersonBodyRelativeLook && POVCameraFunctionality.FirstPersonViewActive() &&
                 Stopwatch.GetElapsedTime(lastSample).TotalSeconds <= 0.25)
                 scope = new BodyViewScope(scene, camera->GameObjectHRotation, WorldRotation);
         }
         try { renderHook!.Original(scene); }
-        finally { scope.Restore(scene); }
+        finally
+        {
+            if (renderCamera != null && scene->RenderCamera == renderCamera) lens.Restore(ref renderCamera->FoV);
+            scope.Restore(scene);
+        }
     }
 }

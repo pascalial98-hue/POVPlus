@@ -388,7 +388,13 @@ public class MainWindow : Window, IDisposable
             {
                 Slider("滑翔额外视场角", ref Config.ShoulderGlideFovDegrees, 0, ShoulderLens.MaxGlideDegrees,
                     ShoulderLens.DefaultGlideDegrees, "%.0f°");
-                ImGui.TextWrapped(L.T("坐骑进入滑翔动作时逐渐展开视野，结束滑翔后平滑收回。"));
+                Slider("滑翔进入延迟（秒）", ref Config.ShoulderGlideEnterDelay, 0, ShoulderGlideTransition.MaxSeconds, 0, "%.2f");
+                Slider("滑翔进入过渡（秒）", ref Config.ShoulderGlideEnterSeconds, 0, ShoulderGlideTransition.MaxSeconds,
+                    ShoulderGlideTransition.DefaultEnterSeconds, "%.2f");
+                Slider("滑翔退出延迟（秒）", ref Config.ShoulderGlideExitDelay, 0, ShoulderGlideTransition.MaxSeconds, 0, "%.2f");
+                Slider("滑翔退出过渡（秒）", ref Config.ShoulderGlideExitSeconds, 0, ShoulderGlideTransition.MaxSeconds,
+                    ShoulderGlideTransition.DefaultExitSeconds, "%.2f");
+                ImGui.TextWrapped(L.T("延迟决定等待多久再改变视场角，过渡决定改变要花多久。过渡设为 0 时立即改变。"));
             }
         }
         else
