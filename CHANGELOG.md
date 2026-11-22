@@ -1,5 +1,19 @@
 # Changelog / 更新记录
 
+## 1.7.0.0 — 2026-11-22
+
+- 在 /pov 的「通用」页开启越肩后，用游戏原有的视角切换键依次切换第三人称、越肩和第一人称。越肩默认关闭。<br>
+  Enable shoulder view in the General page of /pov to cycle through third person, shoulder view and first person with the game's perspective toggle. Shoulder view is off by default.
+
+- 步行和骑乘分别记住滚轮距离，可独立调整肩位和缩放范围。骑乘时还可调整跟随滞后、停步回正和转弯惯性。<br>
+  On-foot and mounted views remember their own zoom distance and have separate framing and zoom limits. Mounts also have adjustable tracking lag, recovery when stopping, and cornering sway.
+
+- 在越肩视角下切换场景后，会重新进入越肩。退出第一人称时，视场角上下限按当前生效值恢复，以便与其他相机设置共用。<br>
+  Shoulder view resumes after changing areas. When leaving first person, the plugin restores the active field-of-view limits so it can coexist with other camera settings.
+
+- 设置按通用、第一人称、越肩分组。窗口较窄时，通过顶部菜单切换页面。<br>
+  Settings are grouped by general, first-person and shoulder controls. In narrower windows, use the menu at the top to switch pages.
+
 ## 1.6.1.4 — 2026-11-12
 
 - 新增可独立开启的“视角与限位跟随身体姿态”，默认关闭。以躯干作为正视基准，弯腰 90° 时正视地面，抬头 90° 可看向前方；转头范围和探头方向随身体姿态变化。<br>
