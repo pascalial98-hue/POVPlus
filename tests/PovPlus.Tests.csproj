@@ -9,6 +9,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\src\PovPlus\ShoulderRig.cs" Link="ShoulderRig.cs" />
+    <Compile Include="..\src\PovPlus\ShoulderZoom.cs" Link="ShoulderZoom.cs" />
+    <Compile Include="..\src\PovPlus\ShoulderFlightHeight.cs" Link="ShoulderFlightHeight.cs" />
     <Compile Include="..\src\PovPlus\CalibrationState.cs" Link="CalibrationState.cs" />
     <Compile Include="..\src\PovPlus\Localization.cs" Link="Localization.cs" />
     <EmbeddedResource Include="..\src\PovPlus\Translations\en.json" LogicalName="PovPlus.Translations.en.json" />

@@ -9,6 +9,8 @@ using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using Hypostasis.Game;
 using Hypostasis.Game.Structures;
 using SceneManager = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CameraManager;
+using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
+using GameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
 namespace PovPlus;
 
@@ -24,9 +26,10 @@ internal sealed unsafe class ShoulderView : IDisposable
     private readonly nint table;
     private readonly ShoulderCycle cycle = new();
     private readonly ShoulderRig rig = new();
-    private float originalDistance, selectedDistance;
-    private float entryTime, blend, lastAppliedZoom;
-    private bool blendingDistance;
+    private readonly ShoulderZoom zoom = new();
+    private readonly ShoulderFlightHeight flightHeight = new();
+    private float originalDistance, entryTime, blend;
+    private long? saveDistanceAt;
     private nint actor;
     internal bool Active => cycle.Active && !Failed;
     internal bool Failed { get; private set; }
@@ -66,7 +69,14 @@ internal sealed unsafe class ShoulderView : IDisposable
         if (native == 0 || Failed || camera != owner) return native;
         try
         {
-            if (!InWorld() || !InputManager.Instance()->GetInputStatus(TogglePerspective)) return native;
+            if (!InWorld()) return native;
+            if (!InputManager.Instance()->GetInputStatus(TogglePerspective))
+            {
+                // This permission also gates scroll-to-first-person at minimum
+                // zoom. Ordinary wheel distance is calculated separately.
+                return Active && camera->mode == 1 && (camera->currentZoom <= camera->minZoom + 0.0001f ||
+                    camera->controlType == 3) ? (byte)0 : native;
+            }
             var framework = Framework.Instance();
             if (framework == null || !ValidZoomBounds()) return native;
             var wasActive = Active;
@@ -77,11 +87,15 @@ internal sealed unsafe class ShoulderView : IDisposable
                 originalDistance = owner->currentZoom;
                 entryTime = 0;
                 blend = ShoulderRig.EntryBlend(0, Config.ShoulderEntryTime);
-                blendingDistance = blend < 1;
-                ApplyDistance();
+                zoom.Begin(originalDistance, Config.ShoulderDistance);
+                UpdateDistance();
                 rig.Reset();
             }
-            else if (wasActive && !Active) RestoreZoom();
+            else if (wasActive && !Active)
+            {
+                if (camera->mode == 1) UpdateDistance();
+                RestoreZoom();
+            }
             return allow ? native : (byte)0;
         }
         catch (Exception ex) { Stop(ex); return native; }
@@ -90,15 +104,34 @@ internal sealed unsafe class ShoulderView : IDisposable
     private bool ValidZoomBounds() => float.IsFinite(owner->currentZoom) && float.IsFinite(owner->minZoom) &&
         float.IsFinite(owner->maxZoom) && owner->minZoom >= 0 && owner->maxZoom > 0 && owner->minZoom <= owner->maxZoom;
 
-    private void ApplyDistance()
+    private void UpdateDistance()
     {
-        selectedDistance = ShoulderRig.Bound(Config.ShoulderDistance, 1, 5, ShoulderRig.DefaultDistance);
-        var target = Math.Clamp(selectedDistance, owner->minZoom, owner->maxZoom);
-        lastAppliedZoom = owner->currentZoom = float.Lerp(originalDistance, target, blend);
+        if (!ValidZoomBounds()) return;
+        owner->currentZoom = zoom.Update(owner->currentZoom, owner->minZoom, owner->maxZoom,
+            Config.ShoulderMinDistance, Config.ShoulderMaxDistance, blend);
+        if (Config.ShoulderDistance == zoom.Selected) return;
+        Config.ShoulderDistance = zoom.Selected;
+        saveDistanceAt = Environment.TickCount64 + 450;
+    }
+
+    private void SaveDistance()
+    {
+        if (!saveDistanceAt.HasValue) return;
+        try
+        {
+            Config.Save();
+            saveDistanceAt = null;
+        }
+        catch (Exception ex)
+        {
+            saveDistanceAt = Environment.TickCount64 + 5000;
+            Service.Log.Warning(ex, "Could not save the shoulder distance.");
+        }
     }
 
     internal void Update()
     {
+        if (saveDistanceAt <= Environment.TickCount64) SaveDistance();
         if (!Active) return;
         try
         {
@@ -113,12 +146,7 @@ internal sealed unsafe class ShoulderView : IDisposable
                 entryTime += MathF.Max(0, dt);
                 blend = MathF.Max(blend, ShoulderRig.EntryBlend(entryTime, Config.ShoulderEntryTime));
             }
-            // Native wheel input can take over at any point in the transition.
-            if (owner->currentZoom != lastAppliedZoom) blendingDistance = false;
-            if (ValidZoomBounds() && (blendingDistance ||
-                selectedDistance != ShoulderRig.Bound(Config.ShoulderDistance, 1, 5, ShoulderRig.DefaultDistance)))
-                ApplyDistance();
-            if (blend >= 1) blendingDistance = false;
+            UpdateDistance();
             rig.Follow(Service.ObjectTable.LocalPlayer!.Position, dt,
                 Config.ShoulderLag, Config.ShoulderMaxLag);
         }
@@ -127,11 +155,28 @@ internal sealed unsafe class ShoulderView : IDisposable
 
     internal void OffsetPivot(GameCamera* camera, nint target, Vector3* position)
     {
-        if (!Active || camera != owner || camera->mode != 1 || position == null || actor != target) return;
+        if (!Active || camera != owner || camera->mode != 1 || position == null) return;
         try
         {
             if (!InWorld()) return;
+            // The native camera reads its requested distance immediately after
+            // this callback, including wheel input later than the framework tick.
+            UpdateDistance();
+            var player = Service.ObjectTable.LocalPlayer!;
+            if (actor != player.Address) return;
+            var mount = ((NativeCharacter*)actor)->Mount.MountObject;
+            var flying = Service.Condition[ConditionFlag.InFlight];
+            if (target != actor && !(flying && mount != null && target == (nint)mount)) return;
             if (!float.IsFinite(position->X) || !float.IsFinite(position->Y) || !float.IsFinite(position->Z)) return;
+            var framework = Framework.Instance();
+            if (framework != null)
+            {
+                var root = player.Position;
+                var headY = flying ? ReadRiderHeadHeight(root) : null;
+                var correctedY = flightHeight.Resolve(framework->FrameCounter, framework->FrameDeltaTime,
+                    (nint)mount, flying, root.Y, headY, position->Y);
+                position->Y = float.Lerp(position->Y, correctedY, blend);
+            }
             var offset = blend * rig.Offset(camera->currentHRotation, Config.ShoulderSide, Config.ShoulderHeight);
             var length = offset.Length();
             if (length < 0.0001f) return;
@@ -145,6 +190,19 @@ internal sealed unsafe class ShoulderView : IDisposable
         catch (Exception ex) { Stop(ex); }
     }
 
+    private float? ReadRiderHeadHeight(Vector3 root)
+    {
+        // Attachment 1 belongs to the rider even when the native orbit targets
+        // the mount. A stale attachment after a teleport cannot seed the filter.
+        var read = Common.getWorldBonePosition.Invoke;
+        var head = Vector3.Zero;
+        if (read != null && read((GameObject*)actor, 1, &head) && Vector3.DistanceSquared(head, root) <= 32 * 32)
+            return head.Y;
+        if (CalibrationViewpoint.TryRead(Vector3.Zero, out var rider) && Vector3.DistanceSquared(rider.Position, root) <= 32 * 32)
+            return rider.Position.Y;
+        return null;
+    }
+
     private void RestoreZoom()
     {
         if (actor != 0 && SameCamera())
@@ -154,10 +212,16 @@ internal sealed unsafe class ShoulderView : IDisposable
         }
         actor = 0;
         rig.Reset();
+        flightHeight.Reset();
+        // Flush on the next framework tick, outside the native permission call.
+        if (saveDistanceAt.HasValue) saveDistanceAt = Environment.TickCount64;
     }
 
     internal void Reset()
     {
+        if (Active && actor != 0 && InWorld() && owner->mode == 1 &&
+            Service.ObjectTable.LocalPlayer?.Address == actor)
+            UpdateDistance();
         RestoreZoom();
         cycle.Reset();
     }
@@ -173,5 +237,6 @@ internal sealed unsafe class ShoulderView : IDisposable
     {
         gate.Dispose();
         Reset();
+        SaveDistance();
     }
 }

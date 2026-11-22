@@ -10,7 +10,11 @@ public class Configuration : IPluginConfiguration
     public bool ShoulderCycleEnabled;
     public float ShoulderSide = ShoulderRig.DefaultSide;
     public float ShoulderHeight = ShoulderRig.DefaultHeight;
+    // Retain the original JSON key so the previous test build's distance
+    // seeds the remembered wheel distance on upgrade.
     public float ShoulderDistance = ShoulderRig.DefaultDistance;
+    public float ShoulderMinDistance = ShoulderZoom.DefaultMin;
+    public float ShoulderMaxDistance = ShoulderZoom.DefaultMax;
     public float ShoulderEntryTime = ShoulderRig.DefaultEntryTime;
     public float ShoulderLag = ShoulderRig.DefaultLag;
     public float ShoulderMaxLag = ShoulderRig.DefaultMaxLag;
