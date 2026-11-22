@@ -7,6 +7,7 @@ internal static partial class Program
     {
         TestShoulderZoom();
         TestShoulderCombat();
+        TestShoulderSpeedZoom();
         TestCameraLensOwnership();
         TestShoulderFlight();
         TestShoulderTurning();
@@ -119,6 +120,65 @@ internal static partial class Program
         wheel.Begin(8, 2);
         Check(Near(wheel.Update(8, 0.25f, 20, 2, 2, 1, 2), 4) && Near(wheel.Selected, 2),
             "Fixed-distance profiles still receive the combat offset");
+    }
+
+    private static void TestShoulderSpeedZoom()
+    {
+        var foot = new ShoulderProfile();
+        var mount = ShoulderProfile.Riding();
+        Check(!foot.SpeedZoomEnabled && !mount.SpeedZoomEnabled, "Speed zoom is opt-in for both saved profiles");
+        mount.SpeedZoomEnabled = true;
+        Check(!foot.SpeedZoomEnabled, "Enabling mounted speed zoom is independent of walking");
+        foot.SpeedZoomEnabled = true;
+
+        static float Travel(Vector3 velocity, bool riding, ShoulderProfile profile, int fps)
+        {
+            var camera = new ShoulderSpeedZoom();
+            for (int i = 0; i <= 4 * fps; i++)
+                camera.Update(velocity * (i / (float)fps), 1f / fps, riding, profile);
+            return camera.Offset;
+        }
+        float walk = Travel(2 * Vector3.UnitX, false, foot, 60);
+        float run = Travel(6 * Vector3.UnitZ, false, foot, 60);
+        float sprint = Travel(-8 * Vector3.UnitX, false, foot, 60);
+        float ride = Travel(13 * Vector3.UnitZ, true, mount, 60);
+        float climb = Travel(18 * Vector3.UnitY, true, mount, 60);
+        Check(0 < walk && walk < run && run < sprint && sprint < ride && ride < climb, "Faster travel gradually pulls farther back across walk, sprint and mount speeds");
+        Check(Near(climb, mount.SpeedZoomDistance) && Near(Travel(-18 * Vector3.UnitY, true, mount, 144), climb),
+            "Climbing and descending affect distance equally across frame rates");
+        Check(Near(Travel(18 * Vector3.Normalize(Vector3.One), true, mount, 30), climb), "Diagonal flight uses total speed once");
+        Check(Travel(10 * Vector3.UnitY, false, foot, 60) == 0 && Travel(0.1f * Vector3.UnitX, true, mount, 60) == 0,
+            "Standing jumps on foot and idle drift do not pull the camera back");
+        mount.SpeedZoomDistance = 0.2f;
+        Check(Near(Travel(25 * Vector3.UnitX, true, mount, 60), 0.2f) && Near(Travel(6 * Vector3.UnitZ, false, foot, 30), run),
+            "Mounted cap is independent of the on-foot cap");
+
+        var speed = new ShoulderSpeedZoom();
+        var zoom = new ShoulderZoom();
+        zoom.Begin(8, 2.5f);
+        float nativeZoom = 8;
+        for (int i = 0; i <= 120; i++)
+        {
+            speed.Update(Vector3.UnitY * (i * 0.25f), 1f / 60, true, mount);
+            nativeZoom = zoom.Update(nativeZoom, 0.25f, 20, 1, 4, 1, 1 + speed.Offset);
+            Check(Near(zoom.Selected, 2.5f) && Near(nativeZoom, 3.5f + speed.Offset), "Speed stacks with combat and leaves wheel memory alone");
+        }
+        nativeZoom = zoom.Update(nativeZoom + 0.25f, 0.25f, 20, 1, 4, 1, 1 + speed.Offset);
+        var moving = speed.Offset;
+        for (int i = 0; i < 360; i++)
+        {
+            speed.Update(30 * Vector3.UnitY, 1f / 60, true, mount);
+            nativeZoom = zoom.Update(nativeZoom, 0.25f, 20, 1, 4, 1, speed.Offset);
+            if (i == 2) Check(speed.Offset > 0.9f * moving && speed.Offset < moving, "Stopping eases in without snapping");
+        }
+        Check(speed.Offset == 0 && Near(zoom.Selected, 2.75f) && Near(nativeZoom, 2.75f), "Stopping and ending combat restore manual wheel changes");
+        speed.Update(Vector3.Zero, 1f / 60, false, foot);
+        speed.Update(100 * Vector3.UnitX, 1f / 60, false, foot);
+        speed.Update(102 * Vector3.UnitX, 1f / 60, true, mount);
+        Check(speed.Offset == 0, "Teleports and mounting do not seed artificial speed");
+        speed.Update(103 * Vector3.UnitX, 1, true, mount);
+        speed.Update(Vector3.Zero, 1f / 60, true, mount);
+        Check(speed.Offset == 0, "First sample after a long pause starts fresh");
     }
 
     private static unsafe void TestCameraLensOwnership()

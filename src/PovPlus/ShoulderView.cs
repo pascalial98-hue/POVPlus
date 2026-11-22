@@ -28,6 +28,7 @@ internal sealed unsafe class ShoulderView : IDisposable
     private readonly ShoulderCycle cycle;
     private readonly ShoulderRig rig = new();
     private readonly ShoulderZoom zoom = new();
+    private readonly ShoulderSpeedZoom speedZoom = new();
     private readonly ShoulderMountAnchor mountAnchor = new();
     private CameraValueOverride orbitFloor;
     private float originalDistance, entryTime, zoomTime, blend, mountWeight;
@@ -160,10 +161,11 @@ internal sealed unsafe class ShoulderView : IDisposable
     {
         if (!ValidZoomBounds()) return;
         var profile = Profile;
+        var distanceOffset = combatOffset.Z + speedZoom.Offset;
         if (!processingWheel)
         {
             var range = ShoulderZoom.Range(profile.MinDistance, profile.MaxDistance);
-            ShoulderZoom.ApplyFloor(ref orbitFloor, ref owner->minZoom, ShoulderZoom.PhysicalDistance(range.Min, combatOffset.Z));
+            ShoulderZoom.ApplyFloor(ref orbitFloor, ref owner->minZoom, ShoulderZoom.PhysicalDistance(range.Min, distanceOffset));
         }
         var inputDistance = owner->currentZoom;
         if (!wheel && !processingWheel && inputDistance != zoom.LastWritten)
@@ -174,7 +176,7 @@ internal sealed unsafe class ShoulderView : IDisposable
             inputDistance = zoom.LastWritten;
         }
         owner->currentZoom = zoom.Update(inputDistance, owner->minZoom, owner->maxZoom,
-            profile.MinDistance, profile.MaxDistance, ShoulderRig.EntryBlend(zoomTime, Config.ShoulderEntryTime), combatOffset.Z);
+            profile.MinDistance, profile.MaxDistance, ShoulderRig.EntryBlend(zoomTime, Config.ShoulderEntryTime), distanceOffset);
         if (profile.Distance == zoom.Selected) return;
         profile.Distance = zoom.Selected;
         saveDistanceAt = Environment.TickCount64 + 450;
@@ -217,13 +219,15 @@ internal sealed unsafe class ShoulderView : IDisposable
                 Reset();
                 return;
             }
-            if (actor != Service.ObjectTable.LocalPlayer!.Address)
+            var player = Service.ObjectTable.LocalPlayer!;
+            if (actor != player.Address)
             {
                 if (actor != 0) RestoreZoom(preserveExternal: true);
                 if (!ValidZoomBounds()) return;
                 Attach();
             }
-            var dt = ShoulderRig.Bound((float)Service.Framework.UpdateDelta.TotalSeconds, 0, 0.25f, 0);
+            var elapsed = (float)Service.Framework.UpdateDelta.TotalSeconds;
+            var dt = ShoulderRig.Bound(elapsed, 0, 0.25f, 0);
             var mountedNow = IsRiding();
             if (riding != mountedNow)
             {
@@ -236,6 +240,7 @@ internal sealed unsafe class ShoulderView : IDisposable
             blend = ShoulderRig.EntryBlend(entryTime, Config.ShoulderEntryTime);
             mountWeight = Math.Clamp(mountWeight + (riding ? dt : -dt) / 0.22f, 0, 1);
             combatOffset = Config.CombatShoulder.Advance(ref combatPhase, Service.Condition[ConditionFlag.InCombat], dt);
+            speedZoom.Update(player.Position, elapsed, riding, Profile);
             UpdateDistance();
         }
         catch (Exception ex) { Stop(ex); }
@@ -317,6 +322,7 @@ internal sealed unsafe class ShoulderView : IDisposable
         motionFrame = null;
         combatPhase = 0;
         combatOffset = Vector3.Zero;
+        speedZoom.Reset();
         orbitFloor = default;
         rig.Reset();
         mountAnchor.Reset();

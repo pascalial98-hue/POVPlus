@@ -27,6 +27,8 @@ public class Configuration : IPluginConfiguration
     public float ShoulderDistance { get => WalkingShoulder.Distance; set => WalkingShoulder.Distance = value; }
     public float ShoulderMinDistance { get => WalkingShoulder.MinDistance; set => WalkingShoulder.MinDistance = value; }
     public float ShoulderMaxDistance { get => WalkingShoulder.MaxDistance; set => WalkingShoulder.MaxDistance = value; }
+    public bool ShoulderSpeedZoomEnabled { get => WalkingShoulder.SpeedZoomEnabled; set => WalkingShoulder.SpeedZoomEnabled = value; }
+    public float ShoulderSpeedZoomDistance { get => WalkingShoulder.SpeedZoomDistance; set => WalkingShoulder.SpeedZoomDistance = value; }
     public float ShoulderEntryTime = ShoulderRig.DefaultEntryTime;
     public float ShoulderLag { get => WalkingShoulder.Lag; set => WalkingShoulder.Lag = value; }
     public float ShoulderMaxLag { get => WalkingShoulder.MaxLag; set => WalkingShoulder.MaxLag = value; }

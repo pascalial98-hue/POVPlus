@@ -8,6 +8,8 @@ public sealed class ShoulderProfile
 {
     public float Side = ShoulderRig.DefaultSide, Height = ShoulderRig.DefaultHeight;
     public float Distance = ShoulderRig.DefaultDistance, MinDistance = ShoulderZoom.DefaultMin, MaxDistance = ShoulderZoom.DefaultMax;
+    public bool SpeedZoomEnabled;
+    public float SpeedZoomDistance = ShoulderSpeedZoom.DefaultDistance;
     public float Lag = ShoulderRig.DefaultLag, MaxLag = ShoulderRig.DefaultMaxLag;
     public float VerticalLagPercent;
     public float RecoverySeconds = ShoulderRig.DefaultRecovery, TurnInertiaPercent = ShoulderRig.DefaultTurnInertia;
