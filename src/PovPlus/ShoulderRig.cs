@@ -3,6 +3,21 @@ using System.Numerics;
 
 namespace PovPlus;
 
+[Serializable]
+public sealed class ShoulderProfile
+{
+    public float Side = ShoulderRig.DefaultSide, Height = ShoulderRig.DefaultHeight;
+    public float Distance = ShoulderRig.DefaultDistance, MinDistance = ShoulderZoom.DefaultMin, MaxDistance = ShoulderZoom.DefaultMax;
+    public float Lag = ShoulderRig.DefaultLag, MaxLag = ShoulderRig.DefaultMaxLag;
+    public float VerticalLagPercent;
+
+    internal static ShoulderProfile Riding() => new()
+    {
+        Side = 0.75f, Height = 0.25f, Distance = 3.5f, MinDistance = 1.5f, MaxDistance = 7,
+        Lag = 0.08f, MaxLag = 0.35f
+    };
+}
+
 // The native camera keeps the orbit, pitch and collision response. This rig
 // describes only a displacement of its target and a bounded movement lag.
 internal sealed class ShoulderRig
@@ -10,7 +25,8 @@ internal sealed class ShoulderRig
     internal const float DefaultSide = 0.46f, DefaultHeight = 0.12f, DefaultDistance = 2.2f;
     internal const float DefaultLag = 0.10f, DefaultMaxLag = 0.32f;
     internal const float DefaultEntryTime = 0.22f;
-    private Vector3 previous, lag;
+    private Vector3 previous, filteredTarget, lag;
+    private float previousYaw;
     private bool sampled;
 
     internal static float Bound(float value, float min, float max, float fallback) =>
@@ -27,12 +43,12 @@ internal sealed class ShoulderRig
     internal void Reset()
     {
         sampled = false;
-        lag = Vector3.Zero;
+        filteredTarget = lag = Vector3.Zero;
     }
 
-    internal void Follow(Vector3 position, float dt, float time, float limit)
+    internal void Follow(Vector3 position, float dt, float time, float limit, float yaw = 0, float verticalPercent = 0)
     {
-        if (!float.IsFinite(position.X) || !float.IsFinite(position.Y) || !float.IsFinite(position.Z))
+        if (!float.IsFinite(position.X) || !float.IsFinite(position.Y) || !float.IsFinite(position.Z) || !float.IsFinite(yaw))
         {
             Reset();
             return;
@@ -42,26 +58,38 @@ internal sealed class ShoulderRig
         time = Bound(time, 0, 0.4f, DefaultLag);
         limit = Bound(limit, 0, 0.8f, DefaultMaxLag);
         if (!sampled || !(dt > 0 && dt < 0.25f) || delta.LengthSquared() > 9 || time < 0.001f || limit == 0)
-            lag = Vector3.Zero;
+        {
+            filteredTarget = lag = Vector3.Zero;
+        }
         else
         {
-            // Exact first-order response to linear target motion over this frame.
-            // Only horizontal translation drives lag, including when riding.
-            delta.Y = 0;
-            var decay = MathF.Exp(-dt / time);
-            lag = lag * decay - delta * (time / dt * (1 - decay));
-            var length = lag.Length();
-            if (length > limit) lag *= limit / length;
+            // Express movement at the middle of the orbit step. Lag history stays
+            // in camera space, so turning cannot fling an old backward offset sideways.
+            float turn = MathF.IEEERemainder(yaw - previousYaw, 2 * MathF.PI);
+            var local = Vector3.Transform(delta, Quaternion.CreateFromAxisAngle(Vector3.UnitY, -previousYaw - turn * 0.5f));
+            local.Y *= Bound(verticalPercent, 0, 100, 0) / 100;
+            var target = local * (-time / dt);
+            var length = target.Length();
+            if (length > limit) target *= limit / length;
+
+            // Exact critically damped response to this velocity sample. Both
+            // stages are convex blends of bounded offsets, including on reversals.
+            var step = dt / Math.Max(0.02f, time * 0.3f);
+            var decay = MathF.Exp(-step);
+            var carry = step * decay;
+            lag = decay * lag + carry * filteredTarget + (1 - decay - carry) * target;
+            filteredTarget = decay * filteredTarget + (1 - decay) * target;
         }
+        previousYaw = yaw;
         sampled = true;
     }
 
     internal Vector3 Offset(float orbitYaw, float side, float height)
     {
         if (!float.IsFinite(orbitYaw)) return Vector3.Zero;
-        side = Bound(side, -1, 1, DefaultSide);
-        height = Bound(height, -0.6f, 0.8f, DefaultHeight);
-        return lag + new Vector3(MathF.Cos(orbitYaw) * side, height, -MathF.Sin(orbitYaw) * side);
+        side = Bound(side, -2, 2, DefaultSide);
+        height = Bound(height, -1.5f, 2, DefaultHeight);
+        return Vector3.Transform(lag + new Vector3(side, height, 0), Quaternion.CreateFromAxisAngle(Vector3.UnitY, orbitYaw));
     }
 }
 

@@ -1,5 +1,10 @@
 {
   "越肩视角": "Over-the-shoulder view",
+  "步行": "On foot",
+  "骑乘": "Mounted",
+  "上下滞后权重": "Vertical lag weight",
+  "移动滞后保留前后与左右的跟随感。上下滞后影响跳跃和坐骑升降，设为零时镜头同步升降。": "Movement lag follows forward, backward and sideways motion. Vertical lag applies to jumps, climbs and descents. Set it to zero to follow altitude immediately.",
+  "上坐骑后自动使用这组参数。镜头跟随骑手肩位，地面骑行与飞行共用。": "Mounting automatically selects these settings. The camera follows the rider’s shoulder both on the ground and in flight.",
   "将越肩视角加入视角切换循环（本地测试）": "Include shoulder view in the perspective cycle (local test)",
   "用游戏原有的视角切换键，依次切换第三人称、越肩和第一人称。": "Press the game's perspective toggle to cycle through third person, shoulder view and first person.",
   "当前客户端无法启用越肩视角，请查看 Dalamud 日志。": "Shoulder view is unavailable on this client. See the Dalamud log for details.",
@@ -11,7 +16,6 @@
   "进入越肩的过渡时间（秒）": "Blend time when entering shoulder view (seconds)",
   "移动跟随滞后（秒）": "Movement lag (seconds)",
   "最大滞后距离": "Maximum lag distance",
-  "移动滞后只跟随角色的水平位移。调大时，镜头在起步和停步时会稍慢一些；设为零可关闭。转动视角始终即时响应。": "Lag follows horizontal character movement. Raise it for a softer start and stop, or set it to zero to disable it. Camera rotation responds immediately.",
   "POV+ Enhanced 第一人称设置###PovPlus": "POV+ Enhanced First-person Settings###PovPlus",
   "启用 POV+ Enhanced": "Enable POV+ Enhanced",
   "/pov toggle 可切换启用状态": "/pov toggle enables or disables POV+ Enhanced",

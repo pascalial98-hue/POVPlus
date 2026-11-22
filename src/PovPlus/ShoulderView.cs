@@ -25,19 +25,24 @@ internal sealed unsafe class ShoulderView : IDisposable
     private readonly Hook<Camera.Delegates.UpdateState> inputUpdate;
     private readonly GameCamera* owner;
     private readonly nint table;
-    private readonly ShoulderCycle cycle = new();
+    private readonly ShoulderCycle cycle;
     private readonly ShoulderRig rig = new();
     private readonly ShoulderZoom zoom = new();
-    private readonly ShoulderFlightHeight flightHeight = new();
-    private float originalDistance, entryTime, blend;
+    private readonly ShoulderMountAnchor mountAnchor = new();
+    private CameraValueOverride orbitFloor;
+    private float originalDistance, entryTime, zoomTime, blend, mountWeight;
+    private bool riding, processingWheel;
+    private ShoulderProfile Profile => riding ? Config.MountedShoulder : Config.WalkingShoulder;
     private long? saveDistanceAt;
+    private uint? motionFrame;
     private nint actor;
-    internal bool Active => cycle.Active && !Failed;
+    internal bool Active => cycle.Active && actor != 0 && !Failed;
     internal bool Failed { get; private set; }
     private static Configuration Config => Plugin.P.Configuration;
 
-    internal ShoulderView(GameCamera* camera)
+    internal ShoulderView(GameCamera* camera, ShoulderCycle cycle)
     {
+        this.cycle = cycle;
         owner = camera;
         table = (nint)camera->vtbl;
         if (camera->vtbl[23] != Service.SigScanner.ScanText(GateSignature) ||
@@ -58,13 +63,15 @@ internal sealed unsafe class ShoulderView : IDisposable
     private bool SameCamera() => Common.CameraManager != null && Common.CameraManager->worldCamera == owner &&
         (nint)owner->vtbl == table;
 
+    private static bool ChangingArea => Service.Condition[ConditionFlag.BetweenAreas] || Service.Condition[ConditionFlag.BetweenAreas51];
+
     private bool InWorld()
     {
         if (!Config.Setting_ModEnabled || !Config.ShoulderCycleEnabled || Plugin.P.CalibrationActive ||
             !SameCamera() || owner->mode is not (0 or 1) || ((Camera*)owner)->IsEventCameraAutoControl ||
             Service.ClientState.IsGPosing || Service.ObjectTable.LocalPlayer == null) return false;
         var c = Service.Condition;
-        if (c[ConditionFlag.BetweenAreas] || c[ConditionFlag.BetweenAreas51] || c[ConditionFlag.WatchingCutscene] ||
+        if (ChangingArea || c[ConditionFlag.WatchingCutscene] ||
             c[ConditionFlag.WatchingCutscene78] || c[ConditionFlag.OccupiedInCutSceneEvent]) return false;
         var scene = SceneManager.Instance();
         return scene != null && scene->CurrentCamera == &((CameraBase*)owner)->SceneCamera;
@@ -80,12 +87,25 @@ internal sealed unsafe class ShoulderView : IDisposable
                 // A real perspective toggle must see the original lens bounds
                 // when the game saves the third-person view on its way out.
                 if (InWorld() && !InputManager.Instance()->GetInputStatus(TogglePerspective))
+                {
+                    UpdateDistance();
                     scope = new ShoulderWheelScope(camera);
+                    processingWheel = true;
+                }
             }
             catch (Exception ex) { Stop(ex); }
         }
         try { inputUpdate.Original(camera); }
-        finally { scope.Restore(camera); }
+        finally
+        {
+            scope.Restore(camera);
+            if (processingWheel)
+            {
+                processingWheel = false;
+                try { if (Active && InWorld() && owner->mode == 1) UpdateDistance(wheel: true); }
+                catch (Exception ex) { Stop(ex); }
+            }
+        }
     }
 
     private byte OnPermission(GameCamera* camera)
@@ -104,21 +124,11 @@ internal sealed unsafe class ShoulderView : IDisposable
             }
             var framework = Framework.Instance();
             if (framework == null || !ValidZoomBounds()) return native;
-            var wasActive = Active;
+            var wasActive = cycle.Active;
             var allow = cycle.AllowToggle(framework->FrameCounter, camera->mode == 1);
-            if (!wasActive && Active)
+            if (!wasActive && cycle.Active) Attach();
+            else if (wasActive && !cycle.Active && actor != 0)
             {
-                actor = Service.ObjectTable.LocalPlayer!.Address;
-                originalDistance = owner->currentZoom;
-                entryTime = 0;
-                blend = ShoulderRig.EntryBlend(0, Config.ShoulderEntryTime);
-                zoom.Begin(originalDistance, Config.ShoulderDistance);
-                UpdateDistance();
-                rig.Reset();
-            }
-            else if (wasActive && !Active)
-            {
-                if (camera->mode == 1) UpdateDistance();
                 RestoreZoom();
             }
             return allow ? native : (byte)0;
@@ -129,13 +139,39 @@ internal sealed unsafe class ShoulderView : IDisposable
     private bool ValidZoomBounds() => float.IsFinite(owner->currentZoom) && float.IsFinite(owner->minZoom) &&
         float.IsFinite(owner->maxZoom) && owner->minZoom >= 0 && owner->maxZoom > 0 && owner->minZoom <= owner->maxZoom;
 
-    private void UpdateDistance()
+    private static bool IsRiding() => Service.Condition[ConditionFlag.Mounted] || Service.Condition[ConditionFlag.RidingPillion];
+
+    private void Attach()
+    {
+        actor = Service.ObjectTable.LocalPlayer!.Address;
+        riding = IsRiding();
+        mountWeight = riding ? 1 : 0;
+        originalDistance = owner->currentZoom;
+        entryTime = zoomTime = 0;
+        blend = ShoulderRig.EntryBlend(0, Config.ShoulderEntryTime);
+        zoom.Begin(originalDistance, Profile.Distance);
+        UpdateDistance();
+        rig.Reset();
+    }
+
+    private void UpdateDistance(bool wheel = false)
     {
         if (!ValidZoomBounds()) return;
-        owner->currentZoom = zoom.Update(owner->currentZoom, owner->minZoom, owner->maxZoom,
-            Config.ShoulderMinDistance, Config.ShoulderMaxDistance, blend);
-        if (Config.ShoulderDistance == zoom.Selected) return;
-        Config.ShoulderDistance = zoom.Selected;
+        var profile = Profile;
+        if (!processingWheel)
+            ShoulderZoom.ApplyFloor(ref orbitFloor, ref owner->minZoom, ShoulderZoom.Range(profile.MinDistance, profile.MaxDistance).Min);
+        var inputDistance = owner->currentZoom;
+        if (!wheel && !processingWheel && inputDistance != zoom.LastWritten)
+        {
+            // A new territory's preset can arrive after our first world tick.
+            // Keep it for returning to third person, outside the wheel memory.
+            originalDistance = inputDistance;
+            inputDistance = zoom.LastWritten;
+        }
+        owner->currentZoom = zoom.Update(inputDistance, owner->minZoom, owner->maxZoom,
+            profile.MinDistance, profile.MaxDistance, ShoulderRig.EntryBlend(zoomTime, Config.ShoulderEntryTime));
+        if (profile.Distance == zoom.Selected) return;
+        profile.Distance = zoom.Selected;
         saveDistanceAt = Environment.TickCount64 + 450;
     }
 
@@ -157,23 +193,44 @@ internal sealed unsafe class ShoulderView : IDisposable
     internal void Update()
     {
         if (saveDistanceAt <= Environment.TickCount64) SaveDistance();
-        if (!Active) return;
+        if (!cycle.Active || Failed)
+        {
+            if (actor != 0) RestoreZoom();
+            return;
+        }
         try
         {
-            if (!InWorld() || owner->mode != 1 || Service.ObjectTable.LocalPlayer!.Address != actor)
+            if (!InWorld())
+            {
+                // The destination can replace both the local actor and the world
+                // camera. Keep only the mode selection while no player camera is ready.
+                Suspend();
+                return;
+            }
+            if (owner->mode != 1)
             {
                 Reset();
                 return;
             }
-            var dt = (float)Service.Framework.UpdateDelta.TotalSeconds;
-            if (blend < 1)
+            if (actor != Service.ObjectTable.LocalPlayer!.Address)
             {
-                entryTime += MathF.Max(0, dt);
-                blend = MathF.Max(blend, ShoulderRig.EntryBlend(entryTime, Config.ShoulderEntryTime));
+                if (actor != 0) RestoreZoom(preserveExternal: true);
+                if (!ValidZoomBounds()) return;
+                Attach();
             }
+            var dt = ShoulderRig.Bound((float)Service.Framework.UpdateDelta.TotalSeconds, 0, 0.25f, 0);
+            var mountedNow = IsRiding();
+            if (riding != mountedNow)
+            {
+                riding = mountedNow;
+                zoom.Begin(owner->currentZoom, Profile.Distance);
+                zoomTime = 0;
+            }
+            entryTime += dt;
+            zoomTime += dt;
+            blend = ShoulderRig.EntryBlend(entryTime, Config.ShoulderEntryTime);
+            mountWeight = Math.Clamp(mountWeight + (riding ? dt : -dt) / 0.22f, 0, 1);
             UpdateDistance();
-            rig.Follow(Service.ObjectTable.LocalPlayer!.Position, dt,
-                Config.ShoulderLag, Config.ShoulderMaxLag);
         }
         catch (Exception ex) { Stop(ex); }
     }
@@ -190,19 +247,30 @@ internal sealed unsafe class ShoulderView : IDisposable
             var player = Service.ObjectTable.LocalPlayer!;
             if (actor != player.Address) return;
             var mount = ((NativeCharacter*)actor)->Mount.MountObject;
-            var flying = Service.Condition[ConditionFlag.InFlight];
-            if (target != actor && !(flying && mount != null && target == (nint)mount)) return;
+            if (target != actor && !(riding && mount != null && target == (nint)mount)) return;
             if (!float.IsFinite(position->X) || !float.IsFinite(position->Y) || !float.IsFinite(position->Z)) return;
             var framework = Framework.Instance();
+            var foot = Config.WalkingShoulder;
+            var mounted = Config.MountedShoulder;
             if (framework != null)
             {
                 var root = player.Position;
-                var headY = flying ? ReadRiderHeadHeight(root) : null;
-                var correctedY = flightHeight.Resolve(framework->FrameCounter, framework->FrameDeltaTime,
-                    (nint)mount, flying, root.Y, headY, position->Y);
-                position->Y = float.Lerp(position->Y, correctedY, blend);
+                // Sample motion from the same camera evaluation that consumes
+                // the offset. A second pivot query in this frame reuses the sample.
+                if (motionFrame != framework->FrameCounter)
+                {
+                    motionFrame = framework->FrameCounter;
+                    rig.Follow(root, framework->FrameDeltaTime,
+                        float.Lerp(foot.Lag, mounted.Lag, mountWeight), float.Lerp(foot.MaxLag, mounted.MaxLag, mountWeight),
+                        camera->currentHRotation, float.Lerp(foot.VerticalLagPercent, mounted.VerticalLagPercent, mountWeight));
+                }
+                var head = riding ? ReadRiderHead(root) : null;
+                var anchor = mountAnchor.Resolve(framework->FrameCounter, framework->FrameDeltaTime,
+                    (nint)mount, riding, root, head, *position);
+                *position = Vector3.Lerp(*position, anchor, blend);
             }
-            var offset = blend * rig.Offset(camera->currentHRotation, Config.ShoulderSide, Config.ShoulderHeight);
+            var offset = blend * rig.Offset(camera->currentHRotation,
+                float.Lerp(Config.ShoulderSide, mounted.Side, mountWeight), float.Lerp(Config.ShoulderHeight, mounted.Height, mountWeight));
             var length = offset.Length();
             if (length < 0.0001f) return;
             var direction = offset / length;
@@ -215,38 +283,44 @@ internal sealed unsafe class ShoulderView : IDisposable
         catch (Exception ex) { Stop(ex); }
     }
 
-    private float? ReadRiderHeadHeight(Vector3 root)
+    private Vector3? ReadRiderHead(Vector3 root)
     {
         // Attachment 1 belongs to the rider even when the native orbit targets
         // the mount. A stale attachment after a teleport cannot seed the filter.
         var read = Common.getWorldBonePosition.Invoke;
         var head = Vector3.Zero;
         if (read != null && read((GameObject*)actor, 1, &head) && Vector3.DistanceSquared(head, root) <= 32 * 32)
-            return head.Y;
+            return head;
         if (CalibrationViewpoint.TryRead(Vector3.Zero, out var rider) && Vector3.DistanceSquared(rider.Position, root) <= 32 * 32)
-            return rider.Position.Y;
+            return rider.Position;
         return null;
     }
 
-    private void RestoreZoom()
+    private void RestoreZoom(bool preserveExternal = false)
     {
         if (actor != 0 && SameCamera())
         {
-            if (owner->mode == 1) owner->currentZoom = originalDistance;
+            orbitFloor.Restore(ref owner->minZoom);
+            if (owner->mode == 1 && ValidZoomBounds() && (!preserveExternal || owner->currentZoom == zoom.LastWritten))
+                owner->currentZoom = Math.Clamp(originalDistance, owner->minZoom, owner->maxZoom);
             else if (owner->mode == 0) ((Camera*)owner)->SavedDistance = originalDistance;
         }
         actor = 0;
+        motionFrame = null;
+        orbitFloor = default;
         rig.Reset();
-        flightHeight.Reset();
+        mountAnchor.Reset();
         // Flush on the next framework tick, outside the native permission call.
         if (saveDistanceAt.HasValue) saveDistanceAt = Environment.TickCount64;
     }
 
+    internal void Suspend()
+    {
+        if (actor != 0) RestoreZoom(preserveExternal: true);
+    }
+
     internal void Reset()
     {
-        if (Active && actor != 0 && InWorld() && owner->mode == 1 &&
-            Service.ObjectTable.LocalPlayer?.Address == actor)
-            UpdateDistance();
         RestoreZoom();
         cycle.Reset();
     }
@@ -262,7 +336,7 @@ internal sealed unsafe class ShoulderView : IDisposable
     {
         inputUpdate.Dispose();
         gate.Dispose();
-        Reset();
+        RestoreZoom(preserveExternal: true);
         SaveDistance();
     }
 }

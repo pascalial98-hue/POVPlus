@@ -4,10 +4,20 @@ namespace PovPlus;
 
 internal sealed class ShoulderZoom
 {
-    internal const float SliderMin = 1, SliderMax = 10, DefaultMin = 1.5f, DefaultMax = 4;
+    internal const float SliderMin = 0.25f, SliderMax = 10, DefaultMin = 1.5f, DefaultMax = 4;
     internal float Selected { get; private set; }
     private float original, lastWritten;
+    internal float LastWritten => lastWritten;
     private bool wheelUsed;
+
+    // Keep the native input and collision solvers working in physical distance,
+    // including when the shoulder slider goes below the ordinary orbit minimum.
+    internal static void ApplyFloor(ref CameraValueOverride owned, ref float nativeMin, float userMin)
+    {
+        var ordinaryMin = owned.Underlying(nativeMin);
+        if (userMin < ordinaryMin) owned.Apply(ref nativeMin, userMin);
+        else owned.Restore(ref nativeMin);
+    }
 
     internal static (float Min, float Max) Range(float min, float max)
     {

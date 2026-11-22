@@ -8,16 +8,23 @@ public class Configuration : IPluginConfiguration
 {
     public PluginLanguage Language = PluginLanguage.Bilingual;
     public bool ShoulderCycleEnabled;
-    public float ShoulderSide = ShoulderRig.DefaultSide;
-    public float ShoulderHeight = ShoulderRig.DefaultHeight;
-    // Retain the original JSON key so the previous test build's distance
-    // seeds the remembered wheel distance on upgrade.
-    public float ShoulderDistance = ShoulderRig.DefaultDistance;
-    public float ShoulderMinDistance = ShoulderZoom.DefaultMin;
-    public float ShoulderMaxDistance = ShoulderZoom.DefaultMax;
+    // Preserve the walking profile's original JSON keys and saved wheel position.
+    internal readonly ShoulderProfile WalkingShoulder = new();
+    private ShoulderProfile mountedShoulder = ShoulderProfile.Riding();
+    public ShoulderProfile MountedShoulder
+    {
+        get => mountedShoulder;
+        set => mountedShoulder = value ?? ShoulderProfile.Riding();
+    }
+    public float ShoulderSide { get => WalkingShoulder.Side; set => WalkingShoulder.Side = value; }
+    public float ShoulderHeight { get => WalkingShoulder.Height; set => WalkingShoulder.Height = value; }
+    public float ShoulderDistance { get => WalkingShoulder.Distance; set => WalkingShoulder.Distance = value; }
+    public float ShoulderMinDistance { get => WalkingShoulder.MinDistance; set => WalkingShoulder.MinDistance = value; }
+    public float ShoulderMaxDistance { get => WalkingShoulder.MaxDistance; set => WalkingShoulder.MaxDistance = value; }
     public float ShoulderEntryTime = ShoulderRig.DefaultEntryTime;
-    public float ShoulderLag = ShoulderRig.DefaultLag;
-    public float ShoulderMaxLag = ShoulderRig.DefaultMaxLag;
+    public float ShoulderLag { get => WalkingShoulder.Lag; set => WalkingShoulder.Lag = value; }
+    public float ShoulderMaxLag { get => WalkingShoulder.MaxLag; set => WalkingShoulder.MaxLag = value; }
+    public float ShoulderVerticalLagPercent { get => WalkingShoulder.VerticalLagPercent; set => WalkingShoulder.VerticalLagPercent = value; }
     // Null distinguishes pre-guide configurations from new/pending installations.
     public bool? HasSeenCalibrationGuide;
     public bool FirstPersonHideHead = true;

@@ -27,6 +27,7 @@ public class Plugin : IDalamudPlugin, IDisposable
 	private TickManager tickManager = new TickManager();
     private readonly DeferredInitialization initialization = new();
     internal ShoulderView? Shoulder { get; private set; }
+    private readonly ShoulderCycle shoulderCycle = new();
     private bool shoulderUnavailable;
     internal bool ShoulderUnavailable => shoulderUnavailable || Shoulder?.Failed == true;
     private FirstPersonHeadVisibility? headVisibility;
@@ -92,6 +93,8 @@ public class Plugin : IDalamudPlugin, IDisposable
         // Do not resolve world-camera hooks at the title screen. This callback
         // remains registered even if the first initialization attempt fails.
         Service.Framework.Update += Tick;
+        Service.ClientState.Logout += OnLogout;
+        Service.ClientState.TerritoryChanged += OnTerritoryChanged;
 	}
 
 	public unsafe bool ShouldDrawGameObjectDetour(CameraBase* thisPtr, GameObject* gameObject, Vector3* sceneCameraPos, Vector3* lookAtVector)
@@ -107,6 +110,8 @@ public class Plugin : IDalamudPlugin, IDisposable
 	private void Tick(object framework)
 	{
         if (disposed) return;
+        if (!Configuration.Setting_ModEnabled || !Configuration.ShoulderCycleEnabled)
+            shoulderCycle.Reset();
         if (initialized && !POVCameraFunctionality.RuntimeCameraMatches()) initialization.Reset(CleanupRuntime);
         if (!initialization.Ensure(Environment.TickCount64, RuntimeAvailable, Initialize, CleanupRuntime,
             ex => Service.Log.Error(ex, "POV+ runtime initialization failed; retrying after login readiness."))) return;
@@ -150,6 +155,9 @@ public class Plugin : IDalamudPlugin, IDisposable
         disposed = true;
         Service.PluginInterface.LanguageChanged -= OnLanguageChanged;
         Service.Framework.Update -= Tick;
+        Service.ClientState.Logout -= OnLogout;
+        Service.ClientState.TerritoryChanged -= OnTerritoryChanged;
+        shoulderCycle.Reset();
         initialization.Reset(CleanupRuntime);
 		Service.PluginInterface.UiBuilder.Draw -= DrawUi;
 		Service.PluginInterface.UiBuilder.OpenConfigUi -= ToggleConfigUi;
@@ -185,6 +193,9 @@ public class Plugin : IDalamudPlugin, IDisposable
         mouseLookUnavailable = vfxUnavailable = false;
         tickManager = new TickManager();
     }
+
+    private void OnLogout(int type, int code) => shoulderCycle.Reset();
+    private void OnTerritoryChanged(uint territory) => Shoulder?.Suspend();
 
 	private void OnCommand(string command, string args)
 	{
@@ -294,7 +305,7 @@ public class Plugin : IDalamudPlugin, IDisposable
         }
         if (Shoulder == null && !shoulderUnavailable)
         {
-            try { Shoulder = new ShoulderView(Hypostasis.Game.Common.CameraManager->worldCamera); }
+            try { Shoulder = new ShoulderView(Hypostasis.Game.Common.CameraManager->worldCamera, shoulderCycle); }
             catch (Exception ex)
             {
                 shoulderUnavailable = true;

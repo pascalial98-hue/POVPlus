@@ -8,6 +8,7 @@ internal static partial class Program
         TestShoulderZoom();
         TestCameraLensOwnership();
         TestShoulderFlight();
+        TestShoulderTurning();
         var cycle = new ShoulderCycle();
         Check(ShoulderRig.EntryBlend(0, 0.2f) == 0 && Near(ShoulderRig.EntryBlend(0.1f, 0.2f), 0.5f) &&
             ShoulderRig.EntryBlend(5, 0.2f) == 1, "Entry blend eases between original and shoulder framing");
@@ -139,13 +140,59 @@ internal static partial class Program
         zoom.Begin(9, 3);
         Check(Near(zoom.Update(9, 5, 20, 1, 4, 1), 5) && Near(zoom.Selected, 3), "Native minimum wins without losing the remembered value");
         Check(Near(zoom.Update(6, 5, 20, 1, 4, 1), 5) && Near(zoom.Selected, 3), "No interval overlap cannot overwrite user preference");
+        foreach (var ordinaryMin in new[] { 0.5f, 1.5f })
+        {
+            var floor = new CameraValueOverride();
+            float applied = ordinaryMin;
+            ShoulderZoom.ApplyFloor(ref floor, ref applied, 0.25f);
+            zoom.Begin(8, 0.25f);
+            Check(applied == 0.25f && zoom.Update(8, applied, 20, 0.25f, 3, 1) == 0.25f,
+                "Near shoulder framing uses physical distance with either native or Cammy limits");
+            Check(Near(zoom.Update(0.60f, applied, 20, 0.25f, 3, 1), 0.60f), "First outward step moves away from the closer stop");
+            floor.Restore(ref applied);
+            Check(applied == ordinaryMin, "Suspending the shoulder camera releases the orbit floor");
+        }
+    }
+
+    private static void TestShoulderTurning()
+    {
+        foreach (var fps in new[] { 30, 60, 144 })
+        foreach (var direction in new[] { Vector3.UnitX, -Vector3.UnitX, Vector3.UnitZ, -Vector3.UnitZ, Vector3.UnitY })
+        {
+            var rig = new ShoulderRig();
+            var p = Vector3.Zero;
+            var dt = 1f / fps;
+            float yaw = 3;
+            rig.Follow(p, dt, 0.20f, 0.8f, yaw, 100);
+            for (int i = 0; i < fps * 2; i++)
+            {
+                var step = (i < fps ? 5 : -5) * dt;
+                var half = Quaternion.CreateFromAxisAngle(Vector3.UnitY, yaw + step / 2);
+                p += Vector3.Transform(direction, half) * (2 * dt);
+                yaw = MathF.IEEERemainder(yaw + step, 2 * MathF.PI);
+                rig.Follow(p, dt, 0.20f, 0.8f, yaw, 100);
+                var offset = Vector3.Transform(rig.Offset(yaw, 0, 0), Quaternion.CreateFromAxisAngle(Vector3.UnitY, -yaw));
+                if (i > fps / 2) Check(Vector3.Distance(offset, -direction * 0.4f) < 0.002f,
+                    "Rapid orbit, reversal and angle wrapping preserve full directional lag without a sideways kick");
+            }
+        }
+        var reversal = new ShoulderRig();
+        Vector3 pos = Vector3.Zero;
+        for (var i = 0; i < 180; i++) { pos.X += 0.025f; reversal.Follow(pos, 1f / 60, 0.2f, 0.8f); }
+        var previous = reversal.Offset(0, 0, 0);
+        pos.X -= 0.025f;
+        reversal.Follow(pos, 1f / 60, 0.2f, 0.8f);
+        Check(Vector3.Distance(previous, reversal.Offset(0, 0, 0)) < 0.03f, "Strafing reversal changes lag continuously");
     }
 
     private static void TestShoulderFlight()
     {
         foreach (var fps in new[] { 30, 60, 144 })
         {
-            var height = new ShoulderFlightHeight();
+            var anchor = new ShoulderMountAnchor();
+            float Resolve(uint frameNumber, float seconds, nint mountId, bool mounted, float root, float? head, float native) =>
+                anchor.Resolve(frameNumber, seconds, mountId, mounted, new(0, root, 0),
+                    head.HasValue ? new Vector3(0, head.Value, 0) : null, new(0, native, 0)).Y;
             var dt = 1f / fps;
             const float seat = 3.5f;
             float y = 50, pivot = 0;
@@ -155,21 +202,25 @@ internal static partial class Program
                 for (var i = 0; i < fps; ++i)
                 {
                     y += speed * dt;
-                    pivot = height.Resolve(++frame, dt, 1, true, y, y + seat, y - 4);
+                    pivot = Resolve(++frame, dt, 1, true, y, y + seat, y - 4);
                     if (i > fps / 4)
                         Check(Near(pivot, y + seat - 0.12f), "Hover, climb and dive retain rider shoulder height");
                 }
             }
-            var missing = height.Resolve(++frame, dt, 1, true, y + 2, null, y - 4);
+            var missing = Resolve(++frame, dt, 1, true, y + 2, null, y - 4);
             Check(Near(missing, pivot + 2), "A missing pose still tracks live altitude");
-            Check(Near(missing, height.Resolve(frame, dt, 1, true, y + 2, null, y - 4)), "Duplicate camera query is stable");
-            for (var i = 0; i < fps; i++) pivot = height.Resolve(++frame, dt, 1, true, y, float.NaN, y - 4);
+            Check(Near(missing, Resolve(frame, dt, 1, true, y + 2, null, y - 4)), "Duplicate camera query is stable");
+            for (var i = 0; i < fps; i++) pivot = Resolve(++frame, dt, 1, true, y, float.NaN, y - 4);
             Check(Near(pivot, y - 4), "Extended pose loss returns to native height");
-            for (var i = 0; i < fps; i++) pivot = height.Resolve(++frame, dt, 1, true, y, y + seat, y - 4);
-            for (var i = 0; i < fps; i++) pivot = height.Resolve(++frame, dt, 1, false, y, null, y + 1);
-            Check(Near(pivot, y + 1), "Landing returns to the native ground pivot");
-            height.Resolve(++frame, dt, 1, true, y, y + seat, y);
-            Check(Near(height.Resolve(++frame, dt, 2, true, y, null, y), y), "Changing mounts discards the former seat");
+            for (var i = 0; i < fps; i++) pivot = Resolve(++frame, dt, 1, true, y, y + seat, y - 4);
+            for (var i = 0; i < fps; i++) pivot = Resolve(++frame, dt, 1, false, y, null, y + 1);
+            Check(Near(pivot, y + 1), "Dismounting returns to the native ground pivot");
+            Resolve(++frame, dt, 1, true, y, y + seat, y);
+            Check(Near(Resolve(++frame, dt, 2, true, y, null, y), y), "Changing mounts discards the former seat");
+            Vector3 groundPivot = default;
+            for (var i = 0; i < fps; i++) groundPivot = anchor.Resolve(++frame, dt, 2, true, new(10, 0, 2),
+                new(11, 3, 4), new(10, 1, 2));
+            Check(Vector3.Distance(groundPivot, new(11, 2.88f, 4)) < 0.002f, "A long ground mount centers on the rider's saddle in all three axes");
         }
     }
 }

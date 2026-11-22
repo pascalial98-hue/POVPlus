@@ -12,6 +12,7 @@ public class MainWindow : Window, IDisposable
     private Configuration Config => plugin.Configuration;
     private bool recordingKey, keyRecorderArmed;
     private int pendingModifier;
+    private static readonly ShoulderProfile WalkingDefaults = new(), RidingDefaults = ShoulderProfile.Riding();
 
     public MainWindow(Plugin plugin) : base(L.T("POV+ Enhanced 第一人称设置###PovPlus"), ImGuiWindowFlags.AlwaysVerticalScrollbar)
     {
@@ -65,26 +66,24 @@ public class MainWindow : Window, IDisposable
         {
             ImGui.TextWrapped(L.T("用游戏原有的视角切换键，依次切换第三人称、越肩和第一人称。"));
             if (plugin.ShoulderUnavailable) ImGui.TextWrapped(L.T("当前客户端无法启用越肩视角，请查看 Dalamud 日志。"));
-            Slider("肩位偏移（负值左肩，正值右肩）", ref Config.ShoulderSide, -1, 1, ShoulderRig.DefaultSide, "%.2f");
-            Slider("肩位高度", ref Config.ShoulderHeight, -0.6f, 0.8f, ShoulderRig.DefaultHeight, "%.2f");
-            var (min, max) = ShoulderZoom.Range(Config.ShoulderMinDistance, Config.ShoulderMaxDistance);
-            if (Slider("滚轮最近距离", ref min, ShoulderZoom.SliderMin, ShoulderZoom.SliderMax, ShoulderZoom.DefaultMin, "%.2f", save: false))
+            if (ImGui.BeginTabBar("ShoulderProfiles"))
             {
-                Config.ShoulderMinDistance = min;
-                Config.ShoulderMaxDistance = max = Math.Max(min, max);
-                Config.Save();
-            }
-            if (Slider("滚轮最远距离", ref max, ShoulderZoom.SliderMin, ShoulderZoom.SliderMax, ShoulderZoom.DefaultMax, "%.2f", save: false))
-            {
-                Config.ShoulderMinDistance = Math.Min(min, max);
-                Config.ShoulderMaxDistance = max;
-                Config.Save();
+                if (ImGui.BeginTabItem(L.Label("步行")))
+                {
+                    DrawShoulderProfile(Config.WalkingShoulder, WalkingDefaults, false);
+                    ImGui.EndTabItem();
+                }
+                if (ImGui.BeginTabItem(L.Label("骑乘")))
+                {
+                    ImGui.TextWrapped(L.T("上坐骑后自动使用这组参数。镜头跟随骑手肩位，地面骑行与飞行共用。"));
+                    DrawShoulderProfile(Config.MountedShoulder, RidingDefaults, true);
+                    ImGui.EndTabItem();
+                }
+                ImGui.EndTabBar();
             }
             ImGui.TextWrapped(L.T("越肩时用滚轮在区间内拉近或拉远，下次进入时沿用上次的距离。两个值相同可固定距离，靠墙时镜头仍会自动收近。"));
             Slider("进入越肩的过渡时间（秒）", ref Config.ShoulderEntryTime, 0, 0.6f, ShoulderRig.DefaultEntryTime, "%.2f");
-            Slider("移动跟随滞后（秒）", ref Config.ShoulderLag, 0, 0.4f, ShoulderRig.DefaultLag, "%.2f");
-            Slider("最大滞后距离", ref Config.ShoulderMaxLag, 0, 0.8f, ShoulderRig.DefaultMaxLag, "%.2f");
-            ImGui.TextWrapped(L.T("移动滞后只跟随角色的水平位移。调大时，镜头在起步和停步时会稍慢一些；设为零可关闭。转动视角始终即时响应。"));
+            ImGui.TextWrapped(L.T("移动滞后保留前后与左右的跟随感。上下滞后影响跳跃和坐骑升降，设为零时镜头同步升降。"));
         }
         MouseLookSettings();
         Heading("转头范围");
@@ -286,6 +285,28 @@ public class MainWindow : Window, IDisposable
             Toggle("显示头部位置与方向辅助线", ref Config.SETTINGS_ShowCameraLocation);
             ImGui.TextWrapped(L.T("辅助线需同时启用第三人称视点绑定，并保持此设置窗口打开。"));
         }
+    }
+
+    private void DrawShoulderProfile(ShoulderProfile profile, ShoulderProfile defaults, bool riding)
+    {
+        Slider("肩位偏移（负值左肩，正值右肩）", ref profile.Side, riding ? -2 : -1, riding ? 2 : 1, defaults.Side, "%.2f");
+        Slider("肩位高度", ref profile.Height, riding ? -1.5f : -0.6f, riding ? 2 : 0.8f, defaults.Height, "%.2f");
+        var (min, max) = ShoulderZoom.Range(profile.MinDistance, profile.MaxDistance);
+        if (Slider("滚轮最近距离", ref min, ShoulderZoom.SliderMin, ShoulderZoom.SliderMax, defaults.MinDistance, "%.2f", save: false))
+        {
+            profile.MinDistance = min;
+            profile.MaxDistance = max = Math.Max(min, max);
+            Config.Save();
+        }
+        if (Slider("滚轮最远距离", ref max, ShoulderZoom.SliderMin, ShoulderZoom.SliderMax, defaults.MaxDistance, "%.2f", save: false))
+        {
+            profile.MinDistance = Math.Min(min, max);
+            profile.MaxDistance = max;
+            Config.Save();
+        }
+        Slider("移动跟随滞后（秒）", ref profile.Lag, 0, 0.4f, defaults.Lag, "%.2f");
+        Slider("最大滞后距离", ref profile.MaxLag, 0, 0.8f, defaults.MaxLag, "%.2f");
+        Slider("上下滞后权重", ref profile.VerticalLagPercent, 0, 100, defaults.VerticalLagPercent, "%.0f%%");
     }
 
     private static void Heading(string text)
