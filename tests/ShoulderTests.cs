@@ -13,7 +13,7 @@ internal static partial class Program
         TestGlideTiming();
         TestShoulderFlight();
         TestWalkingStairHeight();
-        TestMovingJumpAndDismountHeight();
+        TestShoulderLandingRecovery();
         TestFlightSwayAndBank();
         TestShoulderTurning();
         TestRidingResponse();
@@ -548,86 +548,119 @@ internal static partial class Program
 
     private static void TestWalkingStairHeight()
     {
-        const float framing = 1.35f;
-        foreach (var fps in new[] { 30, 60, 144 })
+        foreach (int fps in new[] { 30, 60, 144 })
         {
-            var dt = 1f / fps;
+            var height = new ShoulderWalkingHeight();
+            const float normalFraming = 1.35f;
+            float dt = 1f / fps;
+            uint frame = 0;
             Vector3 root = new(2, 20, -3), drawn = root;
+            float native = root.Y + normalFraming;
+            float Correct() => height.Update(frame, dt, 1, root, drawn, native);
+            Check(Correct() == 0, "Entering walking shoulder preserves the current native framing");
             foreach (var direction in new[] { 1, -1 })
             {
-                for (var frame = 0; frame < 6 * fps; frame++)
+                for (int i = 0; i < 6 * fps; i++)
                 {
+                    frame++;
                     root.Z += dt * 2;
-                    if (frame % Math.Max(1, fps / 6) == 0) root.Y += direction * 0.16f;
-                    // The rendered root follows discrete steps with its own easing.
+                    if (i % Math.Max(1, fps / 6) == 0) root.Y += direction * 0.16f;
+                    // The rendered model eases each discrete step. Simulate a native
+                    // pivot that also leads on ascent and undershoots on descent.
                     drawn = new(root.X, float.Lerp(drawn.Y, root.Y, 1 - MathF.Exp(-dt / 0.09f)), root.Z);
-                    var native = root.Y + framing + direction * 0.3f;
-                    var pivot = ShoulderWalkingHeight.Resolve(root, drawn, framing, native);
-                    Check(Near(pivot, drawn.Y + framing), "Long stairs retain framing against the visible model");
+                    native = root.Y + normalFraming + direction * 0.3f;
+                    if (i % 11 == 8) continue; // some input frames do not query the pivot
+                    var delta = Correct();
+                    Check(Near(native + delta - drawn.Y, normalFraming), "Walking a long staircase keeps the original height relative to the visible model");
+                    Check(Correct() == delta, "Multiple pivot queries per frame apply the same stair correction");
                 }
             }
-            Check(Near(ShoulderWalkingHeight.Resolve(root, drawn, framing + 0.4f, root.Y + framing), drawn.Y + framing + 0.4f),
-                "A live camera offset is used immediately rather than learned from old frames");
-            Check(Near(ShoulderWalkingHeight.Resolve(root, root + Vector3.UnitY * 20, framing, 123), root.Y + framing),
-                "A former model position is ignored after a teleport");
-            Check(Near(ShoulderWalkingHeight.Resolve(root, new Vector3(float.NaN), framing, 123), root.Y + framing),
-                "A missing rendered pose uses the current actor position");
-            Check(ShoulderWalkingHeight.Resolve(new Vector3(float.NaN), drawn, framing, 123) == 123 &&
-                ShoulderWalkingHeight.Resolve(root, drawn, float.NaN, 123) == 123,
-                "Unusable actor data falls back to the native pivot");
-            Check(Near(ShoulderWalkingHeight.Resolve(root, root, 0, 123), root.Y + 0.2f),
-                "Keep the native minimum camera offset");
+            for (int i = 0; i < 2 * fps; i++)
+            {
+                frame++;
+                drawn.Y = float.Lerp(drawn.Y, root.Y, 1 - MathF.Exp(-dt / 0.09f));
+                native = float.Lerp(native, root.Y + normalFraming, 1 - MathF.Exp(-dt / 0.07f));
+                Check(MathF.Abs(native + Correct() - drawn.Y - normalFraming) < 0.01f, "Stopping on a landing avoids a framing kick as native height settles");
+            }
+            frame++;
+            native += 0.4f;
+            Check(Correct() == 0, "A new flat-ground camera preset passes through");
+            frame++;
+            root.Y += 0.4f;
+            native += 0.4f;
+            Check(Correct() < -0.39f, "An ascending step tracks the lower rendered character immediately");
+            Check(height.Update(frame, dt, 2, root, drawn, native) == 0, "A replacement skeleton gets a fresh framing reference");
+            frame++;
+            root.Y += 20;
+            drawn = root;
+            Check(Correct() == 0, "A teleport discards stair history");
+            Check(height.Update(++frame, dt, 1, root, new(float.NaN), native) == 0, "Unavailable render data falls back to native height");
+            height.Reset();
+            Check(height.Update(++frame, dt, 1, root, drawn, native) == 0, "Mount, jump or scene transitions start fresh when returning to walking");
         }
     }
 
-    private static void TestMovingJumpAndDismountHeight()
+    private static void TestShoulderLandingRecovery()
     {
-        const float framing = 1.25f;
-        const float footHeight = -0.45f, mountHeight = 0.75f;
+        const float actorOffset = 1.25f, groundBias = 0.12f, shoulderHeight = -0.28f;
         foreach (var fps in new[] { 30, 60, 144 })
         {
             var dt = 1f / fps;
-            var anchor = new ShoulderMountAnchor();
-            var rig = new ShoulderRig();
+            var ordinary = new ShoulderWalkingHeight();
+            var landing = new ShoulderWalkingHeight();
             Vector3 root = new(0, 20, 0);
-            var ground = root.Y;
             uint frame = 0;
-            const float jump = 1.7f;
-            var staleNative = ground + jump + framing;
-            foreach (var y in new[] { 0f, jump * 0.5f, jump, jump * 0.4f, 0f })
+            var groundHeight = root.Y + actorOffset + groundBias;
+            float Sample(ShoulderWalkingHeight filter, float native) => filter.Update(frame, dt, 1, root, root, native, actorOffset);
+
+            Sample(landing, groundHeight);
+            landing.SuspendForAirOrMount();
+            ordinary.Reset();
+            for (var index = 0; index < 2 * fps; index++)
             {
-                root.X += 0.15f;
-                root.Y = ground + y;
-                var pivot = ShoulderWalkingHeight.Resolve(root, root, framing, staleNative);
-                Check(Near(pivot + rig.Offset(0, 0, footHeight).Y, root.Y + framing + footHeight),
-                    "Jump, apex and landing use the current elevation plus the configured shoulder height");
-            }
-            for (var i = 0; i < fps; i++)
-            {
-                root.X += 0.15f;
-                var pivot = ShoulderWalkingHeight.Resolve(root, root, framing, staleNative);
-                Check(Near(pivot, ground + framing), "A stale native apex cannot hold the pivot up while the player keeps moving");
+                root.X += 4 * dt;
+                frame++;
+                var settling = groundHeight + 0.7f * MathF.Exp(-index * dt / 0.20f);
+                Check(Sample(landing, settling) == Sample(ordinary, settling),
+                    "A normally easing landing retains the original camera output");
             }
 
-            var seat = root + Vector3.UnitY * 3.62f;
-            Vector3 mountedPivot = new(root.X, ground + 3, root.Z);
-            for (var i = 0; i < fps; i++)
-                mountedPivot = anchor.Resolve(++frame, dt, 1, true, root, seat, mountedPivot);
-
-            var weight = 1f;
-            var prior = mountedPivot.Y + mountHeight;
-            for (var i = 0; i < fps; i++)
+            landing.SuspendForAirOrMount();
+            var stale = groundHeight + 0.65f;
+            var adjustment = 0f;
+            for (var index = 0; index < fps; index++)
             {
-                root.X += 0.15f;
-                weight = Math.Max(0, weight - dt / 0.22f);
-                var staleMountY = ground + 3.5f;
-                var walkingPivot = new Vector3(root.X, ShoulderWalkingHeight.Resolve(root, root, framing, staleMountY), root.Z);
-                var pivot = anchor.Resolve(++frame, dt, 0, false, root, null, walkingPivot);
-                var finalHeight = pivot.Y + rig.Offset(0, 0, float.Lerp(footHeight, mountHeight, weight)).Y;
-                Check(finalHeight <= prior + 0.001f, "Moving dismount blends progressively from the saddle");
-                prior = finalHeight;
+                root.X += 4 * dt;
+                frame++;
+                var samples = stale + 0.005f * MathF.Sin(index * dt * 16);
+                adjustment = Sample(landing, samples);
+                if (index * dt < 0.20f) Check(adjustment == 0, "Normal easing has time to start after leaving the air");
+                Check(Sample(landing, samples) == adjustment, "Multiple pivot queries in the same frame reuse the recovery");
             }
-            Check(Near(prior, ground + framing + footHeight), "After dismount, use the saved walking height despite a stale native mount pivot");
+            Check(MathF.Abs(stale + adjustment + shoulderHeight - (groundHeight + shoulderHeight)) < 0.02f,
+                "A stalled jump height recovers while running and keeps the saved shoulder height");
+            frame++;
+            Check(Sample(landing, groundHeight) == 0, "Native recovery hands back the height without a dip");
+            frame++;
+            Check(Sample(landing, groundHeight + 0.4f) == 0, "Normal framing changes resume after recovery");
+
+            // Enter shoulder mode on a mount, with no previous walking sample.
+            var dismount = new ShoulderWalkingHeight();
+            dismount.SuspendForAirOrMount();
+            var mountedHeight = root.Y + actorOffset + 1.1f;
+            var result = 0f;
+            for (var index = 0; index < fps; index++)
+            {
+                root.Z += 3 * dt;
+                frame++;
+                result = Sample(dismount, mountedHeight);
+            }
+            Check(MathF.Abs(mountedHeight + result - (root.Y + actorOffset)) < 0.01f,
+                "Moving dismount can clear an inherited seat height without a prior walking sample");
+
+            dismount.Reset();
+            frame++;
+            Check(Sample(dismount, mountedHeight) == 0, "Leaving the camera discards pending landing recovery");
         }
     }
 

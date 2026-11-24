@@ -35,6 +35,7 @@ internal sealed unsafe class ShoulderView : IDisposable
     private ShoulderGlideTransition glideFov;
     private uint? glideFrame;
     private readonly ShoulderMountAnchor mountAnchor = new();
+    private readonly ShoulderWalkingHeight walkingHeight = new();
     private CameraValueOverride orbitFloor;
     private float originalDistance, entryTime, zoomTime, blend, mountWeight;
     private float combatPhase;
@@ -302,6 +303,7 @@ internal sealed unsafe class ShoulderView : IDisposable
             var mountedNow = IsRiding();
             if (riding != mountedNow)
             {
+                walkingHeight.SuspendForAirOrMount();
                 riding = mountedNow;
                 zoom.Begin(owner->currentZoom, Profile.Distance);
                 zoomTime = 0;
@@ -332,13 +334,13 @@ internal sealed unsafe class ShoulderView : IDisposable
             UpdateDistance();
             var player = Service.ObjectTable.LocalPlayer!;
             if (actor != player.Address) return;
-            var character = (NativeCharacter*)actor;
-            var mount = character->Mount.MountObject;
+            var mount = ((NativeCharacter*)actor)->Mount.MountObject;
             if (target != actor && !(riding && mount != null && target == (nint)mount)) return;
             if (!float.IsFinite(position->X) || !float.IsFinite(position->Y) || !float.IsFinite(position->Z)) return;
             var framework = Framework.Instance();
             var foot = Config.WalkingShoulder;
             var mounted = Config.MountedShoulder;
+            float walkHeightCorrection = 0;
             if (framework != null)
             {
                 var root = player.Position;
@@ -353,22 +355,26 @@ internal sealed unsafe class ShoulderView : IDisposable
                         mountWeight, mounted.RecoverySeconds, mounted.TurnInertiaPercent);
                 }
                 var head = riding ? ReadRiderHead(root) : null;
-                var pivot = *position;
-                if (!riding && !Service.Condition[ConditionFlag.Swimming] && !Service.Condition[ConditionFlag.Diving])
+                var anchor = mountAnchor.Resolve(framework->FrameCounter, framework->FrameDeltaTime,
+                    (nint)mount, riding, root, head, *position);
+                if (Service.Condition[ConditionFlag.Swimming] || Service.Condition[ConditionFlag.Diving])
+                    walkingHeight.Reset();
+                else if (riding || Service.Condition[ConditionFlag.Jumping] || Service.Condition[ConditionFlag.Jumping61])
+                    walkingHeight.SuspendForAirOrMount();
+                else
                 {
                     var model = player.GetCharacterBase();
                     var skeleton = model != null && model->GetObjectType() == SceneObjectType.CharacterBase ? model->Skeleton : null;
-                    var drawnRoot = skeleton == null ? root : (Vector3)skeleton->Transform.Position;
-                    pivot.Y = ShoulderWalkingHeight.Resolve(root, drawnRoot, ((GameObject*)character)->CameraOffset.Y, pivot.Y);
+                    walkHeightCorrection = walkingHeight.Update(framework->FrameCounter, framework->FrameDeltaTime,
+                        (nint)skeleton, root, skeleton == null ? root : (Vector3)skeleton->Transform.Position, position->Y,
+                        ((GameObject*)actor)->CameraOffset.Y);
                 }
-                // Blend the old seat into the live walking pivot on dismount.
-                var anchor = mountAnchor.Resolve(framework->FrameCounter, framework->FrameDeltaTime,
-                    (nint)mount, riding, root, head, pivot);
                 *position = Vector3.Lerp(*position, anchor, blend);
             }
             var offset = blend * rig.Offset(camera->currentHRotation,
                 float.Lerp(Config.ShoulderSide, mounted.Side, mountWeight), float.Lerp(Config.ShoulderHeight, mounted.Height, mountWeight),
                 new Vector2(combatOffset.X, combatOffset.Y) + flight.Sway);
+            offset.Y += blend * (1 - mountWeight) * walkHeightCorrection;
             var length = offset.Length();
             if (length < 0.0001f) return;
             var direction = offset / length;
@@ -419,6 +425,7 @@ internal sealed unsafe class ShoulderView : IDisposable
         orbitFloor = default;
         rig.Reset();
         mountAnchor.Reset();
+        walkingHeight.Reset();
         // Flush on the next framework tick, outside the native permission call.
         if (saveDistanceAt.HasValue) saveDistanceAt = Environment.TickCount64;
     }
