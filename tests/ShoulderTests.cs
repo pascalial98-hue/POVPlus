@@ -9,6 +9,7 @@ internal static partial class Program
         TestShoulderCombat();
         TestShoulderSpeedZoom();
         TestSpeedZoomTransitions();
+        TestShoulderFreeLook();
         TestCameraLensOwnership();
         TestGlideLens();
         TestGlideTiming();
@@ -320,6 +321,23 @@ internal static partial class Program
             Check(Near(configured.Offset, riding ? instant.Offset : gradual.Offset),
                 "Walking and mounted profiles use their own return time");
         }
+    }
+
+    private static void TestShoulderFreeLook()
+    {
+        var left = (int)FFXIVClientStructs.FFXIV.Client.Game.Control.InputManager.MouseButtonHoldState.Left;
+        var right = (int)FFXIVClientStructs.FFXIV.Client.Game.Control.InputManager.MouseButtonHoldState.Right;
+        Check(!ShoulderFreeLook.LeftDrag(left, dragging: false), "A left click alone does not freeze movement direction");
+        Check(ShoulderFreeLook.LeftDrag(left, dragging: true), "Left drag starts free look");
+        Check(!ShoulderFreeLook.LeftDrag(right, dragging: true) && !ShoulderFreeLook.LeftDrag(left | right, dragging: true),
+            "Right drag and native two-button movement keep their ordinary heading");
+
+        var look = new ShoulderFreeLook();
+        Check(Near(look.Resolve(2.95f, active: true), 2.95f) && Near(look.Resolve(-2.8f, active: true), 2.95f),
+            "Heading remains fixed across a camera turn while left drag is held");
+        Check(Near(look.Resolve(-2.8f, active: false), -2.8f), "Releasing left drag immediately restores the live movement direction");
+        Check(float.IsNaN(look.Resolve(float.NaN, active: true)) && Near(look.Resolve(-0.7f, active: true), -0.7f),
+            "Fresh left drag can acquire the next finite heading");
     }
 
     private static unsafe void TestCameraLensOwnership()

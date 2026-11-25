@@ -30,13 +30,13 @@ internal sealed unsafe class StationaryCameraLook : IDisposable
     private int GetRotationMode(GameCamera* camera, Framework* framework)
     {
         var original = hook.Original(camera, framework);
-        if (Failed || original != 1) return original;
+        if (Failed) return original;
         try
         {
-            // Limit the override to the active first-person world camera.
-            // Third person, GPose, calibration and special cameras
-            // keep their original decision. No per-frame input snapshot lives
-            // beyond this call, so disable/unload needs no game-state restore.
+            if (Plugin.P.Shoulder?.CaptureFreeLook(camera) == true)
+                return StationaryLook.CameraRotationMode(original, protect: true);
+            if (original != 1) return original;
+
             if (!FirstPersonLimits.IsActive(camera) || !POVCameraFunctionality.FirstPersonViewActive() ||
                 ((NativeCamera*)camera)->IsEventCameraAutoControl || !MouseLookKeys.Foreground) return original;
             var player = Service.ObjectTable.LocalPlayer;

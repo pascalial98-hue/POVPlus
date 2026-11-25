@@ -21,10 +21,13 @@ internal sealed unsafe class ShoulderView : IDisposable
     // game's CAMERA_MODE binding. Wheel zoom also asks, without this action.
     private const InputCode TogglePerspective = (InputCode)0x2e;
     private const string GateSignature = "40 53 48 83 EC 20 48 8B D9 48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 84 C0 75 ?? 38 83 ?? ?? ?? ?? 75 ?? B0 01";
+    private const string MovementYawSignature = "48 63 81 84 01 00 00 83 F8 06 77 ?? 4C 8D 05 ?? ?? ?? ?? 41 8B 94 80 ?? ?? ?? ?? 49 03 D0 FF E2 F3 0F 10 81 40 01 00 00";
     private delegate byte CanChangePerspective(GameCamera* camera);
+    private delegate float ReadMovementYaw(GameCamera* camera);
     private readonly Hook<CanChangePerspective> gate;
     private readonly Hook<Camera.Delegates.UpdateState> inputUpdate;
     private readonly Hook<Camera.Delegates.Update> cameraUpdate;
+    private readonly Hook<ReadMovementYaw>? movementYaw;
     private readonly GameCamera* owner;
     private readonly nint table;
     private readonly ShoulderCycle cycle;
@@ -36,6 +39,7 @@ internal sealed unsafe class ShoulderView : IDisposable
     private uint? glideFrame;
     private readonly ShoulderMountAnchor mountAnchor = new();
     private readonly ShoulderWalkingHeight walkingHeight = new();
+    private ShoulderFreeLook freeLook;
     private CameraValueOverride orbitFloor;
     private float originalDistance, entryTime, zoomTime, blend, mountWeight;
     private float combatPhase;
@@ -47,6 +51,7 @@ internal sealed unsafe class ShoulderView : IDisposable
     private nint actor;
     internal bool Active => cycle.Active && actor != 0 && !Failed;
     internal bool Failed { get; private set; }
+    internal bool FreeLookUnavailable => movementYaw == null;
     private static Configuration Config => Plugin.P.Configuration;
 
     internal ShoulderView(GameCamera* camera, ShoulderCycle cycle)
@@ -70,6 +75,19 @@ internal sealed unsafe class ShoulderView : IDisposable
             gate.Enable();
         }
         catch { cameraUpdate?.Dispose(); inputUpdate?.Dispose(); gate.Dispose(); throw; }
+
+        try
+        {
+            movementYaw = Service.GameInteropProvider.HookFromAddress<ReadMovementYaw>(
+                Service.SigScanner.ScanText(MovementYawSignature), GetMovementYaw);
+            movementYaw.Enable();
+        }
+        catch (Exception ex)
+        {
+            movementYaw?.Dispose();
+            movementYaw = null;
+            Service.Log.Warning(ex, "POV+ shoulder free-look movement reference unavailable.");
+        }
     }
 
     private bool SameCamera() => Common.CameraManager != null && Common.CameraManager->worldCamera == owner &&
@@ -89,6 +107,31 @@ internal sealed unsafe class ShoulderView : IDisposable
         return scene != null && scene->CurrentCamera == &((CameraBase*)owner)->SceneCamera;
     }
 
+    private bool IsFreeLooking()
+    {
+        if (!Active || owner->mode != 1) return false;
+        var input = InputManager.Instance();
+        return ShoulderFreeLook.LeftDrag(input->MouseButtonHoldStateRaw, input->MouseDragActive) &&
+            MouseLookKeys.Foreground && InWorld() && Service.ObjectTable.LocalPlayer!.Address == actor;
+    }
+
+    internal bool CaptureFreeLook(GameCamera* camera)
+    {
+        if (camera != owner) return false;
+        var active = IsFreeLooking();
+        // Sample before native camera rotation consumes this frame's mouse input.
+        if (movementYaw != null) freeLook.Resolve(active ? movementYaw.Original(camera) : 0, active);
+        return active;
+    }
+
+    private float GetMovementYaw(GameCamera* camera)
+    {
+        var nativeYaw = movementYaw!.Original(camera);
+        if (camera != owner) return nativeYaw;
+        try { return freeLook.Resolve(nativeYaw, IsFreeLooking()); }
+        catch (Exception ex) { Stop(ex); return nativeYaw; }
+    }
+
     private void UpdateCameraInput(Camera* camera)
     {
         var scope = default(ShoulderWheelScope);
@@ -96,6 +139,7 @@ internal sealed unsafe class ShoulderView : IDisposable
         {
             try
             {
+                CaptureFreeLook(owner);
                 // A real perspective toggle must see the original lens bounds
                 // when the game saves the third-person view on its way out.
                 if (InWorld() && !InputManager.Instance()->GetInputStatus(TogglePerspective))
@@ -415,6 +459,7 @@ internal sealed unsafe class ShoulderView : IDisposable
             else if (owner->mode == 0) ((Camera*)owner)->SavedDistance = originalDistance;
         }
         actor = 0;
+        freeLook = default;
         motionFrame = null;
         combatPhase = 0;
         combatOffset = Vector3.Zero;
@@ -450,6 +495,7 @@ internal sealed unsafe class ShoulderView : IDisposable
 
     public void Dispose()
     {
+        movementYaw?.Dispose();
         cameraUpdate.Dispose();
         inputUpdate.Dispose();
         gate.Dispose();

@@ -377,6 +377,9 @@ public partial class MainWindow : Window, IDisposable
             if (!Config.ShoulderCycleEnabled) return;
         }
         if (plugin.ShoulderUnavailable) ImGui.TextWrapped(L.T("当前客户端无法启用越肩视角，请查看 Dalamud 日志。"));
+        else if (plugin.Shoulder?.FreeLookUnavailable == true)
+            ImGui.TextWrapped(L.T("越肩自由镜头的移动方向保护不可用，请查看 Dalamud 日志。"));
+        else ImGui.TextWrapped(L.T("按住左键自由观察，按住右键控制方向。"));
         var profile = riding ? Config.MountedShoulder : Config.WalkingShoulder;
         var defaults = riding ? RidingDefaults : WalkingDefaults;
         if (riding) DrawShoulderMotion(profile, defaults, riding);
