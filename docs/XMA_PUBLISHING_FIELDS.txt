@@ -1,7 +1,7 @@
 POV+ Enhanced — XMA 发布字段建议（未提交 XMA）
 
 Name: POV+ Enhanced
-Version: 1.8.1.0
+Version: 1.8.2.0
 Type: Dalamud Plugin
 Author display name: Pascalial
 Genders: Unisex

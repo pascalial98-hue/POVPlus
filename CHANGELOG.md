@@ -1,5 +1,16 @@
 # Changelog / 更新记录
 
+## 1.82 (1.8.2.0) — 2026-11-25
+
+- 步行和骑乘越肩均支持左键自由观察。松开左键后，镜头平滑回位，人物沿原方向继续移动。回位途中可按右键接管方向。<br>
+  Hold the left mouse button to look around in either shoulder view. On release, the camera eases back while your character keeps moving in the original direction. Hold the right button to steer during the return.
+
+- 速度拉远新增独立的拉远和收回过渡时间，步行和骑乘各自保存，也可随镜头预设导入导出。<br>
+  Speed-based zoom now has independent pullback and return times for on-foot and mounted cameras. Both settings are saved in camera presets and included in JSON import and export.
+
+- 越肩镜头会在落地或下坐骑后检测持续偏高的镜头，并平滑恢复高度。<br>
+  The shoulder camera detects and gently corrects a height that stays too high after landing or dismounting.
+
 ## 1.81 (1.8.1.0) — 2026-11-22
 
 - 在 /pov 的「预设」页保存、应用和管理多套镜头设置。支持把单套或全部预设导出为 JSON。导入后可从列表选择并应用，同名会自动加编号。<br>

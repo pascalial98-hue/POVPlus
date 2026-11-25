@@ -2,7 +2,7 @@
 
 ![POV+ Enhanced](https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/docs/images/povplus-enhanced-preview-v2.png)
 
-**中文 / English · 1.81** · [English only](README.en.md)
+**中文 / English · 1.82** · [English only](README.en.md)
 
 基于 Tiraesias 的 POV+ Beta 制作的国服第一人称增强分支。<br>
 An immersive first-person camera for FFXIV CN, built on Tiraesias's POV+ Beta.
@@ -14,6 +14,12 @@ Look down to see your body and clothes, look around naturally, and adjust the vi
 CURRENT TARGET: Chinese client, Dalamud API 15. Latest build baseline: CN 2026.11.03.0000.0000 / Dalamud 15.0.4.0. International clients have not been verified.
 
 ## 功能 / Features
+
+- 步行和骑乘越肩均支持左键自由观察。松开左键后，镜头平滑回位，人物沿原方向继续移动。回位途中可按右键接管方向。<br>
+  Hold the left mouse button to look around in either shoulder view. On release, the camera eases back while your character keeps moving in the original direction. Hold the right button to steer during the return.
+
+- 速度拉远新增独立的拉远和收回过渡时间，步行和骑乘各自保存，也可随镜头预设导入导出。<br>
+  Speed-based zoom now has independent pullback and return times for on-foot and mounted cameras. Both settings are saved in camera presets and included in JSON import and export.
 
 - 在 /pov 的「预设」页管理多套镜头设置。预设包含视点校准、第一人称、步行和骑乘越肩参数。支持导入 JSON，以及导出单套或全部预设。<br>
   Manage camera setups on the Presets page in /pov. Presets include viewpoint calibration and first-person, on-foot and mounted shoulder settings. Import JSON and export one preset or all of them.

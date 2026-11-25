@@ -2,8 +2,8 @@
   "Author": "Tiraesias; Enhanced fork: pascalial98-hue",
   "Name": "POV+ Enhanced",
   "InternalName": "PovPlus",
-  "AssemblyVersion": "1.8.1.0",
-  "Description": "看见自己的身体，自由观察、探头，用引导校准到适合自己的视点。\nSee your body, look around and lean, with guided viewpoint calibration.\n\n在 /pov 的「通用」页开启越肩后，用游戏原有的视角切换键依次切换第三人称、越肩和第一人称。越肩默认关闭。\nEnable shoulder view in the General page of /pov to cycle through third person, shoulder view and first person with the game's perspective toggle. Shoulder view is off by default.\n\n步行越肩可叠加战斗构图，步行和坐骑可分别按速度拉远。飞行时可调整镜头晃动与转弯侧倾。\nOn-foot shoulder view supports combat framing. Speed-based zoom is adjustable separately on foot and on mounts. Flying mounts can add camera sway and bank into turns.\n\n在 /pov 的「预设」页管理多套镜头设置。预设包含视点校准、第一人称、步行和骑乘越肩参数。支持导入 JSON，以及导出单套或全部预设。\nManage camera setups on the Presets page in /pov. Presets include viewpoint calibration and first-person, on-foot and mounted shoulder settings. Import JSON and export one preset or all of them.\n\n新配置默认隐藏头部、保留完整头影，并逐项显示中英对照。已有设置保留；也可选择单语界面和鼠标直控。\nNew configurations enable head hiding, full head shadows and paired Chinese/English text. Saved settings are retained; single-language UI and direct mouse look are also available.\n\n可选“视角与限位跟随身体姿态”，默认关闭。此选项适合静止姿态观察，不适合移动时使用；即使有平滑处理，跑动时仍可能明显晃动。\nOptional body-relative view and limits, off by default. This option is intended for viewing stationary poses, not for use while moving. Running may still cause noticeable camera sway even with smoothing.\n\n面向国服 / Dalamud API 15，国际服尚未验证。\nTargets FFXIV CN / Dalamud API 15; international clients are unverified.",
+  "AssemblyVersion": "1.8.2.0",
+  "Description": "第一人称可见身体，越肩可自由观察，支持镜头预设。\nSee your body in first person, look around in shoulder view, and save camera presets.",
   "ApplicableVersion": "any",
   "RepoUrl": "https://github.com/pascalial98-hue/POVPlus",
   "Tags": [
@@ -19,8 +19,8 @@
   "LoadSync": false,
   "CanUnloadAsync": false,
   "LoadPriority": 0,
-  "Punchline": "第一人称与可选越肩镜头 / First-person and optional shoulder cameras",
-  "Changelog": "1.81\n在 /pov 的「预设」页保存、应用和管理多套镜头设置。支持把单套或全部预设导出为 JSON。导入后可从列表选择并应用，同名会自动加编号。\nUse the Presets page in /pov to save, apply and manage multiple camera setups. Export one preset or all of them to JSON. Imported presets are added to the list, with duplicate names numbered automatically.\n\n骑乘越肩新增可选的滑翔广角，额外视场角可调 0–60°。进入和退出滑翔分别可设延迟和过渡时间。过渡设为 0 时沿用游戏自带缓动。\nMounted shoulder view can widen the field of view by up to 60° when the mount glides. Glide entry and exit have separate delays and transition times. A transition of 0 uses the game’s camera easing.\n\n修复第三人称近距离缩放会影响越肩视场角的问题。进入越肩时采用常规视场角，回到第三人称时恢复原有缩放。\nFixed shoulder view inheriting the optical zoom from close-range third person. Shoulder view uses the normal field of view and restores your optical zoom when you return to third person.",
+  "Punchline": "第一人称可见身体，越肩可自由观察，支持镜头预设。 / See your body in first person, look around in shoulder view, and save camera presets.",
+  "Changelog": "1.82\n步行和骑乘越肩均支持左键自由观察。松开左键后，镜头平滑回位，人物沿原方向继续移动。回位途中可按右键接管方向。\nHold the left mouse button to look around in either shoulder view. On release, the camera eases back while your character keeps moving in the original direction. Hold the right button to steer during the return.\n\n速度拉远新增独立的拉远和收回过渡时间，步行和骑乘各自保存，也可随镜头预设导入导出。\nSpeed-based zoom now has independent pullback and return times for on-foot and mounted cameras. Both settings are saved in camera presets and included in JSON import and export.\n\n越肩镜头会在落地或下坐骑后检测持续偏高的镜头，并平滑恢复高度。\nThe shoulder camera detects and gently corrects a height that stays too high after landing or dismounting.",
   "AcceptsFeedback": false,
   "IconUrl": "https://raw.githubusercontent.com/pascalial98-hue/POVPlus/main/docs/images/povplus-enhanced-icon-v1.png",
   "ImageUrls": [

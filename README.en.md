@@ -6,7 +6,7 @@
 
 See your body, turn and lean naturally, and keep your head's shadow.
 
-A community fork of [Tiraesias's POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta for FFXIV CN / Dalamud. Current version **1.81** (1.8.1.0). Original attribution, Git history and the AGPL-3.0-or-later license are retained.
+A community fork of [Tiraesias's POV+](https://github.com/TiraesiascenGraven/POVPlus) Beta for FFXIV CN / Dalamud. Current version **1.82** (1.8.2.0). Original attribution, Git history and the AGPL-3.0-or-later license are retained.
 
 See [CN repository review notes](docs/CN_SUBMISSION.md), [standard build instructions](docs/BUILD.md) and [AI usage disclosure](docs/AI_USAGE.md) for submission details and the scope of AI-assisted development and artwork.
 
@@ -34,7 +34,8 @@ Manual packages are available in [Releases](https://github.com/pascalial98-hue/P
 | Optional shoulder view | Enable shoulder view in the General page of /pov to cycle through third person, shoulder view and first person with the game's perspective toggle. Shoulder view is off by default. |
 | On-foot and mounted cameras | On-foot and mounted views remember their own zoom distance and have separate framing and zoom limits. Mounts also have adjustable tracking lag, recovery when stopping, and cornering sway. |
 | Combat framing | On foot, set shoulder position, height and distance offsets for combat, with separate transition times for entering and leaving combat. |
-| Speed-based zoom | Enable speed-based zoom separately on foot and on mounts. The camera pulls back slightly at cruising speed and farther as you accelerate, then returns to your chosen zoom when you stop. |
+| Speed-based zoom | Enable speed-based zoom separately on foot and on mounts. The camera pulls back slightly at cruising speed and farther as you accelerate, then returns to your chosen zoom when you stop. Pullback and return times are adjustable. |
+| Shoulder free look | Hold the left mouse button to look around in either shoulder view. On release, the camera eases back while your character keeps moving in the original direction. Hold the right button to steer during the return. |
 | Flight motion | Adjust camera sway and turn banking on flying mounts. The camera settles smoothly when hovering or landing. |
 | Glide field of view | Use Mounted Camera → Flight Camera in /pov to enable glide FOV. Add up to 60° of field of view, with separate delays and transition times for starting and ending a glide. |
 | Camera presets | Manage camera setups on the Presets page in /pov. Presets include viewpoint calibration and first-person, on-foot and mounted shoulder settings. Import JSON and export one preset or all of them. |
