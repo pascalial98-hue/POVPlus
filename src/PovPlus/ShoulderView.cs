@@ -40,6 +40,7 @@ internal sealed unsafe class ShoulderView : IDisposable
     private readonly ShoulderMountAnchor mountAnchor = new();
     private readonly ShoulderWalkingHeight walkingHeight = new();
     private ShoulderFreeLook freeLook;
+    private uint? freeLookReturnFrame;
     private CameraValueOverride orbitFloor;
     private float originalDistance, entryTime, zoomTime, blend, mountWeight;
     private float combatPhase;
@@ -107,28 +108,34 @@ internal sealed unsafe class ShoulderView : IDisposable
         return scene != null && scene->CurrentCamera == &((CameraBase*)owner)->SceneCamera;
     }
 
-    private bool IsFreeLooking()
+    private bool TrackFreeLook(float? nativeYaw = null)
     {
-        if (!Active || owner->mode != 1) return false;
-        var input = InputManager.Instance();
-        return ShoulderFreeLook.LeftDrag(input->MouseButtonHoldStateRaw, input->MouseDragActive) &&
-            MouseLookKeys.Foreground && InWorld() && Service.ObjectTable.LocalPlayer!.Address == actor;
+        if (Active && owner->mode == 1 && movementYaw != null)
+        {
+            var input = InputManager.Instance();
+            var buttons = input->MouseButtonHoldStateRaw;
+            if ((freeLook.Active || ShoulderFreeLook.LeftDrag(buttons, input->MouseDragActive)) &&
+                MouseLookKeys.Foreground && InWorld() && Service.ObjectTable.LocalPlayer!.Address == actor)
+            {
+                // Capture before native rotation consumes this frame's mouse input.
+                var yaw = freeLook.Active ? 0 : nativeYaw ?? movementYaw.Original(owner);
+                freeLook.UpdateInput(buttons, input->MouseDragActive,
+                    new Vector2(owner->currentHRotation, owner->currentVRotation), yaw);
+                return freeLook.Active;
+            }
+        }
+        freeLook = default;
+        return false;
     }
 
-    internal bool CaptureFreeLook(GameCamera* camera)
-    {
-        if (camera != owner) return false;
-        var active = IsFreeLooking();
-        // Sample before native camera rotation consumes this frame's mouse input.
-        if (movementYaw != null) freeLook.Resolve(active ? movementYaw.Original(camera) : 0, active);
-        return active;
-    }
+    internal int FreeLookRotationMode(GameCamera* camera, int nativeMode) =>
+        camera == owner && TrackFreeLook() ? freeLook.RotationMode(nativeMode) : nativeMode;
 
     private float GetMovementYaw(GameCamera* camera)
     {
         var nativeYaw = movementYaw!.Original(camera);
         if (camera != owner) return nativeYaw;
-        try { return freeLook.Resolve(nativeYaw, IsFreeLooking()); }
+        try { return TrackFreeLook(nativeYaw) ? freeLook.MovementYaw(nativeYaw) : nativeYaw; }
         catch (Exception ex) { Stop(ex); return nativeYaw; }
     }
 
@@ -139,7 +146,7 @@ internal sealed unsafe class ShoulderView : IDisposable
         {
             try
             {
-                CaptureFreeLook(owner);
+                TrackFreeLook();
                 // A real perspective toggle must see the original lens bounds
                 // when the game saves the third-person view on its way out.
                 if (InWorld() && !InputManager.Instance()->GetInputStatus(TogglePerspective))
@@ -171,6 +178,7 @@ internal sealed unsafe class ShoulderView : IDisposable
         {
             try
             {
+                ReturnFreeLook();
                 if (InWorld() && Service.ObjectTable.LocalPlayer!.Address == actor &&
                     ShoulderLens.Valid(camera->FoV, camera->MinFoV, camera->MaxFoV))
                 {
@@ -184,6 +192,18 @@ internal sealed unsafe class ShoulderView : IDisposable
         }
         try { cameraUpdate.Original(camera); }
         finally { fov.Restore(ref camera->FoV); }
+    }
+
+    private void ReturnFreeLook()
+    {
+        if (!TrackFreeLook() || !freeLook.Returning) return;
+        var framework = Framework.Instance();
+        if (framework == null || freeLookReturnFrame == framework->FrameCounter) return;
+        freeLookReturnFrame = framework->FrameCounter;
+        var orbit = freeLook.AdvanceReturn(ShoulderRig.Bound(framework->FrameDeltaTime, 0, 0.25f, 0));
+        owner->currentHRotation = orbit.X;
+        owner->currentVRotation = owner->minVRotation <= owner->maxVRotation
+            ? Math.Clamp(orbit.Y, owner->minVRotation, owner->maxVRotation) : orbit.Y;
     }
 
     private float UpdateGlideWeight()
@@ -460,6 +480,7 @@ internal sealed unsafe class ShoulderView : IDisposable
         }
         actor = 0;
         freeLook = default;
+        freeLookReturnFrame = null;
         motionFrame = null;
         combatPhase = 0;
         combatOffset = Vector3.Zero;

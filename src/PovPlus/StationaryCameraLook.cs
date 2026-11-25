@@ -33,8 +33,7 @@ internal sealed unsafe class StationaryCameraLook : IDisposable
         if (Failed) return original;
         try
         {
-            if (Plugin.P.Shoulder?.CaptureFreeLook(camera) == true)
-                return StationaryLook.CameraRotationMode(original, protect: true);
+            original = Plugin.P.Shoulder?.FreeLookRotationMode(camera, original) ?? original;
             if (original != 1) return original;
 
             if (!FirstPersonLimits.IsActive(camera) || !POVCameraFunctionality.FirstPersonViewActive() ||

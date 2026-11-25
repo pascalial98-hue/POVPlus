@@ -1,5 +1,5 @@
 {
-  "按住左键自由观察，按住右键控制方向。": "Hold the left mouse button to look around. Hold the right mouse button to steer.",
+  "按住左键自由观察，松开后镜头回位。按住右键控制方向。": "Hold the left mouse button to look around. Release it to recenter the camera. Hold the right mouse button to steer.",
   "越肩自由镜头的移动方向保护不可用，请查看 Dalamud 日志。": "Shoulder free look could not preserve the movement direction. See the Dalamud log.",
   "预设": "Presets",
   "预设保存视点校准、第一人称和越肩设置。语言、插件启用状态及鼠标快捷键由全局设置管理。": "Presets store viewpoint calibration and first-person and shoulder camera settings. Language, plugin activation and cursor shortcuts are managed globally.",

@@ -333,11 +333,35 @@ internal static partial class Program
             "Right drag and native two-button movement keep their ordinary heading");
 
         var look = new ShoulderFreeLook();
-        Check(Near(look.Resolve(2.95f, active: true), 2.95f) && Near(look.Resolve(-2.8f, active: true), 2.95f),
-            "Heading remains fixed across a camera turn while left drag is held");
-        Check(Near(look.Resolve(-2.8f, active: false), -2.8f), "Releasing left drag immediately restores the live movement direction");
-        Check(float.IsNaN(look.Resolve(float.NaN, active: true)) && Near(look.Resolve(-0.7f, active: true), -0.7f),
-            "Fresh left drag can acquire the next finite heading");
+        var start = new Vector2(2.95f, -0.35f);
+        var end = new Vector2(-2.8f, 0.25f);
+        look.UpdateInput(left, true, start, float.NaN);
+        Check(!look.Active, "Wait for a valid movement heading before engaging free look");
+        look.UpdateInput(left, true, start, start.X);
+        look.UpdateInput(left, false, end, end.X);
+        Check(Near(look.MovementYaw(end.X), start.X) && look.Active && !look.Returning,
+            "Keep the original heading during left drag even when the mouse stops moving");
+        Check(look.RotationMode(1) == 3 && look.RotationMode(2) == 2,
+            "Free look removes camera-driven character turning");
+
+        look.UpdateInput(0, false, end, end.X);
+        Check(look.Returning && Near(look.MovementYaw(end.X), start.X) && look.RotationMode(0) == 3,
+            "Release keeps the heading while the plugin returns the camera");
+        var halfway = look.AdvanceReturn(ShoulderFreeLook.ReturnSeconds / 2);
+        Check(look.Returning && MathF.Abs(FirstPersonMath.Wrap(halfway.X - start.X)) < 0.3f &&
+            Near(halfway.Y, (start.Y + end.Y) / 2), "Recenter takes the shortest yaw path and restores pitch smoothly");
+        Check(look.AdvanceReturn(ShoulderFreeLook.ReturnSeconds / 2) == start &&
+            !look.Active && Near(look.MovementYaw(start.X), start.X), "Release the movement heading only after orbit alignment");
+
+        look.UpdateInput(left, true, start, start.X);
+        look.UpdateInput(0, false, end, end.X);
+        halfway = look.AdvanceReturn(ShoulderFreeLook.ReturnSeconds / 2);
+        look.UpdateInput(left, true, halfway, halfway.X);
+        Check(!look.Returning && Near(look.MovementYaw(halfway.X), start.X),
+            "Re-grabbing the camera mid-return keeps the original movement heading");
+        look.UpdateInput(right, true, halfway, halfway.X);
+        Check(!look.Active && look.RotationMode(1) == 1 && Near(look.MovementYaw(halfway.X), halfway.X),
+            "Right drag can take over immediately");
     }
 
     private static unsafe void TestCameraLensOwnership()
