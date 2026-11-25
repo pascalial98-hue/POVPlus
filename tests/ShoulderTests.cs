@@ -8,6 +8,7 @@ internal static partial class Program
         TestShoulderZoom();
         TestShoulderCombat();
         TestShoulderSpeedZoom();
+        TestSpeedZoomTransitions();
         TestCameraLensOwnership();
         TestGlideLens();
         TestGlideTiming();
@@ -267,6 +268,58 @@ internal static partial class Program
         speed.Update(103 * Vector3.UnitX, 1, true, mount);
         speed.Update(Vector3.Zero, 1f / 60, true, mount);
         Check(speed.Offset == 0, "First sample after a long pause starts fresh");
+    }
+
+    private static void TestSpeedZoomTransitions()
+    {
+        const int fps = 60;
+        const float dt = 1f / fps;
+        var walking = new ShoulderProfile
+        {
+            SpeedZoomEnabled = true,
+            SpeedZoomEnterSeconds = 0,
+            SpeedZoomExitSeconds = ShoulderSpeedZoom.MaxSeconds
+        };
+        var mounted = ShoulderProfile.Riding();
+        mounted.SpeedZoomEnabled = true;
+        mounted.SpeedZoomEnterSeconds = ShoulderSpeedZoom.MaxSeconds;
+        mounted.SpeedZoomExitSeconds = 0;
+
+        foreach (var (profile, riding) in new[] { (walking, false), (mounted, true) })
+        {
+            var fast = new ShoulderProfile { SpeedZoomEnabled = true, SpeedZoomEnterSeconds = 0, SpeedZoomExitSeconds = 0 };
+            var slow = new ShoulderProfile
+            {
+                SpeedZoomEnabled = true,
+                SpeedZoomEnterSeconds = ShoulderSpeedZoom.MaxSeconds,
+                SpeedZoomExitSeconds = ShoulderSpeedZoom.MaxSeconds
+            };
+            var configured = new ShoulderSpeedZoom();
+            var instant = new ShoulderSpeedZoom();
+            var gradual = new ShoulderSpeedZoom();
+            Vector3 position = Vector3.Zero;
+            void Sample()
+            {
+                configured.Update(position, dt, riding, profile);
+                instant.Update(position, dt, riding, fast);
+                gradual.Update(position, dt, riding, slow);
+            }
+
+            Sample();
+            for (int i = 0; i < 12 * fps; i++)
+            {
+                position += Vector3.UnitX * (25 * dt);
+                Sample();
+                if (i != fps / 3) continue;
+                Check(instant.Offset > gradual.Offset + 0.2f, "Entry time affects how quickly a speed increase pulls the camera back");
+                Check(Near(configured.Offset, riding ? gradual.Offset : instant.Offset),
+                    "Walking and mounted profiles use their own pullback time");
+            }
+            for (int i = 0; i < fps / 2; i++) Sample();
+            Check(gradual.Offset > instant.Offset + 0.2f, "Exit time affects how long the camera eases in after stopping");
+            Check(Near(configured.Offset, riding ? instant.Offset : gradual.Offset),
+                "Walking and mounted profiles use their own return time");
+        }
     }
 
     private static unsafe void TestCameraLensOwnership()

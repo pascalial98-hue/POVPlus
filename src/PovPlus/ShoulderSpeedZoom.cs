@@ -6,6 +6,7 @@ namespace PovPlus;
 internal sealed class ShoulderSpeedZoom
 {
     internal const float DefaultDistance = 0.6f, MaxDistance = 2f;
+    internal const float DefaultEnterSeconds = 0.60f, DefaultExitSeconds = 1.26f, MaxSeconds = 3f;
     private const float DeadZone = 0.5f;
     private Vector3? previous;
     private bool wasRiding;
@@ -57,8 +58,12 @@ internal sealed class ShoulderSpeedZoom
 
         var limit = profile.SpeedZoomEnabled ? ShoulderRig.Bound(profile.SpeedZoomDistance, 0, MaxDistance, DefaultDistance) : 0;
         var target = limit * DistanceFraction(speed, riding);
-        var seconds = target > Offset ? 0.20f : 0.42f;
-        Offset = float.Lerp(Offset, target, 1 - MathF.Exp(-dt / seconds));
+        var seconds = target > Offset
+            ? ShoulderRig.Bound(profile.SpeedZoomEnterSeconds, 0, MaxSeconds, DefaultEnterSeconds)
+            : ShoulderRig.Bound(profile.SpeedZoomExitSeconds, 0, MaxSeconds, DefaultExitSeconds);
+        // Use the time to settle about 95% towards a fixed target. The defaults
+        // preserve the previous 0.20s and 0.42s time constants.
+        Offset = seconds == 0 ? target : float.Lerp(Offset, target, 1 - MathF.Exp(-3 * dt / seconds));
         if (target == 0 && Offset < 0.0001f) Offset = 0;
     }
 }

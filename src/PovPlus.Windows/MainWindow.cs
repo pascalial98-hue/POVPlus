@@ -450,6 +450,10 @@ public partial class MainWindow : Window, IDisposable
         if (profile.SpeedZoomEnabled)
         {
             Slider("速度产生的最大额外距离", ref profile.SpeedZoomDistance, 0, ShoulderSpeedZoom.MaxDistance, ShoulderSpeedZoom.DefaultDistance, "%.2f");
+            Slider("速度拉远过渡（秒）", ref profile.SpeedZoomEnterSeconds, 0, ShoulderSpeedZoom.MaxSeconds,
+                ShoulderSpeedZoom.DefaultEnterSeconds, "%.2f");
+            Slider("速度收回过渡（秒）", ref profile.SpeedZoomExitSeconds, 0, ShoulderSpeedZoom.MaxSeconds,
+                ShoulderSpeedZoom.DefaultExitSeconds, "%.2f");
             ImGui.TextWrapped(L.T(riding
                 ? "常速骑行时轻微拉远，加速后更明显。飞行升降也计入，停稳后回到滚轮选定的距离。"
                 : "常速移动时轻微拉远，加速跑时拉远更明显。按水平移速计算，可与战斗偏移叠加。"));

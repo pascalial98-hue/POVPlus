@@ -50,6 +50,8 @@
   "转弯最大侧倾角": "Maximum bank angle",
   "飞得越快，镜头起伏越明显。转弯时向弯内侧倾，悬停或落地后逐渐回稳。": "Sway builds with airspeed. The camera banks into turns and settles as you hover or land.",
   "随移动速度拉远镜头": "Pull the camera back with movement speed",
+  "速度拉远过渡（秒）": "Speed zoom pullback transition (seconds)",
+  "速度收回过渡（秒）": "Speed zoom return transition (seconds)",
   "速度产生的最大额外距离": "Maximum extra distance at speed",
   "常速骑行时轻微拉远，加速后更明显。飞行升降也计入，停稳后回到滚轮选定的距离。": "The camera pulls back slightly at a normal riding pace and more at higher speeds. Climbs and descents count. Stopping restores your wheel distance.",
   "常速移动时轻微拉远，加速跑时拉远更明显。按水平移速计算，可与战斗偏移叠加。": "The camera pulls back slightly at a normal pace and farther when you sprint. It uses horizontal speed and can combine with combat offsets.",

@@ -9,7 +9,7 @@ using System.Security.Permissions;
 [assembly: AssemblyConfiguration("Release")]
 [assembly: AssemblyDescription("POV+ Enhanced first-person and shoulder cameras")]
 [assembly: AssemblyFileVersion("1.8.1.0")]
-[assembly: AssemblyInformationalVersion("1.8.1.0-shoulder-height-local.2")]
+[assembly: AssemblyInformationalVersion("1.8.1.0-speed-zoom-timing-local.1")]
 [assembly: AssemblyProduct("POV+ Enhanced")]
 [assembly: AssemblyTitle("POV+ Enhanced")]
 [assembly: AssemblyMetadata("RepositoryUrl", "https://github.com/pascalial98-hue/POVPlus")]
